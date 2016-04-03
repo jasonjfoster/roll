@@ -1,0 +1,32 @@
+language: r
+r: devel
+sudo: true
+cache: packages
+
+warnings_are_errors: true
+
+before_install:
+  ## PPA for Rcpp and some other packages
+  - sudo add-apt-repository -y ppa:edd/misc
+  - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
+  - chmod 755 ./travis-tool.sh
+  - ./travis-tool.sh bootstrap
+  - ./travis-tool.sh install_aptget libgsl0-dev gsl-bin
+
+install:
+  - ./travis-tool.sh install_deps
+  
+script: ./travis-tool.sh run_tests
+
+after_script:
+  - ./travis-tool.sh dump_logs
+
+notifications:
+  email: false
+
+env:
+   global:
+     - CRAN: http://cran.rstudio.com
+     - R_BUILD_ARGS=" --compact-vignettes=gs+qpdf" 
+     - R_CHECK_ARGS="--as-cran"
+     - BOOTSTRAP_LATEX="1"

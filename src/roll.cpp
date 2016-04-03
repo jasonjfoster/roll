@@ -1,9 +1,3 @@
-// Google C++ Style Guide: https://google.github.io/styleguide/cppguide.html
-
-// #ifndef ARMA_DONT_PRINT_ERRORS
-#define ARMA_DONT_PRINT_ERRORS
-// #endif
-
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppParallel)]]
 #include <RcppArmadillo.h>
