@@ -8,8 +8,6 @@ before_install:
   - ./travis-tool.sh bootstrap
   - ./travis-tool.sh install_aptget r-cran-rcpp r-cran-rcpparmadillo
 
-install:
-  - ./travis-tool.sh install_deps
-  
 script: 
+  - R CMD INSTALL .
   - ./travis-tool.sh run_tests
