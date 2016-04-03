@@ -9,6 +9,7 @@ Description: Parallel functions for computing rolling statistics of time-series
     data.
 License: GPL (>= 2)
 Imports:
-    Rcpp
+    Rcpp,
+    RcppParallel
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
 RoxygenNote: 5.0.1
