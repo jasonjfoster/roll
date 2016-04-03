@@ -12,4 +12,5 @@ Imports:
     Rcpp,
     RcppParallel
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
+SystemRequirements: GNU make
 RoxygenNote: 5.0.1
