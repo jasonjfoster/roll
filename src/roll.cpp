@@ -11,37 +11,6 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
-struct ExpDecay : public Worker {
-  
-  const double halflife;
-  const int n_obs;
-  RVector<double> result;
-  
-  ExpDecay(const double halflife, const int n_obs,
-           NumericVector result)
-    : halflife(halflife), n_obs(n_obs),
-      result(result) { }
-  
-  void operator()(std::size_t begin_row, std::size_t end_row) {
-    for (std::size_t i = begin_row; i < end_row; i++) {
-      double lambda = pow(0.5, 1 / halflife);
-      result[n_obs - i - 1] = pow(lambda, i);
-    }
-  }
-  
-};
-
-NumericVector exp_weights(const double& halflife, const int& n_obs) {
-  
-  NumericVector result(n_obs);
-  ExpDecay exp_decay(halflife, n_obs, result);
-  
-  parallelFor(0, n_obs, exp_decay); 
-  
-  return result;
-  
-}
-
 List dimnames_ols(const List& input, const int& n_cols) {
   
   if (input.size() > 1) {
@@ -181,7 +150,7 @@ void check_comps(const arma::uvec& comps, const unsigned int& n_cols) {
   
 }
 
-// this is the same as check_comps except need < instead of <=
+// this is the same as check_comps except uses < instead of <=
 void check_comps_vif(const arma::uvec& comps, const unsigned int& n_cols) {
   
   if (comps.max() > n_cols) {
@@ -210,14 +179,6 @@ void check_min_obs(const int& min_obs, const int& width) {
   
   if ((min_obs < 1) || (min_obs > width)) {
     stop("value of 'min_obs' must be between one and 'width'");
-  }
-  
-}
-
-void check_parallel_for(const std::string& parallel_for) {
-  
-  if ((parallel_for != "rows") && (parallel_for != "cols")) {
-    stop("invalid 'parallel_for' argument");
   }
   
 }
@@ -401,9 +362,6 @@ NumericMatrix roll_mean(const NumericMatrix& data, const int& width,
   // otherwise check argument for errors
   check_min_obs(min_obs, width);
   
-  // check 'parallel_for' argument for errors
-  check_parallel_for(parallel_for);
-  
   // default 'complete_obs' argument is 'false' (equivalent to 'pairwise'),
   // otherwise check argument for errors
   if (complete_obs) {
@@ -492,15 +450,15 @@ struct RollVarRows : public Worker {
               // compute the rolling sum of squares with 'center' argument
               if (center) {
                 sum_data +=
-                  pow(data(i - count, j) - arma_center(i, j), 2) *
+                  pow(data(i - count, j) - arma_center(i, j), 2.0) *
                   arma_weights[width - count - 1];
               } else if (!center) {
-                sum_data += pow(data(i - count, j), 2) *
+                sum_data += pow(data(i - count, j), 2.0) *
                   arma_weights[width - count - 1];
               }
               
               sum_weights += arma_weights[width - count - 1];
-              sum_weights_sq += pow(arma_weights[width - count - 1], 2);
+              sum_weights_sq += pow(arma_weights[width - count - 1], 2.0);
               n_obs += 1;
               
             }
@@ -512,7 +470,7 @@ struct RollVarRows : public Worker {
           // compute the unbiased estimate of variance
           if (n_obs >= min_obs) {
             arma_scale(i, j) = ((sum_data / sum_weights) /
-                                  (1 - (sum_weights_sq / pow(sum_weights, 2))));
+                                  (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
           } else {
             arma_scale(i, j) = NAN;
           }
@@ -581,16 +539,16 @@ struct RollVarCols : public Worker {
               // compute the rolling sum of squares with 'center' argument
               if (center) {
                 sum_data +=
-                  pow(data(i - count, j) - arma_center(i, j), 2) *
+                  pow(data(i - count, j) - arma_center(i, j), 2.0) *
                   arma_weights[width - count - 1];
               } else if (!center) {
                 sum_data +=
-                  pow(data(i - count, j), 2) *
+                  pow(data(i - count, j), 2.0) *
                   arma_weights[width - count - 1];
               }
               
               sum_weights += arma_weights[width - count - 1];
-              sum_weights_sq += pow(arma_weights[width - count - 1], 2);
+              sum_weights_sq += pow(arma_weights[width - count - 1], 2.0);
               n_obs += 1;
               
             }
@@ -602,7 +560,7 @@ struct RollVarCols : public Worker {
           // compute the unbiased estimate of variance
           if (n_obs >= min_obs) {
             arma_scale(i, j) = ((sum_data / sum_weights) /
-                                  (1 - (sum_weights_sq / pow(sum_weights, 2))));
+                                  (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
           } else {
             arma_scale(i, j) = NAN;
           }
@@ -639,9 +597,6 @@ NumericMatrix roll_var(const NumericMatrix& data, const int& width,
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
   check_min_obs(min_obs, width);
-  
-  // check 'parallel_for' argument for errors
-  check_parallel_for(parallel_for);
   
   // default 'complete_obs' argument is 'false' (equivalent to 'pairwise'),
   // otherwise check argument for errors
@@ -751,15 +706,15 @@ struct RollSdRows : public Worker {
               // compute the rolling sum of squares with 'center' argument
               if (center) {
                 sum_data +=
-                  pow(data(i - count, j) - arma_center(i, j), 2) *
+                  pow(data(i - count, j) - arma_center(i, j), 2.0) *
                   arma_weights[width - count - 1];
               } else if (!center) {
-                sum_data += pow(data(i - count, j), 2) *
+                sum_data += pow(data(i - count, j), 2.0) *
                   arma_weights[width - count - 1];
               }
               
               sum_weights += arma_weights[width - count - 1];
-              sum_weights_sq += pow(arma_weights[width - count - 1], 2);
+              sum_weights_sq += pow(arma_weights[width - count - 1], 2.0);
               n_obs += 1;
               
             }
@@ -771,7 +726,7 @@ struct RollSdRows : public Worker {
           // compute the unbiased estimate of standard deviation
           if (n_obs >= min_obs) {
             arma_scale(i, j) = sqrt((sum_data / sum_weights) /
-                                      (1 - (sum_weights_sq / pow(sum_weights, 2))));
+                                      (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
           } else {
             arma_scale(i, j) = NAN;
           }
@@ -840,16 +795,16 @@ struct RollSdCols : public Worker {
               // compute the rolling sum of squares with 'center' argument
               if (center) {
                 sum_data +=
-                  pow(data(i - count, j) - arma_center(i, j), 2) *
+                  pow(data(i - count, j) - arma_center(i, j), 2.0) *
                   arma_weights[width - count - 1];
               } else if (!center) {
                 sum_data +=
-                  pow(data(i - count, j), 2) *
+                  pow(data(i - count, j), 2.0) *
                   arma_weights[width - count - 1];
               }
               
               sum_weights += arma_weights[width - count - 1];
-              sum_weights_sq += pow(arma_weights[width - count - 1], 2);
+              sum_weights_sq += pow(arma_weights[width - count - 1], 2.0);
               n_obs += 1;
               
             }
@@ -861,7 +816,7 @@ struct RollSdCols : public Worker {
           // compute the unbiased estimate of standard deviation
           if (n_obs >= min_obs) {
             arma_scale(i, j) = sqrt((sum_data / sum_weights) /
-                                      (1 - (sum_weights_sq / pow(sum_weights, 2))));
+                                      (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
           } else {
             arma_scale(i, j) = NAN;
           }
@@ -898,9 +853,6 @@ NumericMatrix roll_sd(const NumericMatrix& data, const int& width,
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
   check_min_obs(min_obs, width);
-  
-  // check 'parallel_for' argument for errors
-  check_parallel_for(parallel_for);
   
   // default 'complete_obs' argument is 'false' (equivalent to 'pairwise'),
   // otherwise check argument for errors
@@ -1198,17 +1150,17 @@ struct RollVarRowsCube : public Worker {
                   
                   // compute the rolling sum of squares with 'center' argument
                   if (center) {
-                    sum_j += pow(data(i - count, j) - arma_center_j(j, k, i), 2) *
+                    sum_j += pow(data(i - count, j) - arma_center_j(j, k, i), 2.0) *
                       arma_weights[width - count - 1];
-                    sum_k += pow(data(i - count, k) - arma_center_k(j, k, i), 2) *
+                    sum_k += pow(data(i - count, k) - arma_center_k(j, k, i), 2.0) *
                       arma_weights[width - count - 1];
                   } else if (!center) {
-                    sum_j += pow(data(i - count, j), 2) * arma_weights[width - count - 1];
-                    sum_k += pow(data(i - count, k), 2) * arma_weights[width - count - 1];
+                    sum_j += pow(data(i - count, j), 2.0) * arma_weights[width - count - 1];
+                    sum_k += pow(data(i - count, k), 2.0) * arma_weights[width - count - 1];
                   }
                   
                   sum_weights += arma_weights[width - count - 1];
-                  sum_weights_sq += pow(arma_weights[width - count - 1], 2);
+                  sum_weights_sq += pow(arma_weights[width - count - 1], 2.0);
                   n_obs += 1;
                   
               }
@@ -1220,9 +1172,9 @@ struct RollVarRowsCube : public Worker {
             // compute the mean
             if (n_obs >= min_obs) {
               arma_scale_j(k, j, i) = ((sum_j / sum_weights) /
-                                         (1 - (sum_weights_sq / pow(sum_weights, 2))));
+                                         (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
               arma_result_k(k, j, i) = ((sum_k / sum_weights) /
-                                          (1 - (sum_weights_sq / pow(sum_weights, 2))));
+                                          (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
             } else {
               arma_scale_j(k, j, i) = NAN;
               arma_result_k(k, j, i) = NAN;
@@ -1307,17 +1259,17 @@ struct RollVarColsCube : public Worker {
                   
                   // compute the rolling sum of squares with 'center' argument
                   if (center) {
-                    sum_j += pow(data(i - count, j) - arma_center_j(j, k, i), 2) *
+                    sum_j += pow(data(i - count, j) - arma_center_j(j, k, i), 2.0) *
                       arma_weights[width - count - 1];
-                    sum_k += pow(data(i - count, k) - arma_center_k(j, k, i), 2) *
+                    sum_k += pow(data(i - count, k) - arma_center_k(j, k, i), 2.0) *
                       arma_weights[width - count - 1];
                   } else if (!center) {
-                    sum_j += pow(data(i - count, j), 2) * arma_weights[width - count - 1];
-                    sum_k += pow(data(i - count, k), 2) * arma_weights[width - count - 1];
+                    sum_j += pow(data(i - count, j), 2.0) * arma_weights[width - count - 1];
+                    sum_k += pow(data(i - count, k), 2.0) * arma_weights[width - count - 1];
                   }
                   
                   sum_weights += arma_weights[width - count - 1];
-                  sum_weights_sq += pow(arma_weights[width - count - 1], 2);
+                  sum_weights_sq += pow(arma_weights[width - count - 1], 2.0);
                   n_obs += 1;
                   
               }
@@ -1329,9 +1281,9 @@ struct RollVarColsCube : public Worker {
             // compute the mean
             if (n_obs >= min_obs) {
               arma_scale_j(k, j, i) = ((sum_j / sum_weights) /
-                                         (1 - (sum_weights_sq / pow(sum_weights, 2))));
+                                         (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
               arma_scale_k(k, j, i) = ((sum_k / sum_weights) /
-                                         (1 - (sum_weights_sq / pow(sum_weights, 2))));
+                                         (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
             } else {
               arma_scale_j(k, j, i) = NAN;
               arma_scale_k(k, j, i) = NAN;
@@ -1441,18 +1393,19 @@ struct RollCovRows : public Worker {
                   }
                   
                   sum_weights += arma_weights[width - count - 1];
-                  sum_weights_sq += pow(arma_weights[width - count - 1], 2);
+                  sum_weights_sq += pow(arma_weights[width - count - 1], 2.0);
                   n_obs += 1;
                   
               }
               
               count += 1;
+              
             }
             
             // compute the unbiased estimate of covariance
             if (n_obs >= min_obs) {
               arma_cov(k, j, i) = ((sum_data / sum_weights) /
-                                     (1 - (sum_weights_sq / pow(sum_weights, 2))));
+                                     (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
             } else {
               arma_cov(k, j, i) = NAN;
             }
@@ -1559,7 +1512,7 @@ struct RollCovCols : public Worker {
                   }
                   
                   sum_weights += arma_weights[width - count - 1];
-                  sum_weights_sq += pow(arma_weights[width - count - 1], 2);
+                  sum_weights_sq += pow(arma_weights[width - count - 1], 2.0);
                   n_obs += 1;
                   
               }
@@ -1571,7 +1524,7 @@ struct RollCovCols : public Worker {
             // compute the unbiased estimate of covariance
             if (n_obs >= min_obs) {
               arma_cov(k, j, i) = ((sum_data / sum_weights) / 
-                                     (1 - (sum_weights_sq / pow(sum_weights, 2))));
+                                     (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
             } else {
               arma_cov(k, j, i) = NAN;
             }
@@ -1618,9 +1571,6 @@ NumericVector roll_cov(const NumericMatrix& data, const int& width,
   // otherwise check argument for errors
   check_min_obs(min_obs, width);
   
-  // check 'parallel_for' argument for errors
-  check_parallel_for(parallel_for);
-  
   // default 'complete_obs' argument is 'true' (equivalent to 'complete'),
   // otherwise check argument for errors
   if (complete_obs) {
@@ -1662,6 +1612,7 @@ NumericVector roll_cov(const NumericMatrix& data, const int& width,
       parallelFor(0, n_cols, roll_var_cols);
     }
   }
+  
   // compute rolling covariance matrices
   if (parallel_for == "rows") {
     RollCovRows roll_cov_rows(data, n_rows, n_cols, width, weights,
@@ -1804,7 +1755,6 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
   arma::mat arma_lm(n_rows, n_cols);
   arma::mat arma_rsq(n_rows, 1);
   
-  
   // check 'x' and 'y' arguments for errors
   check_ols(n_rows, y.nrow(), y.ncol());
   
@@ -1823,9 +1773,6 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
   check_min_obs(min_obs, width);
-  
-  // check 'parallel_for' argument for errors
-  check_parallel_for(parallel_for);
   
   // default 'complete_obs' argument is 'true' (equivalent to 'complete'),
   // otherwise check argument for errors
@@ -2037,9 +1984,6 @@ List roll_eigen(const NumericMatrix& data, const int& width,
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
   check_min_obs(min_obs, width);
-  
-  // check 'parallel_for' argument for errors
-  check_parallel_for(parallel_for);
   
   // default 'complete_obs' argument is 'true' (equivalent to 'complete'),
   // otherwise check argument for errors
@@ -2283,9 +2227,6 @@ List roll_pcr(const NumericMatrix& x, const NumericMatrix& y,
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
   check_min_obs(min_obs, width);
-  
-  // check 'parallel_for' argument for errors
-  check_parallel_for(parallel_for);
   
   // default 'complete_obs' argument is 'true' (equivalent to 'complete'),
   // otherwise check argument for errors
@@ -2607,9 +2548,6 @@ NumericMatrix roll_vif(const NumericMatrix& x, const int& width,
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
   check_min_obs(min_obs, width);
-  
-  // check 'parallel_for' argument for errors
-  check_parallel_for(parallel_for);
   
   // default 'complete_obs' argument is 'true' (equivalent to 'complete'),
   // otherwise check argument for errors

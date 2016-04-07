@@ -22,7 +22,7 @@ if \code{FALSE} then zero is used.}
 otherwise result is NA.}
 
 \item{complete_obs}{logical. If \code{TRUE} then rows containing any missing values are removed,
-if \code{FALSE} then pairwise is used.}
+if \code{FALSE} then each value is used.}
 
 \item{na_restore}{logical. Should missing values be restored?}
 

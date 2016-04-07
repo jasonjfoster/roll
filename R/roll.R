@@ -8,7 +8,7 @@
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
 ##' otherwise result is NA.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
-##' if \code{FALSE} then pairwise is used.
+##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
@@ -58,7 +58,7 @@ roll_mean <- function(data, width, weights = rep(1, width),
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
 ##' otherwise result is NA.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
-##' if \code{FALSE} then pairwise is used.
+##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
@@ -109,7 +109,7 @@ roll_var <- function(data, width, weights = rep(1, width), center = TRUE,
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
 ##' otherwise result is NA.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
-##' if \code{FALSE} then pairwise is used.
+##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
