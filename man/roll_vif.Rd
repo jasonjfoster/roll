@@ -4,12 +4,12 @@
 \alias{roll_vif}
 \title{Rolling Variance Inflation Factors}
 \usage{
-roll_vif(x, width, comps = 1:(ncol(x) - 1), weights = rep(1, width),
+roll_vif(data, width, comps = 1:(ncol(data) - 1), weights = rep(1, width),
   center = TRUE, scale = FALSE, min_obs = width, complete_obs = TRUE,
   na_restore = FALSE, parallel_for = c("rows", "cols"))
 }
 \arguments{
-\item{x}{matrix or xts object. Rows are observations and columns are the independent variables.}
+\item{data}{matrix or xts object. Rows are observations and columns are variables.}
 
 \item{width}{integer. Window size.}
 
@@ -20,7 +20,7 @@ roll_vif(x, width, comps = 1:(ncol(x) - 1), weights = rep(1, width),
 \item{center}{logical. If \code{TRUE} then the weighted mean of each variable is used,
 if \code{FALSE} then zero is used.}
 
-\item{scale}{logical. If \code{TRUE} then the weighted standard deviation of each variable is used, 
+\item{scale}{logical. If \code{TRUE} then the weighted standard deviation of each variable is used,
 if \code{FALSE} then no scaling is done.}
 
 \item{min_obs}{integer. Minimum number of observations required to have a value within a window, 
@@ -35,7 +35,8 @@ if \code{FALSE} then pairwise is used.}
 \code{rows} or \code{cols}.}
 }
 \value{
-An object of the same class and dimension as \code{x} with the rolling variance inflation factors.
+An object of the same class and dimension as \code{data} with the rolling variance
+inflation factors.
 }
 \description{
 A parallel function for computing rolling variance inflation factors of time-series data.
@@ -48,23 +49,23 @@ libraries, then limit the number of cores in the RcppParallel package to one wit
 \examples{
 n_vars <- 10
 n_obs <- 1000
-x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 
 # 252-day rolling variance inflation factors (lm)
-result <- roll_vif(x, 252)
+result <- roll_vif(data, 252)
 
 # 252-day rolling variance inflation factors (pcr)
-result <- roll_vif(x, 252, comps = 1)
+result <- roll_vif(data, 252, comps = 1)
 
 # Equivalent to 'na.rm = TRUE'
-result <- roll_vif(x, 252, min_obs = 1)
+result <- roll_vif(data, 252, min_obs = 1)
 
 # Expanding window
-result <- roll_vif(x, n_obs, min_obs = 1)
+result <- roll_vif(data, n_obs, min_obs = 1)
 
 # Exponential decay
 weights <- 0.9 ^ (251:0)
-result <- roll_vif(x, 252, weights = weights, min_obs = 1)
+result <- roll_vif(data, 252, weights = weights, min_obs = 1)
 }
 \seealso{
 \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.

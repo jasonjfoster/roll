@@ -1376,7 +1376,7 @@ struct RollCovRows : public Worker {
   const arma::uvec arma_any_na;
   const bool na_restore;
   arma::cube& arma_cov;             // destination (pass by reference)
-
+  
   // initialize with source and destination
   RollCovRows(const NumericMatrix data, const int n_rows,
               const int n_cols, const int width,
@@ -1447,21 +1447,8 @@ struct RollCovRows : public Worker {
                       ((data(i - count, k))) *
                       arma_weights[width - count - 1];
                   } else {
-                    if (center_x && !scale_x) {
-                      if (j != n_cols - 1) {
-                        sum_x = data(i - count, j) - arma_center_j(k, j, i);
-                      }
-                      if (k != n_cols - 1) {
-                        sum_y = data(i - count, k) - arma_center_k(k, j, i);
-                      }
-                    } else if (!center_x && !scale_x) {
-                      if (j != n_cols - 1) {
-                        sum_x = data(i - count, j);
-                      }
-                      if (k != n_cols - 1) {
-                        sum_y = data(i - count, k);
-                      }
-                    } else if (center_x && scale_x) {
+                    
+                    if (center_x && scale_x) {
                       if (j != n_cols - 1) {
                         sum_x = (data(i - count, j) - arma_center_j(k, j, i)) / sqrt(arma_scale_j(k, j, i));
                       }
@@ -1475,24 +1462,23 @@ struct RollCovRows : public Worker {
                       if (k != n_cols - 1) {
                         sum_y = (data(i - count, k)) / sqrt(arma_scale_k(k, j, i));
                       }
-                    }
-
-                    // compute the rolling sum of squares with 'center' and 'scale' arguments
-                    if (center_y && !scale_y) {
-                      if (j == n_cols - 1) {
+                    } else if (center_x && !scale_x) {
+                      if (j != n_cols - 1) {
                         sum_x = data(i - count, j) - arma_center_j(k, j, i);
                       }
-                      if (k == n_cols - 1) {
+                      if (k != n_cols - 1) {
                         sum_y = data(i - count, k) - arma_center_k(k, j, i);
                       }
-                    } else if (!center_y && !scale_y) {
-                      if (j == n_cols - 1) {
+                    } else if (!center_x && !scale_x) {
+                      if (j != n_cols - 1) {
                         sum_x = data(i - count, j);
                       }
-                      if (k == n_cols - 1) {
+                      if (k != n_cols - 1) {
                         sum_y = data(i - count, k);
                       }
-                    } else if (center_y && scale_y) {
+                    } 
+                    
+                    if (center_y && scale_y) {
                       if (j == n_cols - 1) {
                         sum_x = (data(i - count, j) - arma_center_j(k, j, i)) / sqrt(arma_scale_j(k, j, i));
                       }
@@ -1506,8 +1492,24 @@ struct RollCovRows : public Worker {
                       if (k == n_cols - 1) {
                         sum_y = (data(i - count, k)) / sqrt(arma_scale_k(k, j, i));
                       }
-                    }
+                    } else if (center_y && !scale_y) {
+                      if (j == n_cols - 1) {
+                        sum_x = data(i - count, j) - arma_center_j(k, j, i);
+                      }
+                      if (k == n_cols - 1) {
+                        sum_y = data(i - count, k) - arma_center_k(k, j, i);
+                      }
+                    } else if (!center_y && !scale_y) {
+                      if (j == n_cols - 1) {
+                        sum_x = data(i - count, j);
+                      }
+                      if (k == n_cols - 1) {
+                        sum_y = data(i - count, k);
+                      }
+                    } 
+                    
                     sum_data += sum_x * sum_y * arma_weights[width - count - 1];
+                    
                   }
                   
                   sum_weights += arma_weights[width - count - 1];
@@ -1563,7 +1565,7 @@ struct RollCovCols : public Worker {
   const arma::uvec arma_any_na;
   const bool na_restore;
   arma::cube& arma_cov;             // destination (pass by reference)
-
+  
   // initialize with source and destination
   RollCovCols(const NumericMatrix data, const int n_rows,
               const int n_cols, const int width,
@@ -1634,22 +1636,8 @@ struct RollCovCols : public Worker {
                       ((data(i - count, k))) *
                       arma_weights[width - count - 1];
                   } else {
-
-                    if (center_x && !scale_x) {
-                      if ((int)j != n_cols - 1) {
-                        sum_x = data(i - count, j) - arma_center_j(k, j, i);
-                      }
-                      if ((int)k != n_cols - 1) {
-                        sum_y = data(i - count, k) - arma_center_k(k, j, i);
-                      }
-                    } else if (!center_x && !scale_x) {
-                      if ((int)j != n_cols - 1) {
-                        sum_x = data(i - count, j);
-                      }
-                      if ((int)k != n_cols - 1) {
-                        sum_y = data(i - count, k);
-                      }
-                    } else if (center_x && scale_x) {
+                    
+                    if (center_x && scale_x) {
                       if ((int)j != n_cols - 1) {
                         sum_x = (data(i - count, j) - arma_center_j(k, j, i)) / sqrt(arma_scale_j(k, j, i));
                       }
@@ -1663,24 +1651,23 @@ struct RollCovCols : public Worker {
                       if ((int)k != n_cols - 1) {
                         sum_y = (data(i - count, k)) / sqrt(arma_scale_k(k, j, i));
                       }
-                    }
-
-                    // compute the rolling sum of squares with 'center' and 'scale' arguments
-                    if (center_y && !scale_y) {
-                      if ((int)j == n_cols - 1) {
+                    } else if (center_x && !scale_x) {
+                      if ((int)j != n_cols - 1) {
                         sum_x = data(i - count, j) - arma_center_j(k, j, i);
                       }
-                      if ((int)k == n_cols - 1) {
+                      if ((int)k != n_cols - 1) {
                         sum_y = data(i - count, k) - arma_center_k(k, j, i);
                       }
-                    } else if (!center_y && !scale_y) {
-                      if ((int)j == n_cols - 1) {
+                    } else if (!center_x && !scale_x) {
+                      if ((int)j != n_cols - 1) {
                         sum_x = data(i - count, j);
                       }
-                      if ((int)k == n_cols - 1) {
+                      if ((int)k != n_cols - 1) {
                         sum_y = data(i - count, k);
                       }
-                    } else if (center_y && scale_y) {
+                    }
+                    
+                    if (center_y && scale_y) {
                       if ((int)j == n_cols - 1) {
                         sum_x = (data(i - count, j) - arma_center_j(k, j, i)) / sqrt(arma_scale_j(k, j, i));
                       }
@@ -1694,8 +1681,24 @@ struct RollCovCols : public Worker {
                       if ((int)k == n_cols - 1) {
                         sum_y = (data(i - count, k)) / sqrt(arma_scale_k(k, j, i));
                       }
+                    } else if (center_y && !scale_y) {
+                      if ((int)j == n_cols - 1) {
+                        sum_x = data(i - count, j) - arma_center_j(k, j, i);
+                      }
+                      if ((int)k == n_cols - 1) {
+                        sum_y = data(i - count, k) - arma_center_k(k, j, i);
+                      }
+                    } else if (!center_y && !scale_y) {
+                      if ((int)j == n_cols - 1) {
+                        sum_x = data(i - count, j);
+                      }
+                      if ((int)k == n_cols - 1) {
+                        sum_y = data(i - count, k);
+                      }
                     }
+                    
                     sum_data += sum_x * sum_y * arma_weights[width - count - 1];
+                    
                   }
                   
                   sum_weights += arma_weights[width - count - 1];
@@ -1751,7 +1754,7 @@ NumericVector roll_cov(const NumericMatrix& data, const int& width,
   arma::cube arma_scale_k(n_cols, n_cols, n_rows);
   arma::cube arma_scale_intercept(n_cols, n_cols, n_rows);
   arma::cube arma_cov(n_cols, n_cols, n_rows);
-
+  
   // check 'width' argument for errors
   check_width(width, n_rows);
   
@@ -1840,7 +1843,7 @@ NumericVector roll_cov(const NumericMatrix& data, const int& width,
   
 }
 
-// 'Worker' function for computing rolling means
+// 'Worker' function for computing rolling means (scaled)
 struct RollMeanScaleRows : public Worker {
   
   const RMatrix<double> data;   // source
@@ -1919,7 +1922,7 @@ struct RollMeanScaleRows : public Worker {
   
 };
 
-// 'Worker' function for computing rolling means
+// 'Worker' function for computing rolling means (scaled)
 struct RollMeanScaleCols : public Worker {
   
   const RMatrix<double> data;   // source
@@ -2010,7 +2013,7 @@ struct RollLmSlices : public Worker {
   const bool scale_x;
   const bool scale_y;
   const arma::mat arma_scale_intercept;
-  arma::mat& arma_coef;             // destination (pass by reference)
+  arma::mat& arma_coef;           // destination (pass by reference)
   arma::mat& arma_rsq;            // destination (pass by reference)
   
   // initialize with source and destination
@@ -2146,7 +2149,7 @@ List roll_lm(const NumericMatrix& x, const NumericVector& y,
   arma::cube arma_cov(n_cols, n_cols, n_rows);
   arma::mat arma_coef(n_rows, n_cols);
   arma::mat arma_rsq(n_rows, 1);
-
+  
   // check 'x' and 'y' arguments for errors
   check_ols(n_rows, y.size());
   
@@ -2822,7 +2825,7 @@ List roll_pcr(const NumericMatrix& x, const NumericVector& y,
 // 'Worker' function for rolling OLS regressions
 struct RollLmVifSlices : public Worker {
   
-  const arma::cube arma_cov;   // source
+  const arma::cube arma_cov;  // source
   const int n_rows;
   const int n_cols;
   const arma::uvec arma_cols;
@@ -3005,14 +3008,14 @@ struct RollPcrVifSlices : public Worker {
 };
 
 // [[Rcpp::export]]
-NumericMatrix roll_vif(const NumericMatrix& x, const int& width,
+NumericMatrix roll_vif(const NumericMatrix& data, const int& width,
                        const arma::uvec& comps, const arma::vec& weights,
                        const bool& center, const bool& scale,
                        const int& min_obs, const bool& complete_obs,
                        const bool& na_restore, const std::string& parallel_for) {
   
-  int n_rows = x.nrow();
-  int n_cols = x.ncol();
+  int n_rows = data.nrow();
+  int n_cols = data.ncol();
   bool center_x = center;
   bool center_y = center;
   bool scale_x = scale;
@@ -3046,7 +3049,7 @@ NumericMatrix roll_vif(const NumericMatrix& x, const int& width,
   // default 'complete_obs' argument is 'true' (equivalent to 'complete'),
   // otherwise check argument for errors
   if (complete_obs) {
-    arma_any_na = any_na(x);
+    arma_any_na = any_na(data);
   } else {
     arma_any_na.fill(0);
   }
@@ -3055,12 +3058,12 @@ NumericMatrix roll_vif(const NumericMatrix& x, const int& width,
   // otherwise no scaling is done
   if (center) {
     if (parallel_for == "rows") {
-      RollMeanRowsCube roll_mean_rows(x, n_rows, n_cols, width, weights,
+      RollMeanRowsCube roll_mean_rows(data, n_rows, n_cols, width, weights,
                                       min_obs, arma_any_na, na_restore,
                                       arma_center_j, arma_center_k);
       parallelFor(0, n_rows, roll_mean_rows);
     } else if (parallel_for == "cols") {
-      RollMeanColsCube roll_mean_cols(x, n_rows, n_cols, width, weights,
+      RollMeanColsCube roll_mean_cols(data, n_rows, n_cols, width, weights,
                                       min_obs, arma_any_na, na_restore,
                                       arma_center_j, arma_center_k);
       parallelFor(0, n_cols, roll_mean_cols);
@@ -3071,13 +3074,13 @@ NumericMatrix roll_vif(const NumericMatrix& x, const int& width,
   // otherwise divide by the standard deviation of each variable
   if (scale) {
     if (parallel_for == "rows") {
-      RollVarRowsCube roll_var_rows(x, n_rows, n_cols, width, weights,
+      RollVarRowsCube roll_var_rows(data, n_rows, n_cols, width, weights,
                                     center_x, center_y, arma_center_j, arma_center_k,
                                     min_obs, arma_any_na, na_restore,
                                     arma_scale_j, arma_scale_k);
       parallelFor(0, n_rows, roll_var_rows);
     } else if (parallel_for == "cols") {
-      RollVarColsCube roll_var_cols(x, n_rows, n_cols, width, weights,
+      RollVarColsCube roll_var_cols(data, n_rows, n_cols, width, weights,
                                     center_x, center_y, arma_center_j, arma_center_k,
                                     min_obs, arma_any_na, na_restore,
                                     arma_scale_j, arma_scale_k);
@@ -3087,7 +3090,7 @@ NumericMatrix roll_vif(const NumericMatrix& x, const int& width,
   
   // compute rolling covariance matrices
   if (parallel_for == "rows") {
-    RollCovRows roll_cov_rows(x, n_rows, n_cols, width, weights,
+    RollCovRows roll_cov_rows(data, n_rows, n_cols, width, weights,
                               center_x, center_y,
                               arma_center_j, arma_center_k,
                               scale_x, scale_y,
@@ -3096,7 +3099,7 @@ NumericMatrix roll_vif(const NumericMatrix& x, const int& width,
                               arma_cov);
     parallelFor(0, n_rows, roll_cov_rows); 
   } else if (parallel_for == "cols") {
-    RollCovCols roll_cov_cols(x, n_rows, n_cols, width, weights,
+    RollCovCols roll_cov_cols(data, n_rows, n_cols, width, weights,
                               center_x, center_y,
                               arma_center_j, arma_center_k,
                               scale_x, scale_y,
@@ -3120,20 +3123,17 @@ NumericMatrix roll_vif(const NumericMatrix& x, const int& width,
   
   // create and return a matrix or xts object for variance inflation factors 
   NumericMatrix result(wrap(arma_vif));
-  List dimnames = x.attr("dimnames");
+  List dimnames = data.attr("dimnames");
   result.attr("dimnames") = dimnames;
-  result.attr("index") = x.attr("index");
-  result.attr(".indexCLASS") = x.attr(".indexCLASS");
-  result.attr(".indexTZ") = x.attr(".indexTZ");
-  result.attr("tclass") = x.attr("tclass");
-  result.attr("tzone") = x.attr("tzone");
-  result.attr("class") = x.attr("class");
+  result.attr("index") = data.attr("index");
+  result.attr(".indexCLASS") = data.attr(".indexCLASS");
+  result.attr(".indexTZ") = data.attr(".indexTZ");
+  result.attr("tclass") = data.attr("tclass");
+  result.attr("tzone") = data.attr("tzone");
+  result.attr("class") = data.attr("class");
   
   return result;
   
 }
-
-
-
 
 
