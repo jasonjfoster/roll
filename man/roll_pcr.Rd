@@ -5,13 +5,14 @@
 \title{Rolling Principal Component Regressions}
 \usage{
 roll_pcr(x, y, width, comps = 1:ncol(x), weights = rep(1, width),
-  center = TRUE, scale = FALSE, min_obs = width, complete_obs = TRUE,
-  na_restore = FALSE, parallel_for = c("rows", "cols"))
+  center_x = TRUE, center_y = TRUE, scale_x = FALSE, scale_y = FALSE,
+  min_obs = width, complete_obs = TRUE, na_restore = FALSE,
+  parallel_for = c("rows", "cols"))
 }
 \arguments{
 \item{x}{matrix or xts object. Rows are observations and columns are the independent variables.}
 
-\item{y}{matrix or xts object. Rows are observations and column is the dependent variable.}
+\item{y}{vector or xts object. Rows are observations and column is the dependent variable.}
 
 \item{width}{integer. Window size.}
 
@@ -19,11 +20,17 @@ roll_pcr(x, y, width, comps = 1:ncol(x), weights = rep(1, width),
 
 \item{weights}{vector. Weights for each observation within a window.}
 
-\item{center}{logical. If \code{TRUE} then the weighted mean of each variable is used,
+\item{center_x}{logical. If \code{TRUE} then the weighted mean of each \code{x} variable is used,
 if \code{FALSE} then zero is used.}
 
-\item{scale}{logical. If \code{TRUE} then the weighted standard deviation of each variable is used,
-if \code{FALSE} then no scaling is done.}
+\item{center_y}{logical. If \code{TRUE} then the weighted mean of the \code{y} variable is used,
+if \code{FALSE} then zero is used.}
+
+\item{scale_x}{logical. If \code{TRUE} then the weighted standard deviation of each \code{x} 
+variable is used, if \code{FALSE} then no scaling is done.}
+
+\item{scale_y}{logical. If \code{TRUE} then the weighted standard deviation of the \code{y} 
+variable is used, if \code{FALSE} then no scaling is done.}
 
 \item{min_obs}{integer. Minimum number of observations required to have a value within a window, 
 otherwise result is NA.}

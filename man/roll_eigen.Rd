@@ -34,7 +34,7 @@ if \code{FALSE} then pairwise is used.}
 }
 \value{
 A list containing the following components:
-\item{values}{An object of the same class and dimension as \code{x} with the rolling eigenvalues.}
+\item{values}{An object of the same class and dimension as \code{data} with the rolling eigenvalues.}
 \item{vectors}{A cube with each slice the rolling eigenvectors.}
 }
 \description{
