@@ -249,11 +249,11 @@ struct RollMeanRows : public Worker {
           if (n_obs >= min_obs) {
             arma_center(i, j) = sum_data / sum_weights;
           } else {
-            arma_center(i, j) = NAN;
+            arma_center(i, j) = NA_REAL;
           }
           
         } else {
-          arma_center(i, j) = NAN;
+          arma_center(i, j) = NA_REAL;
         }
         
       }
@@ -323,11 +323,11 @@ struct RollMeanCols : public Worker {
           if (n_obs >= min_obs) {
             arma_center(i, j) = sum_data / sum_weights;
           } else {
-            arma_center(i, j) = NAN;
+            arma_center(i, j) = NA_REAL;
           }
           
         } else {
-          arma_center(i, j) = NAN;
+          arma_center(i, j) = NA_REAL;
         }
         
       }
@@ -468,11 +468,11 @@ struct RollVarRows : public Worker {
             arma_scale(i, j) = ((sum_data / sum_weights) /
                                   (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
           } else {
-            arma_scale(i, j) = NAN;
+            arma_scale(i, j) = NA_REAL;
           }
           
         } else {
-          arma_scale(i, j) = NAN;
+          arma_scale(i, j) = NA_REAL;
         }
         
       }
@@ -558,11 +558,11 @@ struct RollVarCols : public Worker {
             arma_scale(i, j) = ((sum_data / sum_weights) /
                                   (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
           } else {
-            arma_scale(i, j) = NAN;
+            arma_scale(i, j) = NA_REAL;
           }
           
         } else {
-          arma_scale(i, j) = NAN;
+          arma_scale(i, j) = NA_REAL;
         }
         
       }
@@ -724,11 +724,11 @@ struct RollSdRows : public Worker {
             arma_scale(i, j) = sqrt((sum_data / sum_weights) /
                                       (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
           } else {
-            arma_scale(i, j) = NAN;
+            arma_scale(i, j) = NA_REAL;
           }
           
         } else {
-          arma_scale(i, j) = NAN;
+          arma_scale(i, j) = NA_REAL;
         }
         
       }
@@ -814,11 +814,11 @@ struct RollSdCols : public Worker {
             arma_scale(i, j) = sqrt((sum_data / sum_weights) /
                                       (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
           } else {
-            arma_scale(i, j) = NAN;
+            arma_scale(i, j) = NA_REAL;
           }
           
         } else {
-          arma_scale(i, j) = NAN;
+          arma_scale(i, j) = NA_REAL;
         }
         
       }
@@ -973,13 +973,13 @@ struct RollMeanRowsCube : public Worker {
               arma_center_j(k, j, i) = sum_j / sum_weights;
               arma_center_k(k, j, i) = sum_k / sum_weights;
             } else {
-              arma_center_j(k, j, i) = NAN;
-              arma_center_k(k, j, i) = NAN;
+              arma_center_j(k, j, i) = NA_REAL;
+              arma_center_k(k, j, i) = NA_REAL;
             }
             
           } else {
-            arma_center_j(k, j, i) = NAN;
-            arma_center_k(k, j, i) = NAN;
+            arma_center_j(k, j, i) = NA_REAL;
+            arma_center_k(k, j, i) = NA_REAL;
           }
           
           // covariance matrix is symmetric
@@ -1063,13 +1063,13 @@ struct RollMeanColsCube : public Worker {
               arma_center_j(k, j, i) = sum_j / sum_weights;
               arma_center_k(k, j, i) = sum_k / sum_weights;
             } else {
-              arma_center_j(k, j, i) = NAN;
-              arma_center_k(k, j, i) = NAN;
+              arma_center_j(k, j, i) = NA_REAL;
+              arma_center_k(k, j, i) = NA_REAL;
             }
             
           } else {
-            arma_center_j(k, j, i) = NAN;
-            arma_center_k(k, j, i) = NAN;
+            arma_center_j(k, j, i) = NA_REAL;
+            arma_center_k(k, j, i) = NA_REAL;
           }
           
           // covariance matrix is symmetric
@@ -1199,13 +1199,13 @@ struct RollVarRowsCube : public Worker {
               arma_scale_k(k, j, i) = ((sum_k / sum_weights) /
                                          (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
             } else {
-              arma_scale_j(k, j, i) = NAN;
-              arma_scale_k(k, j, i) = NAN;
+              arma_scale_j(k, j, i) = NA_REAL;
+              arma_scale_k(k, j, i) = NA_REAL;
             }
             
           } else {
-            arma_scale_j(k, j, i) = NAN;
-            arma_scale_k(k, j, i) = NAN;
+            arma_scale_j(k, j, i) = NA_REAL;
+            arma_scale_k(k, j, i) = NA_REAL;
           }
           
           // covariance matrix is symmetric
@@ -1335,13 +1335,13 @@ struct RollVarColsCube : public Worker {
               arma_scale_k(k, j, i) = ((sum_k / sum_weights) /
                                          (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
             } else {
-              arma_scale_j(k, j, i) = NAN;
-              arma_scale_k(k, j, i) = NAN;
+              arma_scale_j(k, j, i) = NA_REAL;
+              arma_scale_k(k, j, i) = NA_REAL;
             }
             
           } else {
-            arma_scale_j(k, j, i) = NAN;
-            arma_scale_k(k, j, i) = NAN;
+            arma_scale_j(k, j, i) = NA_REAL;
+            arma_scale_k(k, j, i) = NA_REAL;
           }
           
           // covariance matrix is symmetric
@@ -1527,11 +1527,11 @@ struct RollCovRows : public Worker {
               arma_cov(k, j, i) = ((sum_data / sum_weights) /
                                      (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
             } else {
-              arma_cov(k, j, i) = NAN;
+              arma_cov(k, j, i) = NA_REAL;
             }
             
           } else {
-            arma_cov(k, j, i) = NAN;
+            arma_cov(k, j, i) = NA_REAL;
           }
           
           // covariance matrix is symmetric
@@ -1716,11 +1716,11 @@ struct RollCovCols : public Worker {
               arma_cov(k, j, i) = ((sum_data / sum_weights) / 
                                      (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
             } else {
-              arma_cov(k, j, i) = NAN;
+              arma_cov(k, j, i) = NA_REAL;
             }
             
           } else {
-            arma_cov(k, j, i) = NAN;
+            arma_cov(k, j, i) = NA_REAL;
           }
           
           // covariance matrix is symmetric
@@ -1909,11 +1909,11 @@ struct RollMeanScaleRows : public Worker {
           if (n_obs >= min_obs) {
             arma_center(i, j) = sum_data / sum_weights;
           } else {
-            arma_center(i, j) = NAN;
+            arma_center(i, j) = NA_REAL;
           }
           
         } else {
-          arma_center(i, j) = NAN;
+          arma_center(i, j) = NA_REAL;
         }
         
       }
@@ -1988,11 +1988,11 @@ struct RollMeanScaleCols : public Worker {
           if (n_obs >= min_obs) {
             arma_center(i, j) = sum_data / sum_weights;
           } else {
-            arma_center(i, j) = NAN;
+            arma_center(i, j) = NA_REAL;
           }
           
         } else {
-          arma_center(i, j) = NAN;
+          arma_center(i, j) = NA_REAL;
         }
         
       }
@@ -2108,20 +2108,20 @@ struct RollLmSlices : public Worker {
         } else if (!status) {
           
           arma::vec no_solution(n_cols);
-          no_solution.fill(NAN);
+          no_solution.fill(NA_REAL);
           
           arma_coef.row(i) = trans(no_solution);
-          arma_rsq(i, 0) = NAN;
+          arma_rsq(i, 0) = NA_REAL;
           
         }
         
       } else {
         
         arma::vec no_solution(n_cols);
-        no_solution.fill(NAN);
+        no_solution.fill(NA_REAL);
         
         arma_coef.row(i) = trans(no_solution);
-        arma_rsq(i, 0) = NAN;
+        arma_rsq(i, 0) = NA_REAL;
         
       }
       
@@ -2350,10 +2350,10 @@ struct RollEigenSlices : public Worker {
         } else if (!status) {
           
           arma::vec no_solution_row(n_cols);
-          no_solution_row.fill(NAN);
+          no_solution_row.fill(NA_REAL);
           
           arma::mat no_solution_slice(n_cols, n_cols);
-          no_solution_slice.fill(NAN);
+          no_solution_slice.fill(NA_REAL);
           
           arma_eigen_values.row(i) = trans(no_solution_row);
           arma_eigen_vectors.slice(i) = no_solution_slice;
@@ -2363,10 +2363,10 @@ struct RollEigenSlices : public Worker {
       } else {
         
         arma::vec no_solution_row(n_cols);
-        no_solution_row.fill(NAN);
+        no_solution_row.fill(NA_REAL);
         
         arma::mat no_solution_slice(n_cols, n_cols);
-        no_solution_slice.fill(NAN);
+        no_solution_slice.fill(NA_REAL);
         
         arma_eigen_values.row(i) = trans(no_solution_row);
         arma_eigen_vectors.slice(i) = no_solution_slice;
@@ -2628,20 +2628,20 @@ struct RollPcrSlices : public Worker {
         } else if (!status) {
           
           arma::vec no_solution(n_cols);
-          no_solution.fill(NAN);
+          no_solution.fill(NA_REAL);
           
           arma_coef.row(i) = trans(no_solution);
-          arma_rsq[i] = NAN;
+          arma_rsq[i] = NA_REAL;
           
         }
         
       } else {
         
         arma::vec no_solution(n_cols);
-        no_solution.fill(NAN);
+        no_solution.fill(NA_REAL);
         
         arma_coef.row(i) = trans(no_solution);
-        arma_rsq[i] = NAN;
+        arma_rsq[i] = NA_REAL;
         
       }
       
@@ -2886,7 +2886,7 @@ struct RollLmVifSlices : public Worker {
             
             
           } else if (!status) {
-            arma_vif(i, j) = NAN;
+            arma_vif(i, j) = NA_REAL;
           }
           
         }
@@ -2894,7 +2894,7 @@ struct RollLmVifSlices : public Worker {
       } else {
         
         arma::vec no_solution(n_cols);
-        no_solution.fill(NAN);
+        no_solution.fill(NA_REAL);
         
         arma_vif.row(i) = trans(no_solution);
         
@@ -2984,11 +2984,11 @@ struct RollPcrVifSlices : public Worker {
               arma_vif(i, j) = 1 / (1 - rsq);
               
             } else if (!status2) {
-              arma_vif(i, j) = NAN;
+              arma_vif(i, j) = NA_REAL;
             }
             
           } else if (!status1) {
-            arma_vif(i, j) = NAN;
+            arma_vif(i, j) = NA_REAL;
           }
           
         }
@@ -2996,7 +2996,7 @@ struct RollPcrVifSlices : public Worker {
       } else {
         
         arma::vec no_solution(n_cols);
-        no_solution.fill(NAN);
+        no_solution.fill(NA_REAL);
         
         arma_vif.row(i) = trans(no_solution);
         
