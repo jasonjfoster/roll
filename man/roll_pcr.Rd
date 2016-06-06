@@ -12,7 +12,7 @@ roll_pcr(x, y, width, comps = 1:ncol(x), weights = rep(1, width),
 \arguments{
 \item{x}{matrix or xts object. Rows are observations and columns are the independent variables.}
 
-\item{y}{vector or xts object. Rows are observations and column is the dependent variable.}
+\item{y}{matrix or xts object. Rows are observations and columns are the dependent variables.}
 
 \item{width}{integer. Window size.}
 
@@ -49,7 +49,7 @@ A list containing the following components:
 \item{r.squared}{An object of the same class as \code{x} with the rolling r-squareds.}
 }
 \description{
-A parallel function for computing rolling principal component regressions of time-series data.
+A parallel function in C++ for computing rolling principal component regressions of time-series data.
 }
 \note{
 If users are already taking advantage of parallelism using multithreaded BLAS/LAPACK

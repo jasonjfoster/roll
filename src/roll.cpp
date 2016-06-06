@@ -1,8 +1,6 @@
 // Google C++ Style Guide: https://google.github.io/styleguide/cppguide.html
 
-// #ifndef ARMA_DONT_PRINT_ERRORS
 #define ARMA_DONT_PRINT_ERRORS
-// #endif
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppParallel)]]
@@ -2130,13 +2128,12 @@ struct RollLmSlices : public Worker {
   
 };
 
-// [[Rcpp::export]]
-List roll_lm(const NumericMatrix& x, const NumericVector& y,
-             const int& width, const arma::vec& weights,
-             const bool& center_x, const bool& center_y,
-             const bool& scale_x, const bool& scale_y,
-             const int& min_obs, const bool& complete_obs,
-             const bool& na_restore, const std::string& parallel_for) {
+List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
+               const int& width, const arma::vec& weights,
+               const bool& center_x, const bool& center_y,
+               const bool& scale_x, const bool& scale_y,
+               const int& min_obs, const bool& complete_obs,
+               const bool& na_restore, const std::string& parallel_for) {
   
   int n_rows = x.nrow();  
   int n_cols = x.ncol() + 1;
@@ -2258,34 +2255,82 @@ List roll_lm(const NumericMatrix& x, const NumericVector& y,
                               arma_coef, arma_rsq);
   parallelFor(0, n_rows, roll_lm_slices);
   
-  // create and return a matrix or xts object for coefficients
-  NumericMatrix coef(wrap(arma_coef));
-  List dimnames = x.attr("dimnames");
-  coef.attr("dimnames") = dimnames_ols(dimnames, n_cols - 1);
-  coef.attr("index") = x.attr("index");
-  coef.attr(".indexCLASS") = x.attr(".indexCLASS");
-  coef.attr(".indexTZ") = x.attr(".indexTZ");
-  coef.attr("tclass") = x.attr("tclass");
-  coef.attr("tzone") = x.attr("tzone");
-  coef.attr("class") = x.attr("class");
+  // create and return a list
+  List result = List::create(Named("coefficients") = arma_coef,
+                             Named("r.squared") = arma_rsq);
   
-  // create and return a matrix or xts object for r-squared
-  NumericMatrix rsq(wrap(arma_rsq));
-  if (dimnames.size() > 1) {
-    rsq.attr("dimnames") = List::create(dimnames[0], "R-squared");
-  } else {
-    rsq.attr("dimnames") = List::create(R_NilValue, "R-squared");
+  return result;
+  
+}
+
+// [[Rcpp::export]]
+List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
+             const int& width, const arma::vec& weights,
+             const bool& center_x, const bool& center_y,
+             const bool& scale_x, const bool& scale_y,
+             const int& min_obs, const bool& complete_obs,
+             const bool& na_restore, const std::string& parallel_for) {
+  
+  int n_rows = x.nrow();  
+  int n_cols = x.ncol() + 1;
+  int y_n_cols = y.ncol();
+  List result_z(2);
+  List result_coef(y_n_cols);
+  List result_rsq(y_n_cols);
+  
+  for (int z = 0; z < y_n_cols; z++) {
+    
+    result_z = roll_lm_z(x, y(_, z),
+                         width, weights,
+                         center_x, center_y,
+                         scale_x, scale_y,
+                         min_obs, complete_obs,
+                         na_restore, parallel_for);
+    
+    arma::mat arma_coef_z = result_z[0];
+    arma::mat arma_rsq_z = result_z[1];
+    
+    // create and return a matrix or xts object for coefficients
+    NumericVector coef(wrap(arma_coef_z));
+    coef.attr("dim") = IntegerVector::create(n_rows, n_cols);
+    List dimnames = x.attr("dimnames");
+    coef.attr("dimnames") = dimnames_ols(dimnames, n_cols - 1);
+    coef.attr("index") = x.attr("index");
+    coef.attr(".indexCLASS") = x.attr(".indexCLASS");
+    coef.attr(".indexTZ") = x.attr(".indexTZ");
+    coef.attr("tclass") = x.attr("tclass");
+    coef.attr("tzone") = x.attr("tzone");
+    coef.attr("class") = x.attr("class");
+    
+    // create and return a matrix or xts object for r-squared
+    NumericVector rsq(wrap(arma_rsq_z));
+    rsq.attr("dim") = IntegerVector::create(n_rows, 1);
+    if (dimnames.size() > 1) {
+      rsq.attr("dimnames") = List::create(dimnames[0], "R-squared");
+    } else {
+      rsq.attr("dimnames") = List::create(R_NilValue, "R-squared");
+    }
+    rsq.attr("index") = x.attr("index");
+    rsq.attr(".indexCLASS") = x.attr(".indexCLASS");
+    rsq.attr(".indexTZ") = x.attr(".indexTZ");
+    rsq.attr("tclass") = x.attr("tclass");
+    rsq.attr("tzone") = x.attr("tzone");
+    rsq.attr("class") = x.attr("class");
+    
+    result_coef(z) = coef;
+    result_rsq(z) = rsq;
+    
   }
-  rsq.attr("index") = x.attr("index");
-  rsq.attr(".indexCLASS") = x.attr(".indexCLASS");
-  rsq.attr(".indexTZ") = x.attr(".indexTZ");
-  rsq.attr("tclass") = x.attr("tclass");
-  rsq.attr("tzone") = x.attr("tzone");
-  rsq.attr("class") = x.attr("class");
+  
+  List dimnames = y.attr("dimnames");
+  if (dimnames.size() > 1) {
+    result_coef.attr("names") = dimnames[1];
+    result_rsq.attr("names") = dimnames[1];
+  }
   
   // create and return a list
-  List result = List::create(Named("coefficients") = coef,
-                             Named("r.squared") = rsq);
+  List result = List::create(Named("coefficients") = result_coef,
+                             Named("r.squared") = result_rsq);
   
   return result;
   
@@ -2650,14 +2695,13 @@ struct RollPcrSlices : public Worker {
   
 };
 
-// [[Rcpp::export]]
-List roll_pcr(const NumericMatrix& x, const NumericVector& y,
-              const int& width, const arma::uvec& comps,
-              const arma::vec& weights, const bool& center_x,
-              const bool& center_y, const bool& scale_x,
-              const bool& scale_y, const int& min_obs,
-              const bool& complete_obs, const bool& na_restore,
-              const std::string& parallel_for) {
+List roll_pcr_z(const NumericMatrix& x, const NumericVector& y,
+                const int& width, const arma::uvec& comps,
+                const arma::vec& weights, const bool& center_x,
+                const bool& center_y, const bool& scale_x,
+                const bool& scale_y, const int& min_obs,
+                const bool& complete_obs, const bool& na_restore,
+                const std::string& parallel_for) {
   
   int n_rows = x.nrow();
   int n_cols = x.ncol() + 1;
@@ -2789,34 +2833,84 @@ List roll_pcr(const NumericMatrix& x, const NumericVector& y,
                                 arma_rsq);
   parallelFor(0, n_rows, roll_pcr_slices);
   
-  // create and return a matrix or xts object for coefficients
-  NumericMatrix coef(wrap(arma_coef));
-  List dimnames = x.attr("dimnames");
-  coef.attr("dimnames") = dimnames_ols(dimnames, n_cols - 1);
-  coef.attr("index") = x.attr("index");
-  coef.attr(".indexCLASS") = x.attr(".indexCLASS");
-  coef.attr(".indexTZ") = x.attr(".indexTZ");
-  coef.attr("tclass") = x.attr("tclass");
-  coef.attr("tzone") = x.attr("tzone");
-  coef.attr("class") = x.attr("class");
+  // create and return a list
+  List result = List::create(Named("coefficients") = arma_coef,
+                             Named("r.squared") = arma_rsq);
   
-  // create and return a matrix or xts object for r-squared
-  NumericMatrix rsq(wrap(arma_rsq));
-  if (dimnames.size() > 1) {
-    rsq.attr("dimnames") = List::create(dimnames[0], "R-squared");
-  } else {
-    rsq.attr("dimnames") = List::create(R_NilValue, "R-squared");
+  return result;
+  
+}
+
+// [[Rcpp::export]]
+List roll_pcr(const NumericMatrix& x, const NumericMatrix& y,
+              const int& width, const arma::uvec& comps,
+              const arma::vec& weights, const bool& center_x,
+              const bool& center_y, const bool& scale_x,
+              const bool& scale_y, const int& min_obs,
+              const bool& complete_obs, const bool& na_restore,
+              const std::string& parallel_for) {
+  
+  int n_rows = x.nrow();  
+  int n_cols = x.ncol() + 1;
+  int y_n_cols = y.ncol();
+  List result_z(2);
+  List result_coef(y_n_cols);
+  List result_rsq(y_n_cols);
+  
+  for (int z = 0; z < y_n_cols; z++) {
+    
+    result_z = roll_pcr_z(x, y(_, z),
+                          width, comps, 
+                          weights, center_x,
+                          center_y, scale_x,
+                          scale_y, min_obs,
+                          complete_obs, na_restore, 
+                          parallel_for);
+    
+    arma::mat arma_coef_z = result_z[0];
+    arma::mat arma_rsq_z = result_z[1];
+    
+    // create and return a matrix or xts object for coefficients
+    NumericVector coef(wrap(arma_coef_z));
+    coef.attr("dim") = IntegerVector::create(n_rows, n_cols);
+    List dimnames = x.attr("dimnames");
+    coef.attr("dimnames") = dimnames_ols(dimnames, n_cols - 1);
+    coef.attr("index") = x.attr("index");
+    coef.attr(".indexCLASS") = x.attr(".indexCLASS");
+    coef.attr(".indexTZ") = x.attr(".indexTZ");
+    coef.attr("tclass") = x.attr("tclass");
+    coef.attr("tzone") = x.attr("tzone");
+    coef.attr("class") = x.attr("class");
+    
+    // create and return a matrix or xts object for r-squared
+    NumericVector rsq(wrap(arma_rsq_z));
+    rsq.attr("dim") = IntegerVector::create(n_rows, 1);
+    if (dimnames.size() > 1) {
+      rsq.attr("dimnames") = List::create(dimnames[0], "R-squared");
+    } else {
+      rsq.attr("dimnames") = List::create(R_NilValue, "R-squared");
+    }
+    rsq.attr("index") = x.attr("index");
+    rsq.attr(".indexCLASS") = x.attr(".indexCLASS");
+    rsq.attr(".indexTZ") = x.attr(".indexTZ");
+    rsq.attr("tclass") = x.attr("tclass");
+    rsq.attr("tzone") = x.attr("tzone");
+    rsq.attr("class") = x.attr("class");
+    
+    result_coef(z) = coef;
+    result_rsq(z) = rsq;
+    
   }
-  rsq.attr("index") = x.attr("index");
-  rsq.attr(".indexCLASS") = x.attr(".indexCLASS");
-  rsq.attr(".indexTZ") = x.attr(".indexTZ");
-  rsq.attr("tclass") = x.attr("tclass");
-  rsq.attr("tzone") = x.attr("tzone");
-  rsq.attr("class") = x.attr("class");
+  
+  List dimnames = y.attr("dimnames");
+  if (dimnames.size() > 1) {
+    result_coef.attr("names") = dimnames[1];
+    result_rsq.attr("names") = dimnames[1];
+  }
   
   // create and return a list
-  List result = List::create(Named("coefficients") = coef,
-                             Named("r.squared") = rsq);
+  List result = List::create(Named("coefficients") = result_coef,
+                             Named("r.squared") = result_rsq);
   
   return result;
   

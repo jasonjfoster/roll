@@ -12,7 +12,7 @@ roll_lm(x, y, width, weights = rep(1, width), center_x = TRUE,
 \arguments{
 \item{x}{matrix or xts object. Rows are observations and columns are the independent variables.}
 
-\item{y}{vector or xts object. Rows are observations and column is the dependent variable.}
+\item{y}{matrix or xts object. Rows are observations and columns are the dependent variables.}
 
 \item{width}{integer. Window size.}
 
@@ -47,7 +47,7 @@ A list containing the following components:
 \item{r.squared}{An object of the same class as \code{x} with the rolling r-squareds.}
 }
 \description{
-A parallel function for computing rolling linear models of time-series data.
+A parallel function in C++ for computing rolling linear models of time-series data.
 }
 \note{
 If users are already taking advantage of parallelism using multithreaded BLAS/LAPACK

@@ -36,7 +36,7 @@ if \code{FALSE} then pairwise is used.}
 A cube with each slice the rolling covariance matrix.
 }
 \description{
-A parallel function for computing rolling covariance matrices of time-series data.
+A parallel function in C++ for computing rolling covariance matrices of time-series data.
 }
 \examples{
 n_vars <- 10

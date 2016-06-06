@@ -38,7 +38,7 @@ A list containing the following components:
 \item{vectors}{A cube with each slice the rolling eigenvectors.}
 }
 \description{
-A parallel function for computing rolling eigenvalues and eigenvectors of time-series data.
+A parallel function in C++ for computing rolling eigenvalues and eigenvectors of time-series data.
 }
 \note{
 If users are already taking advantage of parallelism using multithreaded BLAS/LAPACK
