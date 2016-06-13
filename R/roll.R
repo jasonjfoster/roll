@@ -1,6 +1,6 @@
 ##' Rolling Means
 ##'
-##' A parallel function in C++ for computing rolling means of time-series data.
+##' A parallel function for computing rolling means of time-series data.
 ##'
 ##' @param data matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -48,7 +48,7 @@ roll_mean <- function(data, width, weights = rep(1, width),
 
 ##' Rolling Variances
 ##'
-##' A parallel function in C++ for computing rolling variances of time-series data.
+##' A parallel function for computing rolling variances of time-series data.
 ##'
 ##' @param data matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -99,7 +99,7 @@ roll_var <- function(data, width, weights = rep(1, width), center = TRUE,
 
 ##' Rolling Standard Deviations
 ##'
-##' A parallel function in C++ for computing rolling standard deviations of time-series data.
+##' A parallel function for computing rolling standard deviations of time-series data.
 ##'
 ##' @param data matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -150,7 +150,7 @@ roll_sd <- function(data, width, weights = rep(1, width), center = TRUE,
 
 ##' Rolling Covariance Matrices
 ##'
-##' A parallel function in C++ for computing rolling covariance matrices of time-series data.
+##' A parallel function for computing rolling covariance matrices of time-series data.
 ##' 
 ##' @param data matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -204,7 +204,7 @@ roll_cov <- function(data, width, weights = rep(1, width), center = TRUE, scale 
 
 ##' Rolling Correlation Matrices
 ##'
-##' A parallel function in C++ for computing rolling correlation matrices of time-series data.
+##' A parallel function for computing rolling correlation matrices of time-series data.
 ##' 
 ##' @param data matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -258,7 +258,7 @@ roll_cor <- function(data, width, weights = rep(1, width), center = TRUE, scale 
 
 ##' Rolling Linear Models
 ##'
-##' A parallel function in C++ for computing rolling linear models of time-series data.
+##' A parallel function for computing rolling linear models of time-series data.
 ##' 
 ##' @param x matrix or xts object. Rows are observations and columns are the independent variables.
 ##' @param y matrix or xts object. Rows are observations and columns are the dependent variables.
@@ -326,7 +326,7 @@ roll_lm <- function(x, y, width, weights = rep(1, width), center_x = TRUE, cente
 
 ##' Rolling Eigenvalues and Eigenvectors
 ##'
-##' A parallel function in C++ for computing rolling eigenvalues and eigenvectors of time-series data.
+##' A parallel function for computing rolling eigenvalues and eigenvectors of time-series data.
 ##' 
 ##' @param data matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -385,7 +385,7 @@ roll_eigen <- function(data, width, weights = rep(1, width), center = TRUE, scal
 
 ##' Rolling Principal Component Regressions 
 ##'
-##' A parallel function in C++ for computing rolling principal component regressions of time-series data.
+##' A parallel function for computing rolling principal component regressions of time-series data.
 ##' 
 ##' @param x matrix or xts object. Rows are observations and columns are the independent variables.
 ##' @param y matrix or xts object. Rows are observations and columns are the dependent variables.
@@ -456,7 +456,7 @@ roll_pcr <- function(x, y, width, comps = 1:ncol(x), weights = rep(1, width),
 
 ##' Rolling Variance Inflation Factors
 ##'
-##' A parallel function in C++ for computing rolling variance inflation factors of time-series data.
+##' A parallel function for computing rolling variance inflation factors of time-series data.
 ##' 
 ##' @param data matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.

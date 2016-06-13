@@ -49,7 +49,7 @@ A list containing the following components:
 \item{r.squared}{An object of the same class as \code{x} with the rolling r-squareds.}
 }
 \description{
-A parallel function in C++ for computing rolling principal component regressions of time-series data.
+A parallel function for computing rolling principal component regressions of time-series data.
 }
 \note{
 If users are already taking advantage of parallelism using multithreaded BLAS/LAPACK

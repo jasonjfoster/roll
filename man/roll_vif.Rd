@@ -39,7 +39,7 @@ An object of the same class and dimension as \code{data} with the rolling varian
 inflation factors.
 }
 \description{
-A parallel function in C++ for computing rolling variance inflation factors of time-series data.
+A parallel function for computing rolling variance inflation factors of time-series data.
 }
 \note{
 If users are already taking advantage of parallelism using multithreaded BLAS/LAPACK

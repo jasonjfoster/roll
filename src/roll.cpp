@@ -1732,6 +1732,383 @@ struct RollCovCols : public Worker {
   
 };
 
+// 'Worker' function for computing rolling covariance matrices
+struct RollCovRowsUpdateY : public Worker {
+  
+  const RMatrix<double> data;     // source
+  const int n_rows;
+  const int n_cols;
+  const int width;
+  const arma::vec arma_weights;
+  const bool center_x;
+  const bool center_y;
+  const arma::cube arma_center_j;
+  const arma::cube arma_center_k;
+  const bool scale_x;
+  const bool scale_y;
+  const arma::cube arma_scale_j;
+  const arma::cube arma_scale_k;
+  const int min_obs;
+  const arma::uvec arma_any_na;
+  const bool na_restore;
+  arma::cube& arma_cov;             // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollCovRowsUpdateY(const NumericMatrix data, const int n_rows,
+                     const int n_cols, const int width,
+                     const arma::vec arma_weights, const bool center_x, 
+                     const bool center_y, const arma::cube arma_center_j,
+                     const arma::cube arma_center_k, const bool scale_x,
+                     const bool scale_y, const arma::cube arma_scale_j,
+                     const arma::cube arma_scale_k, const int min_obs,
+                     const arma::uvec arma_any_na, const bool na_restore,
+                     arma::cube& arma_cov)
+    : data(data), n_rows(n_rows),
+      n_cols(n_cols), width(width),
+      arma_weights(arma_weights), center_x(center_x),
+      center_y(center_y), arma_center_j(arma_center_j),
+      arma_center_k(arma_center_k), scale_x(scale_x),
+      scale_y(scale_y), arma_scale_j(arma_scale_j),
+      arma_scale_k(arma_scale_k), min_obs(min_obs),
+      arma_any_na(arma_any_na), na_restore(na_restore),
+      arma_cov(arma_cov) { }
+  
+  // function call operator that iterates by row
+  void operator()(std::size_t begin_row, std::size_t end_row) {
+    for (std::size_t i = begin_row; i < end_row; i++) {
+      for (int j = 0; j < n_cols; j++) {
+        //for (int k = 0; k <= j; k++) {
+        int k = n_cols - 1;
+        
+        int count = 0;
+        int n_obs = 0;
+        double sum_x = 0;
+        double sum_y = 0;
+        double sum_data = 0;
+        double sum_weights = 0;
+        double sum_weights_sq = 0;
+        
+        // don't compute if missing value and 'na_restore' argument is true
+        if ((!na_restore)
+              || (na_restore && !std::isnan(data(i, j)) && !std::isnan(data(i, k)))) {
+          
+          // number of observations is either the window size or,
+          // for partial results, the number of the current row
+          while ((width > count) && (i >= (unsigned)count)) {
+            
+            // don't include if missing value and 'any_na' argument is 1
+            // note: 'any_na' is set to 0 if 'complete_obs' argument is false
+            if ((arma_any_na[i - count] == 0) &&
+                !std::isnan(data(i - count, j)) &&
+                !std::isnan(data(i - count, k))) {
+                
+                // compute the rolling sum of squares with 'center' and 'scale' arguments
+                if (center_x && center_y && scale_x && scale_y) {
+                  sum_data +=
+                    ((data(i - count, j) - arma_center_j(k, j, i)) / sqrt(arma_scale_j(k, j, i))) *
+                    ((data(i - count, k) - arma_center_k(k, j, i)) / sqrt(arma_scale_k(k, j, i))) *
+                    arma_weights[width - count - 1];
+                } else if (!center_x && !center_y && scale_x && scale_y) {
+                  sum_data +=
+                    ((data(i - count, j)) / sqrt(arma_scale_j(k, j, i))) *
+                    ((data(i - count, k)) / sqrt(arma_scale_k(k, j, i))) *
+                    arma_weights[width - count - 1];
+                } else if (center_x && center_y && !scale_x && !scale_y) {
+                  sum_data +=
+                    ((data(i - count, j) - arma_center_j(k, j, i))) *
+                    ((data(i - count, k) - arma_center_k(k, j, i))) *
+                    arma_weights[width - count - 1];
+                } else if (!center_x && !center_y && !scale_x && !scale_y) {
+                  sum_data +=
+                    ((data(i - count, j))) *
+                    ((data(i - count, k))) *
+                    arma_weights[width - count - 1];
+                } else {
+                  
+                  if (center_x && scale_x) {
+                    if (j != n_cols - 1) {
+                      sum_x = (data(i - count, j) - arma_center_j(k, j, i)) / sqrt(arma_scale_j(k, j, i));
+                    }
+                    if (k != n_cols - 1) {
+                      sum_y = (data(i - count, k) - arma_center_k(k, j, i)) / sqrt(arma_scale_k(k, j, i));
+                    }
+                  } else if (!center_x && scale_x) {
+                    if (j != n_cols - 1) {
+                      sum_x = (data(i - count, j)) / sqrt(arma_scale_j(k, j, i));
+                    }
+                    if (k != n_cols - 1) {
+                      sum_y = (data(i - count, k)) / sqrt(arma_scale_k(k, j, i));
+                    }
+                  } else if (center_x && !scale_x) {
+                    if (j != n_cols - 1) {
+                      sum_x = data(i - count, j) - arma_center_j(k, j, i);
+                    }
+                    if (k != n_cols - 1) {
+                      sum_y = data(i - count, k) - arma_center_k(k, j, i);
+                    }
+                  } else if (!center_x && !scale_x) {
+                    if (j != n_cols - 1) {
+                      sum_x = data(i - count, j);
+                    }
+                    if (k != n_cols - 1) {
+                      sum_y = data(i - count, k);
+                    }
+                  } 
+                  
+                  if (center_y && scale_y) {
+                    if (j == n_cols - 1) {
+                      sum_x = (data(i - count, j) - arma_center_j(k, j, i)) / sqrt(arma_scale_j(k, j, i));
+                    }
+                    if (k == n_cols - 1) {
+                      sum_y = (data(i - count, k) - arma_center_k(k, j, i)) / sqrt(arma_scale_k(k, j, i));
+                    }
+                  } else if (!center_y && scale_y) {
+                    if (j == n_cols - 1) {
+                      sum_x = (data(i - count, j)) / sqrt(arma_scale_j(k, j, i));
+                    }
+                    if (k == n_cols - 1) {
+                      sum_y = (data(i - count, k)) / sqrt(arma_scale_k(k, j, i));
+                    }
+                  } else if (center_y && !scale_y) {
+                    if (j == n_cols - 1) {
+                      sum_x = data(i - count, j) - arma_center_j(k, j, i);
+                    }
+                    if (k == n_cols - 1) {
+                      sum_y = data(i - count, k) - arma_center_k(k, j, i);
+                    }
+                  } else if (!center_y && !scale_y) {
+                    if (j == n_cols - 1) {
+                      sum_x = data(i - count, j);
+                    }
+                    if (k == n_cols - 1) {
+                      sum_y = data(i - count, k);
+                    }
+                  } 
+                  
+                  sum_data += sum_x * sum_y * arma_weights[width - count - 1];
+                  
+                }
+                
+                sum_weights += arma_weights[width - count - 1];
+                sum_weights_sq += pow(arma_weights[width - count - 1], 2.0);
+                n_obs += 1;
+                
+            }
+            
+            count += 1;
+            
+          }
+          
+          // compute the unbiased estimate of covariance
+          if (n_obs >= min_obs) {
+            arma_cov(k, j, i) = ((sum_data / sum_weights) /
+                                   (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
+          } else {
+            arma_cov(k, j, i) = NA_REAL;
+          }
+          
+        } else {
+          arma_cov(k, j, i) = NA_REAL;
+        }
+        
+        // covariance matrix is symmetric
+        arma_cov(j, k, i) = arma_cov(k, j, i);
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling covariance matrices
+struct RollCovColsUpdateY : public Worker {
+  
+  const RMatrix<double> data;     // source
+  const int n_rows;
+  const int n_cols;
+  const int width;
+  const arma::vec arma_weights;
+  const bool center_x;
+  const bool center_y;
+  const arma::cube arma_center_j;
+  const arma::cube arma_center_k;
+  const bool scale_x;
+  const bool scale_y;
+  const arma::cube arma_scale_j;
+  const arma::cube arma_scale_k;
+  const int min_obs;
+  const arma::uvec arma_any_na;
+  const bool na_restore;
+  arma::cube& arma_cov;             // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollCovColsUpdateY(const NumericMatrix data, const int n_rows,
+                     const int n_cols, const int width,
+                     const arma::vec arma_weights, const bool center_x, 
+                     const bool center_y, const arma::cube arma_center_j,
+                     const arma::cube arma_center_k, const bool scale_x,
+                     const bool scale_y, const arma::cube arma_scale_j,
+                     const arma::cube arma_scale_k, const int min_obs,
+                     const arma::uvec arma_any_na, const bool na_restore,
+                     arma::cube& arma_cov)
+    : data(data), n_rows(n_rows),
+      n_cols(n_cols), width(width),
+      arma_weights(arma_weights), center_x(center_x),
+      center_y(center_y), arma_center_j(arma_center_j),
+      arma_center_k(arma_center_k), scale_x(scale_x),
+      scale_y(scale_y), arma_scale_j(arma_scale_j),
+      arma_scale_k(arma_scale_k), min_obs(min_obs),
+      arma_any_na(arma_any_na), na_restore(na_restore),
+      arma_cov(arma_cov) { }
+  
+  // function call operator that iterates by column
+  void operator()(std::size_t begin_col, std::size_t end_col) {
+    for (std::size_t j = begin_col; j < end_col; j++) {
+      std::size_t k = n_cols - 1;
+      for (int i = 0; i < n_rows; i++) {
+        
+        int count = 0;
+        int n_obs = 0;
+        double sum_x = 0;
+        double sum_y = 0;
+        double sum_data = 0;
+        double sum_weights = 0;
+        double sum_weights_sq = 0;
+        
+        // don't compute if missing value and 'na_restore' argument is true
+        if ((!na_restore) ||
+            (na_restore && !std::isnan(data(i, j)) && !std::isnan(data(i, k)))) {
+          
+          // number of observations is either the window size or,
+          // for partial results, the number of the current row
+          while ((width > count) && (i >= count)) {
+            
+            // don't include if missing value and 'any_na' argument is 1
+            // note: 'any_na' is set to 0 if 'complete_obs' argument is false
+            if ((arma_any_na[i - count] == 0) &&
+                !std::isnan(data(i - count, j)) &&
+                !std::isnan(data(i - count, k))) {
+                
+                // compute the rolling sum of squares with 'center' and 'scale' arguments
+                if (center_x && center_y && scale_x && scale_y) {
+                  sum_data +=
+                    ((data(i - count, j) - arma_center_j(k, j, i)) / sqrt(arma_scale_j(k, j, i))) *
+                    ((data(i - count, k) - arma_center_k(k, j, i)) / sqrt(arma_scale_k(k, j, i))) *
+                    arma_weights[width - count - 1];
+                } else if (!center_x && !center_y && scale_x && scale_y) {
+                  sum_data +=
+                    ((data(i - count, j)) / sqrt(arma_scale_j(k, j, i))) *
+                    ((data(i - count, k)) / sqrt(arma_scale_k(k, j, i))) *
+                    arma_weights[width - count - 1];
+                } else if (center_x && center_y && !scale_x && !scale_y) {
+                  sum_data +=
+                    ((data(i - count, j) - arma_center_j(k, j, i))) *
+                    ((data(i - count, k) - arma_center_k(k, j, i))) *
+                    arma_weights[width - count - 1];
+                } else if (!center_x && !center_y && !scale_x && !scale_y) {
+                  sum_data +=
+                    ((data(i - count, j))) *
+                    ((data(i - count, k))) *
+                    arma_weights[width - count - 1];
+                } else {
+                  
+                  if (center_x && scale_x) {
+                    if ((int)j != n_cols - 1) {
+                      sum_x = (data(i - count, j) - arma_center_j(k, j, i)) / sqrt(arma_scale_j(k, j, i));
+                    }
+                    if ((int)k != n_cols - 1) {
+                      sum_y = (data(i - count, k) - arma_center_k(k, j, i)) / sqrt(arma_scale_k(k, j, i));
+                    }
+                  } else if (!center_x && scale_x) {
+                    if ((int)j != n_cols - 1) {
+                      sum_x = (data(i - count, j)) / sqrt(arma_scale_j(k, j, i));
+                    }
+                    if ((int)k != n_cols - 1) {
+                      sum_y = (data(i - count, k)) / sqrt(arma_scale_k(k, j, i));
+                    }
+                  } else if (center_x && !scale_x) {
+                    if ((int)j != n_cols - 1) {
+                      sum_x = data(i - count, j) - arma_center_j(k, j, i);
+                    }
+                    if ((int)k != n_cols - 1) {
+                      sum_y = data(i - count, k) - arma_center_k(k, j, i);
+                    }
+                  } else if (!center_x && !scale_x) {
+                    if ((int)j != n_cols - 1) {
+                      sum_x = data(i - count, j);
+                    }
+                    if ((int)k != n_cols - 1) {
+                      sum_y = data(i - count, k);
+                    }
+                  }
+                  
+                  if (center_y && scale_y) {
+                    if ((int)j == n_cols - 1) {
+                      sum_x = (data(i - count, j) - arma_center_j(k, j, i)) / sqrt(arma_scale_j(k, j, i));
+                    }
+                    if ((int)k == n_cols - 1) {
+                      sum_y = (data(i - count, k) - arma_center_k(k, j, i)) / sqrt(arma_scale_k(k, j, i));
+                    }
+                  } else if (!center_y && scale_y) {
+                    if ((int)j == n_cols - 1) {
+                      sum_x = (data(i - count, j)) / sqrt(arma_scale_j(k, j, i));
+                    }
+                    if ((int)k == n_cols - 1) {
+                      sum_y = (data(i - count, k)) / sqrt(arma_scale_k(k, j, i));
+                    }
+                  } else if (center_y && !scale_y) {
+                    if ((int)j == n_cols - 1) {
+                      sum_x = data(i - count, j) - arma_center_j(k, j, i);
+                    }
+                    if ((int)k == n_cols - 1) {
+                      sum_y = data(i - count, k) - arma_center_k(k, j, i);
+                    }
+                  } else if (!center_y && !scale_y) {
+                    if ((int)j == n_cols - 1) {
+                      sum_x = data(i - count, j);
+                    }
+                    if ((int)k == n_cols - 1) {
+                      sum_y = data(i - count, k);
+                    }
+                  }
+                  
+                  sum_data += sum_x * sum_y * arma_weights[width - count - 1];
+                  
+                }
+                
+                sum_weights += arma_weights[width - count - 1];
+                sum_weights_sq += pow(arma_weights[width - count - 1], 2.0);
+                n_obs += 1;
+                
+            }
+            
+            count += 1;
+            
+          }
+          
+          // compute the unbiased estimate of covariance
+          if (n_obs >= min_obs) {
+            arma_cov(k, j, i) = ((sum_data / sum_weights) / 
+                                   (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
+          } else {
+            arma_cov(k, j, i) = NA_REAL;
+          }
+          
+        } else {
+          arma_cov(k, j, i) = NA_REAL;
+        }
+        
+        // covariance matrix is symmetric
+        arma_cov(j, k, i) = arma_cov(k, j, i);
+        
+      }
+      
+    }
+  }
+  
+};
+
 // [[Rcpp::export]]
 NumericVector roll_cov(const NumericMatrix& data, const int& width,
                        const arma::vec& weights, const bool& center,
@@ -2133,7 +2510,8 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
                const bool& center_x, const bool& center_y,
                const bool& scale_x, const bool& scale_y,
                const int& min_obs, const bool& complete_obs,
-               const bool& na_restore, const std::string& parallel_for) {
+               const bool& na_restore, const std::string& parallel_for,
+               arma::cube& arma_cov, int& z) {
   
   int n_rows = x.nrow();  
   int n_cols = x.ncol() + 1;
@@ -2143,7 +2521,6 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
   arma::cube arma_scale_j(n_cols, n_cols, n_rows);
   arma::cube arma_scale_k(n_cols, n_cols, n_rows);
   arma::mat arma_scale_intercept(n_rows, n_cols);
-  arma::cube arma_cov(n_cols, n_cols, n_rows);
   arma::mat arma_coef(n_rows, n_cols);
   arma::mat arma_rsq(n_rows, 1);
   
@@ -2210,25 +2587,52 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
     }
   }
   
-  // compute rolling covariance matrices
-  if (parallel_for == "rows") {
-    RollCovRows roll_cov_rows(data, n_rows, n_cols, width, weights,
-                              center_x, center_y,
-                              arma_center_j, arma_center_k,
-                              scale_x, scale_y,
-                              arma_scale_j, arma_scale_k,
-                              min_obs, arma_any_na, na_restore,
-                              arma_cov);
-    parallelFor(0, n_rows, roll_cov_rows); 
-  } else if (parallel_for == "cols") {
-    RollCovCols roll_cov_cols(data, n_rows, n_cols, width, weights,
-                              center_x, center_y,
-                              arma_center_j, arma_center_k,
-                              scale_x, scale_y,
-                              arma_scale_j, arma_scale_k,
-                              min_obs, arma_any_na, na_restore,
-                              arma_cov);
-    parallelFor(0, n_cols, roll_cov_cols);   
+  if (z == 0) {
+    
+    // compute rolling covariance matrices (update both x and y)
+    if (parallel_for == "rows") {
+      RollCovRows roll_cov_rows(data, n_rows, n_cols, width, weights,
+                                center_x, center_y,
+                                arma_center_j, arma_center_k,
+                                scale_x, scale_y,
+                                arma_scale_j, arma_scale_k,
+                                min_obs, arma_any_na, na_restore,
+                                arma_cov);
+      parallelFor(0, n_rows, roll_cov_rows); 
+    } else if (parallel_for == "cols") {
+      RollCovCols roll_cov_cols(data, n_rows, n_cols, width, weights,
+                                center_x, center_y,
+                                arma_center_j, arma_center_k,
+                                scale_x, scale_y,
+                                arma_scale_j, arma_scale_k,
+                                min_obs, arma_any_na, na_restore,
+                                arma_cov);
+      parallelFor(0, n_cols, roll_cov_cols);   
+    }
+    
+  } else {
+    
+    // compute rolling covariance matrices (update y only)
+    if (parallel_for == "rows") {
+      RollCovRowsUpdateY roll_cov_rows(data, n_rows, n_cols, width, weights,
+                                       center_x, center_y,
+                                       arma_center_j, arma_center_k,
+                                       scale_x, scale_y,
+                                       arma_scale_j, arma_scale_k,
+                                       min_obs, arma_any_na, na_restore,
+                                       arma_cov);
+      parallelFor(0, n_rows, roll_cov_rows); 
+    } else if (parallel_for == "cols") {
+      RollCovColsUpdateY roll_cov_cols(data, n_rows, n_cols, width, weights,
+                                       center_x, center_y,
+                                       arma_center_j, arma_center_k,
+                                       scale_x, scale_y,
+                                       arma_scale_j, arma_scale_k,
+                                       min_obs, arma_any_na, na_restore,
+                                       arma_cov);
+      parallelFor(0, n_cols, roll_cov_cols);   
+    }
+    
   }
   
   // compute rolling mean of each variable (scaled)
@@ -2271,21 +2675,27 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
              const int& min_obs, const bool& complete_obs,
              const bool& na_restore, const std::string& parallel_for) {
   
+  int z_0 = 0;
   int n_rows = x.nrow();  
   int n_cols = x.ncol() + 1;
   int y_n_cols = y.ncol();
   List result_z(2);
   List result_coef(y_n_cols);
   List result_rsq(y_n_cols);
+  List result(2);
+  arma::cube arma_cov(n_cols, n_cols, n_rows);
   
-  for (int z = 0; z < y_n_cols; z++) {
+  // result is a list of matrices if only one y variable,
+  // otherwise a list of lists is returned
+  if (y_n_cols == 1) {
     
-    result_z = roll_lm_z(x, y(_, z),
+    result_z = roll_lm_z(x, y(_, 0),
                          width, weights,
                          center_x, center_y,
                          scale_x, scale_y,
                          min_obs, complete_obs,
-                         na_restore, parallel_for);
+                         na_restore, parallel_for,
+                         arma_cov, z_0);
     
     arma::mat arma_coef_z = result_z[0];
     arma::mat arma_rsq_z = result_z[1];
@@ -2293,8 +2703,8 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
     // create and return a matrix or xts object for coefficients
     NumericVector coef(wrap(arma_coef_z));
     coef.attr("dim") = IntegerVector::create(n_rows, n_cols);
-    List dimnames = x.attr("dimnames");
-    coef.attr("dimnames") = dimnames_ols(dimnames, n_cols - 1);
+    List x_dimnames = x.attr("dimnames");
+    coef.attr("dimnames") = dimnames_ols(x_dimnames, n_cols - 1);
     coef.attr("index") = x.attr("index");
     coef.attr(".indexCLASS") = x.attr(".indexCLASS");
     coef.attr(".indexTZ") = x.attr(".indexTZ");
@@ -2302,11 +2712,11 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
     coef.attr("tzone") = x.attr("tzone");
     coef.attr("class") = x.attr("class");
     
-    // create and return a matrix or xts object for r-squared
+    // create and return a matrix or xts object for r-squareds
     NumericVector rsq(wrap(arma_rsq_z));
     rsq.attr("dim") = IntegerVector::create(n_rows, 1);
-    if (dimnames.size() > 1) {
-      rsq.attr("dimnames") = List::create(dimnames[0], "R-squared");
+    if (x_dimnames.size() > 1) {
+      rsq.attr("dimnames") = List::create(x_dimnames[0], "R-squared");
     } else {
       rsq.attr("dimnames") = List::create(R_NilValue, "R-squared");
     }
@@ -2317,20 +2727,74 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
     rsq.attr("tzone") = x.attr("tzone");
     rsq.attr("class") = x.attr("class");
     
-    result_coef(z) = coef;
-    result_rsq(z) = rsq;
+    List y_dimnames = y.attr("dimnames");
+    if (y_dimnames.size() > 1) {
+      result_coef.attr("names") = y_dimnames[1];
+      result_rsq.attr("names") = y_dimnames[1];
+    }
+    
+    // create and return a list
+    result = List::create(Named("coefficients") = coef,
+                          Named("r.squared") = rsq);
+    
+  } else {
+    
+    for (int z = 0; z < y_n_cols; z++) {
+      
+      result_z = roll_lm_z(x, y(_, z),
+                           width, weights,
+                           center_x, center_y,
+                           scale_x, scale_y,
+                           min_obs, complete_obs,
+                           na_restore, parallel_for,
+                           arma_cov, z);
+      
+      arma::mat arma_coef_z = result_z[0];
+      arma::mat arma_rsq_z = result_z[1];
+      
+      // create and return a matrix or xts object for coefficients
+      NumericVector coef(wrap(arma_coef_z));
+      coef.attr("dim") = IntegerVector::create(n_rows, n_cols);
+      List x_dimnames = x.attr("dimnames");
+      coef.attr("dimnames") = dimnames_ols(x_dimnames, n_cols - 1);
+      coef.attr("index") = x.attr("index");
+      coef.attr(".indexCLASS") = x.attr(".indexCLASS");
+      coef.attr(".indexTZ") = x.attr(".indexTZ");
+      coef.attr("tclass") = x.attr("tclass");
+      coef.attr("tzone") = x.attr("tzone");
+      coef.attr("class") = x.attr("class");
+      
+      // create and return a matrix or xts object for r-squareds
+      NumericVector rsq(wrap(arma_rsq_z));
+      rsq.attr("dim") = IntegerVector::create(n_rows, 1);
+      if (x_dimnames.size() > 1) {
+        rsq.attr("dimnames") = List::create(x_dimnames[0], "R-squared");
+      } else {
+        rsq.attr("dimnames") = List::create(R_NilValue, "R-squared");
+      }
+      rsq.attr("index") = x.attr("index");
+      rsq.attr(".indexCLASS") = x.attr(".indexCLASS");
+      rsq.attr(".indexTZ") = x.attr(".indexTZ");
+      rsq.attr("tclass") = x.attr("tclass");
+      rsq.attr("tzone") = x.attr("tzone");
+      rsq.attr("class") = x.attr("class");
+      
+      result_coef(z) = coef;
+      result_rsq(z) = rsq;
+      
+    }
+    
+    List y_dimnames = y.attr("dimnames");
+    if (y_dimnames.size() > 1) {
+      result_coef.attr("names") = y_dimnames[1];
+      result_rsq.attr("names") = y_dimnames[1];
+    }
+    
+    // create and return a list
+    result = List::create(Named("coefficients") = result_coef,
+                          Named("r.squared") = result_rsq);
     
   }
-  
-  List dimnames = y.attr("dimnames");
-  if (dimnames.size() > 1) {
-    result_coef.attr("names") = dimnames[1];
-    result_rsq.attr("names") = dimnames[1];
-  }
-  
-  // create and return a list
-  List result = List::create(Named("coefficients") = result_coef,
-                             Named("r.squared") = result_rsq);
   
   return result;
   
@@ -2856,10 +3320,13 @@ List roll_pcr(const NumericMatrix& x, const NumericMatrix& y,
   List result_z(2);
   List result_coef(y_n_cols);
   List result_rsq(y_n_cols);
+  List result(2);
   
-  for (int z = 0; z < y_n_cols; z++) {
+  // result is a list of matrices if only one y variable,
+  // otherwise a list of lists is returned
+  if (y_n_cols == 1) {
     
-    result_z = roll_pcr_z(x, y(_, z),
+    result_z = roll_pcr_z(x, y(_, 0),
                           width, comps, 
                           weights, center_x,
                           center_y, scale_x,
@@ -2873,8 +3340,8 @@ List roll_pcr(const NumericMatrix& x, const NumericMatrix& y,
     // create and return a matrix or xts object for coefficients
     NumericVector coef(wrap(arma_coef_z));
     coef.attr("dim") = IntegerVector::create(n_rows, n_cols);
-    List dimnames = x.attr("dimnames");
-    coef.attr("dimnames") = dimnames_ols(dimnames, n_cols - 1);
+    List x_dimnames = x.attr("dimnames");
+    coef.attr("dimnames") = dimnames_ols(x_dimnames, n_cols - 1);
     coef.attr("index") = x.attr("index");
     coef.attr(".indexCLASS") = x.attr(".indexCLASS");
     coef.attr(".indexTZ") = x.attr(".indexTZ");
@@ -2882,11 +3349,11 @@ List roll_pcr(const NumericMatrix& x, const NumericMatrix& y,
     coef.attr("tzone") = x.attr("tzone");
     coef.attr("class") = x.attr("class");
     
-    // create and return a matrix or xts object for r-squared
+    // create and return a matrix or xts object for r-squareds
     NumericVector rsq(wrap(arma_rsq_z));
     rsq.attr("dim") = IntegerVector::create(n_rows, 1);
-    if (dimnames.size() > 1) {
-      rsq.attr("dimnames") = List::create(dimnames[0], "R-squared");
+    if (x_dimnames.size() > 1) {
+      rsq.attr("dimnames") = List::create(x_dimnames[0], "R-squared");
     } else {
       rsq.attr("dimnames") = List::create(R_NilValue, "R-squared");
     }
@@ -2897,20 +3364,74 @@ List roll_pcr(const NumericMatrix& x, const NumericMatrix& y,
     rsq.attr("tzone") = x.attr("tzone");
     rsq.attr("class") = x.attr("class");
     
-    result_coef(z) = coef;
-    result_rsq(z) = rsq;
+    List y_dimnames = y.attr("dimnames");
+    if (y_dimnames.size() > 1) {
+      result_coef.attr("names") = y_dimnames[1];
+      result_rsq.attr("names") = y_dimnames[1];
+    }
+    
+    // create and return a list
+    result = List::create(Named("coefficients") = coef,
+                          Named("r.squared") = rsq);
+    
+  } else {
+    
+    for (int z = 0; z < y_n_cols; z++) {
+      
+      result_z = roll_pcr_z(x, y(_, z),
+                            width, comps, 
+                            weights, center_x,
+                            center_y, scale_x,
+                            scale_y, min_obs,
+                            complete_obs, na_restore, 
+                            parallel_for);
+      
+      arma::mat arma_coef_z = result_z[0];
+      arma::mat arma_rsq_z = result_z[1];
+      
+      // create and return a matrix or xts object for coefficients
+      NumericVector coef(wrap(arma_coef_z));
+      coef.attr("dim") = IntegerVector::create(n_rows, n_cols);
+      List x_dimnames = x.attr("dimnames");
+      coef.attr("dimnames") = dimnames_ols(x_dimnames, n_cols - 1);
+      coef.attr("index") = x.attr("index");
+      coef.attr(".indexCLASS") = x.attr(".indexCLASS");
+      coef.attr(".indexTZ") = x.attr(".indexTZ");
+      coef.attr("tclass") = x.attr("tclass");
+      coef.attr("tzone") = x.attr("tzone");
+      coef.attr("class") = x.attr("class");
+      
+      // create and return a matrix or xts object for r-squareds
+      NumericVector rsq(wrap(arma_rsq_z));
+      rsq.attr("dim") = IntegerVector::create(n_rows, 1);
+      if (x_dimnames.size() > 1) {
+        rsq.attr("dimnames") = List::create(x_dimnames[0], "R-squared");
+      } else {
+        rsq.attr("dimnames") = List::create(R_NilValue, "R-squared");
+      }
+      rsq.attr("index") = x.attr("index");
+      rsq.attr(".indexCLASS") = x.attr(".indexCLASS");
+      rsq.attr(".indexTZ") = x.attr(".indexTZ");
+      rsq.attr("tclass") = x.attr("tclass");
+      rsq.attr("tzone") = x.attr("tzone");
+      rsq.attr("class") = x.attr("class");
+      
+      result_coef(z) = coef;
+      result_rsq(z) = rsq;
+      
+    }
+    
+    List y_dimnames = y.attr("dimnames");
+    if (y_dimnames.size() > 1) {
+      result_coef.attr("names") = y_dimnames[1];
+      result_rsq.attr("names") = y_dimnames[1];
+    }
+    
+    // create and return a list
+    result = List::create(Named("coefficients") = result_coef,
+                          Named("r.squared") = result_rsq);
     
   }
-  
-  List dimnames = y.attr("dimnames");
-  if (dimnames.size() > 1) {
-    result_coef.attr("names") = dimnames[1];
-    result_rsq.attr("names") = dimnames[1];
-  }
-  
-  // create and return a list
-  List result = List::create(Named("coefficients") = result_coef,
-                             Named("r.squared") = result_rsq);
   
   return result;
   
