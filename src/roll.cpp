@@ -1373,7 +1373,7 @@ struct RollCovRows : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::cube& arma_cov;             // destination (pass by reference)
+  arma::cube& arma_cov;           // destination (pass by reference)
   
   // initialize with source and destination
   RollCovRows(const NumericMatrix data, const int n_rows,
@@ -1562,7 +1562,7 @@ struct RollCovCols : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::cube& arma_cov;             // destination (pass by reference)
+  arma::cube& arma_cov;           // destination (pass by reference)
   
   // initialize with source and destination
   RollCovCols(const NumericMatrix data, const int n_rows,
@@ -2155,7 +2155,7 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
   std::copy(x.begin(), x.end(), data.begin());
   std::copy(y.begin(), y.end(), data.begin() + n_rows * (n_cols - 1));
   
-  // Check 'width' argument for errors
+  // check 'width' argument for errors
   check_width(width, n_rows);
   
   // default 'weights' argument is equal-weighted,
@@ -2210,7 +2210,7 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
     }
   }
   
-  // compute rolling covariance matrices (update both x and y)
+  // compute rolling covariance matrices
   if (parallel_for == "rows") {
     RollCovRows roll_cov_rows(data, n_rows, n_cols, width, weights,
                               center_x, center_y,
@@ -2279,8 +2279,8 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
   List result_rsq(y_n_cols);
   List result(2);
   
-  // result is a list of matrices if only one y variable,
-  // otherwise a list of lists is returned
+  // create a list of matrices,
+  // otherwise a list of lists
   if (y_n_cols == 1) {
     
     result_z = roll_lm_z(x, y(_, 0),
@@ -2376,6 +2376,7 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
       
     }
     
+    // add names to each list
     List y_dimnames = y.attr("dimnames");
     if (y_dimnames.size() > 1) {
       result_coef.attr("names") = y_dimnames[1];
@@ -2914,8 +2915,8 @@ List roll_pcr(const NumericMatrix& x, const NumericMatrix& y,
   List result_rsq(y_n_cols);
   List result(2);
   
-  // result is a list of matrices if only one y variable,
-  // otherwise a list of lists is returned
+  // create a list of matrices,
+  // otherwise a list of lists
   if (y_n_cols == 1) {
     
     result_z = roll_pcr_z(x, y(_, 0),
@@ -3013,6 +3014,7 @@ List roll_pcr(const NumericMatrix& x, const NumericMatrix& y,
       
     }
     
+    // add names to each list
     List y_dimnames = y.attr("dimnames");
     if (y_dimnames.size() > 1) {
       result_coef.attr("names") = y_dimnames[1];
