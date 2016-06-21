@@ -148,6 +148,60 @@ roll_sd <- function(data, width, weights = rep(1, width), center = TRUE,
   ))
 }
 
+##' Rolling Scaling and Centering
+##'
+##' A parallel function for computing rolling scaling and centering of time-series data.
+##'
+##' @param data matrix or xts object. Rows are observations and columns are variables.
+##' @param width integer. Window size.
+##' @param weights vector. Weights for each observation within a window.
+##' @param center logical. If \code{TRUE} then the weighted mean of each variable is used,
+##' if \code{FALSE} then zero is used.
+##' @param scale logical. If \code{TRUE} then the weighted standard deviation of each variable is used,
+##' if \code{FALSE} then no scaling is done.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is NA.
+##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
+##' if \code{FALSE} then each value is used.
+##' @param na_restore logical. Should missing values be restored?
+##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
+##' \code{rows} or \code{cols}.
+##' @return An object of the same class and dimension as \code{data} with the rolling scaling and centering.
+##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
+##' @examples
+##' n_vars <- 10
+##' n_obs <- 1000
+##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' 
+##' # 252-day rolling z-score
+##' result <- roll_scale(data, 252)
+##' 
+##' # Equivalent to 'na.rm = TRUE'
+##' result <- roll_scale(data, 252, min_obs = 1)
+##' 
+##' # Expanding window
+##' result <- roll_scale(data, n_obs, min_obs = 1)
+##' 
+##' # Exponential decay
+##' weights <- 0.9 ^ (251:0)
+##' result <- roll_scale(data, 252, weights, min_obs = 1)
+##' @export
+roll_scale <- function(data, width, weights = rep(1, width), center = TRUE, scale = TRUE,
+                       min_obs = width, complete_obs = FALSE, na_restore = FALSE,
+                       parallel_for = c("rows", "cols")) {
+  return(.Call('roll_roll_scale', PACKAGE = 'roll',
+               data,
+               as.integer(width),
+               as.numeric(weights),
+               as.logical(center),
+               as.logical(scale),
+               as.integer(min_obs),
+               as.logical(complete_obs),
+               as.logical(na_restore),
+               as.character(match.arg(parallel_for))
+  ))
+}
+
 ##' Rolling Covariance Matrices
 ##'
 ##' A parallel function for computing rolling covariance matrices of time-series data.

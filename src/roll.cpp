@@ -646,7 +646,7 @@ NumericMatrix roll_var(const NumericMatrix& data, const int& width,
   
 }
 
-// 'Worker' function for computing rolling variances
+// 'Worker' function for computing rolling standard deviations
 struct RollSdRows : public Worker {
   
   const RMatrix<double> data;   // source
@@ -735,7 +735,7 @@ struct RollSdRows : public Worker {
   
 };
 
-// 'Worker' function for computing rolling variances
+// 'Worker' function for computing rolling standard deviations
 struct RollSdCols : public Worker {
   
   const RMatrix<double> data;   // source
@@ -889,6 +889,223 @@ NumericMatrix roll_sd(const NumericMatrix& data, const int& width,
   
   // create and return a matrix or xts object
   NumericMatrix result(wrap(arma_scale));
+  List dimnames = data.attr("dimnames");
+  result.attr("dimnames") = dimnames;
+  result.attr("index") = data.attr("index");
+  result.attr(".indexCLASS") = data.attr(".indexCLASS");
+  result.attr(".indexTZ") = data.attr(".indexTZ");
+  result.attr("tclass") = data.attr("tclass");
+  result.attr("tzone") = data.attr("tzone");
+  result.attr("class") = data.attr("class");
+  
+  return result;
+  
+}
+
+// 'Worker' function for computing rolling scaling and centering
+struct RollScaleCenterRows : public Worker {
+  
+  const RMatrix<double> data;   // source
+  const int n_rows;
+  const int n_cols;
+  const int width;
+  const arma::vec arma_weights;
+  const bool center;
+  const arma::mat arma_center;
+  const bool scale;
+  const arma::mat arma_scale;
+  const int min_obs;
+  const arma::uvec arma_any_na;
+  const bool na_restore;
+  arma::mat& arma_cov;        // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollScaleCenterRows(const NumericMatrix data, const int n_rows,
+                      const int n_cols, const int width,
+                      const arma::vec arma_weights, const bool center,
+                      const arma::mat arma_center, const bool scale,
+                      const arma::mat arma_scale, const int min_obs,
+                      const arma::uvec arma_any_na, const bool na_restore,
+                      arma::mat& arma_cov)
+    : data(data), n_rows(n_rows),
+      n_cols(n_cols), width(width),
+      arma_weights(arma_weights), center(center),
+      arma_center(arma_center), scale(scale),
+      arma_scale(arma_scale), min_obs(min_obs),
+      arma_any_na(arma_any_na), na_restore(na_restore),
+      arma_cov(arma_cov) { }
+  
+  // function call operator that iterates by row
+  void operator()(std::size_t begin_row, std::size_t end_row) {
+    for (std::size_t i = begin_row; i < end_row; i++) {
+      for (int j = 0; j < n_cols; j++) {
+        
+        // don't compute if missing value and 'na_restore' argument is true
+        if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
+          
+          // compute with 'center' and 'scale' arguments
+          if (center && scale) {
+            arma_cov(i, j) = (data(i, j) - arma_center(i, j)) / sqrt(arma_scale(i, j));
+          } else if (!center && scale) {
+            arma_cov(i, j) = (data(i, j)) / sqrt(arma_scale(i, j));
+          } else if (!center && !scale) {
+            arma_cov(i, j) = (data(i, j));
+          }
+          
+        } else {
+          arma_cov(i, j) = NA_REAL;
+        }
+        
+      }
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling scaling and centering
+struct RollScaleCenterCols : public Worker {
+  
+  const RMatrix<double> data;   // source
+  const int n_rows;
+  const int n_cols;
+  const int width;
+  const arma::vec arma_weights;
+  const bool center;
+  const arma::mat arma_center;
+  const bool scale;
+  const arma::mat arma_scale;
+  const int min_obs;
+  const arma::uvec arma_any_na;
+  const bool na_restore;
+  arma::mat& arma_cov;        // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollScaleCenterCols(const NumericMatrix data, const int n_rows,
+                      const int n_cols, const int width,
+                      const arma::vec arma_weights, const bool center,
+                      const arma::mat arma_center, const bool scale,
+                      const arma::mat arma_scale, const int min_obs,
+                      const arma::uvec arma_any_na, const bool na_restore,
+                      arma::mat& arma_cov)
+    : data(data), n_rows(n_rows),
+      n_cols(n_cols), width(width),
+      arma_weights(arma_weights), center(center),
+      arma_center(arma_center), scale(scale),
+      arma_scale(arma_scale), min_obs(min_obs),
+      arma_any_na(arma_any_na), na_restore(na_restore),
+      arma_cov(arma_cov) { }
+  
+  // function call operator that iterates by row
+  void operator()(std::size_t begin_col, std::size_t end_col) {
+    for (std::size_t j = begin_col; j < end_col; j++) {
+      for (int i = 0; i < n_rows; i++) {
+        
+        // don't compute if missing value and 'na_restore' argument is true
+        if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
+          
+          // compute with 'center' and 'scale' arguments
+          if (center && scale) {
+            arma_cov(i, j) = (data(i, j) - arma_center(i, j)) / sqrt(arma_scale(i, j));
+          } else if (!center && scale) {
+            arma_cov(i, j) = (data(i, j)) / sqrt(arma_scale(i, j));
+          } else if (!center && !scale) {
+            arma_cov(i, j) = (data(i, j));
+          }
+          
+        } else {
+          arma_cov(i, j) = NA_REAL;
+        }
+        
+      }
+    }
+  }
+  
+};
+
+// [[Rcpp::export]]
+NumericMatrix roll_scale(const NumericMatrix& data, const int& width,
+                         const arma::vec& weights, const bool& center,
+                         const bool& scale, const int& min_obs,
+                         const bool& complete_obs, const bool& na_restore,
+                         const std::string& parallel_for) {
+  
+  int n_rows = data.nrow();
+  int n_cols = data.ncol();
+  arma::uvec arma_any_na(n_rows);
+  arma::mat arma_center(n_rows, n_cols);
+  arma::mat arma_scale(n_rows, n_cols);
+  arma::mat arma_cov(n_rows, n_cols);
+  
+  // check 'width' argument for errors
+  check_width(width, n_rows);
+  
+  // default 'weights' argument is equal-weighted,
+  // otherwise check argument for errors
+  check_weights(weights, width);
+  
+  // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
+  // otherwise check argument for errors
+  check_min_obs(min_obs, width);
+  
+  // default 'complete_obs' argument is 'false' (equivalent to 'pairwise'),
+  // otherwise check argument for errors
+  if (complete_obs) {
+    arma_any_na = any_na(data);
+  } else {
+    arma_any_na.fill(0);
+  }
+  
+  // default 'center' argument subtracts mean of each variable,
+  // otherwise no scaling is done
+  if (center) {
+    if (parallel_for == "rows") {
+      RollMeanRows roll_mean_rows(data, n_rows, n_cols, width, weights,
+                                  min_obs, arma_any_na, na_restore,
+                                  arma_center);
+      parallelFor(0, n_rows, roll_mean_rows);
+    } else if (parallel_for == "cols") {
+      RollMeanCols roll_mean_cols(data, n_rows, n_cols, width, weights,
+                                  min_obs, arma_any_na, na_restore,
+                                  arma_center);
+      parallelFor(0, n_cols, roll_mean_cols);
+    }
+  }
+  
+  // default 'scale' argument is none,
+  // otherwise divide by the standard deviation of each variable
+  if (scale) {
+    if (parallel_for == "rows") {
+      RollVarRows roll_var_rows(data, n_rows, n_cols, width, weights,
+                                center, arma_center,
+                                min_obs, arma_any_na, na_restore,
+                                arma_scale);
+      parallelFor(0, n_rows, roll_var_rows); 
+    } else if (parallel_for == "cols") {
+      RollVarCols roll_var_cols(data, n_rows, n_cols, width, weights,
+                                center, arma_center,
+                                min_obs, arma_any_na, na_restore,
+                                arma_scale);
+      parallelFor(0, n_cols, roll_var_cols);   
+    }
+  }
+  
+  // compute rolling scaling and centering
+  if (parallel_for == "rows") {
+    RollScaleCenterRows roll_scale_center_rows(data, n_rows, n_cols, width, weights,
+                                               center, arma_center, scale, arma_scale,
+                                               min_obs, arma_any_na, na_restore,
+                                               arma_cov);
+    parallelFor(0, n_rows, roll_scale_center_rows); 
+  } else if (parallel_for == "cols") {
+    RollScaleCenterCols roll_scale_center_cols(data, n_rows, n_cols, width, weights,
+                                               center, arma_center, scale, arma_scale,
+                                               min_obs, arma_any_na, na_restore,
+                                               arma_cov);
+    parallelFor(0, n_cols, roll_scale_center_cols); 
+  }
+  
+  // create and return a matrix or xts object
+  NumericMatrix result(wrap(arma_cov));
   List dimnames = data.attr("dimnames");
   result.attr("dimnames") = dimnames;
   result.attr("index") = data.attr("index");

@@ -59,6 +59,25 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// roll_scale
+NumericMatrix roll_scale(const NumericMatrix& data, const int& width, const arma::vec& weights, const bool& center, const bool& scale, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
+RcppExport SEXP roll_roll_scale(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< const int& >::type width(widthSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type scale(scaleSEXP);
+    Rcpp::traits::input_parameter< const int& >::type min_obs(min_obsSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type complete_obs(complete_obsSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type na_restore(na_restoreSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type parallel_for(parallel_forSEXP);
+    __result = Rcpp::wrap(roll_scale(data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for));
+    return __result;
+END_RCPP
+}
 // roll_cov
 NumericVector roll_cov(const NumericMatrix& data, const int& width, const arma::vec& weights, const bool& center, const bool& scale, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
 RcppExport SEXP roll_roll_cov(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {

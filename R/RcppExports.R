@@ -13,6 +13,10 @@ roll_sd <- function(data, width, weights, center, min_obs, complete_obs, na_rest
     .Call('roll_roll_sd', PACKAGE = 'roll', data, width, weights, center, min_obs, complete_obs, na_restore, parallel_for)
 }
 
+roll_scale <- function(data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for) {
+    .Call('roll_roll_scale', PACKAGE = 'roll', data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for)
+}
+
 roll_cov <- function(data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for) {
     .Call('roll_roll_cov', PACKAGE = 'roll', data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for)
 }
