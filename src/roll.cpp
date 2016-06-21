@@ -917,7 +917,7 @@ struct RollScaleCenterRows : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::mat& arma_cov;        // destination (pass by reference)
+  arma::mat& arma_cov;          // destination (pass by reference)
   
   // initialize with source and destination
   RollScaleCenterRows(const NumericMatrix data, const int n_rows,
@@ -977,7 +977,7 @@ struct RollScaleCenterCols : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::mat& arma_cov;        // destination (pass by reference)
+  arma::mat& arma_cov;          // destination (pass by reference)
   
   // initialize with source and destination
   RollScaleCenterCols(const NumericMatrix data, const int n_rows,
