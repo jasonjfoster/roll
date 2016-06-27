@@ -942,60 +942,50 @@ struct RollScaleCenterRows : public Worker {
         
         int count = 0;
         int n_obs = 0;
+        bool any_data = false;
         double sum_data = 0;
-        double sum_weights = 0;
-        double sum_weights_sq = 0;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
           
           // number of observations is either the window size or,
           // for partial results, the number of the current row
-          // note: only compute if scaling
-          if (scale) {
-            while ((width > count) && (i >= (unsigned)count)) {
+          while ((width > count) && (i >= (unsigned)count)) {
+            
+            // don't include if missing value and 'any_na' argument is 1
+            // note: 'any_na' is set to 0 if 'complete_obs' argument is false
+            if ((arma_any_na[i - count] == 0) && !std::isnan(data(i - count, j))) {
               
-              // don't include if missing value and 'any_na' argument is 1
-              // note: 'any_na' is set to 0 if 'complete_obs' argument is false
-              if ((arma_any_na[i - count] == 0) && !std::isnan(data(i - count, j))) {
-                
-                // compute the rolling sum of squares with 'center' argument
-                if (center) {
-                  sum_data +=
-                    pow(data(i - count, j) - arma_center(i, j), 2.0) *
-                    arma_weights[width - count - 1];
-                } else if (!center) {
-                  sum_data +=
-                    pow(data(i - count, j), 2.0) *
-                    arma_weights[width - count - 1];
-                }
-                
-                sum_weights += arma_weights[width - count - 1];
-                sum_weights_sq += pow(arma_weights[width - count - 1], 2.0);
-                n_obs += 1;
-                
+              // keep first non-missing value
+              if (!any_data) {
+                sum_data = data(i - count, j);
               }
               
-              count += 1;
+              any_data = true;
+              n_obs += 1;
               
             }
             
-            // compute the unbiased estimate of standard deviation
-            if (n_obs >= min_obs) {
-              arma_scale(i, j) = ((sum_data / sum_weights) /
-                                    (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
-            } else {
-              arma_scale(i, j) = NA_REAL;
-            }
+            count += 1;
+            
           }
-
-          // compute with 'center' and 'scale' arguments
-          if (center && scale) {
-            arma_cov(i, j) = (data(i, j) - arma_center(i, j)) / sqrt(arma_scale(i, j));
-          } else if (!center && scale) {
-            arma_cov(i, j) = (data(i, j)) / sqrt(arma_scale(i, j));
-          } else if (!center && !scale) {
-            arma_cov(i, j) = (data(i, j));
+          
+          // compute the scaling and centering
+          if (n_obs >= min_obs) {
+            
+            // compute with 'center' and 'scale' arguments
+            if (center && scale) {
+              arma_cov(i, j) = (sum_data - arma_center(i, j)) / sqrt(arma_scale(i, j));
+            } else if (!center && scale) {
+              arma_cov(i, j) = (sum_data) / sqrt(arma_scale(i, j));
+            } else if (center && !scale) {
+              arma_cov(i, j) = (sum_data - arma_center(i, j));
+            } else if (!center && !scale) {
+              arma_cov(i, j) = (sum_data);
+            }
+            
+          } else {
+            arma_cov(i, j) = NA_REAL;
           }
           
         } else {
@@ -1048,60 +1038,50 @@ struct RollScaleCenterCols : public Worker {
         
         int count = 0;
         int n_obs = 0;
+        bool any_data = false;
         double sum_data = 0;
-        double sum_weights = 0;
-        double sum_weights_sq = 0;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
           
           // number of observations is either the window size or,
           // for partial results, the number of the current row
-          // note: only compute if scaling
-          if (scale) {
-            while ((width > count) && (i >= count)) {
+          while ((width > count) && (i >= count)) {
+            
+            // don't include if missing value and 'any_na' argument is 1
+            // note: 'any_na' is set to 0 if 'complete_obs' argument is false
+            if ((arma_any_na[i - count] == 0) && !std::isnan(data(i - count, j))) {
               
-              // don't include if missing value and 'any_na' argument is 1
-              // note: 'any_na' is set to 0 if 'complete_obs' argument is false
-              if ((arma_any_na[i - count] == 0) && !std::isnan(data(i - count, j))) {
-                
-                // if scaling, compute the rolling sum of squares with 'center' argument
-                if (center) {
-                  sum_data +=
-                    pow(data(i - count, j) - arma_center(i, j), 2.0) *
-                    arma_weights[width - count - 1];
-                } else if (!center) {
-                  sum_data +=
-                    pow(data(i - count, j), 2.0) *
-                    arma_weights[width - count - 1];
-                }
-                
-                sum_weights += arma_weights[width - count - 1];
-                sum_weights_sq += pow(arma_weights[width - count - 1], 2.0);
-                n_obs += 1;
-                
+              // keep first non-missing value
+              if (!any_data) {
+                sum_data = data(i - count, j);
               }
               
-              count += 1;
+              any_data = true;
+              n_obs += 1;
               
             }
             
-            // compute the unbiased estimate of standard deviation
-            if (n_obs >= min_obs) {
-              arma_scale(i, j) = ((sum_data / sum_weights) /
-                                    (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
-            } else {
-              arma_scale(i, j) = NA_REAL;
-            }
+            count += 1;
+            
           }
           
-          // compute with 'center' and 'scale' arguments
-          if (center && scale) {
-            arma_cov(i, j) = (data(i, j) - arma_center(i, j)) / sqrt(arma_scale(i, j));
-          } else if (!center && scale) {
-            arma_cov(i, j) = (data(i, j)) / sqrt(arma_scale(i, j));
-          } else if (!center && !scale) {
-            arma_cov(i, j) = (data(i, j));
+          // compute the scaling and centering
+          if (n_obs >= min_obs) {
+            
+            // compute with 'center' and 'scale' arguments
+            if (center && scale) {
+              arma_cov(i, j) = (sum_data - arma_center(i, j)) / sqrt(arma_scale(i, j));
+            } else if (!center && scale) {
+              arma_cov(i, j) = (sum_data) / sqrt(arma_scale(i, j));
+            } else if (center && !scale) {
+              arma_cov(i, j) = (sum_data - arma_center(i, j));
+            } else if (!center && !scale) {
+              arma_cov(i, j) = (sum_data);
+            }
+            
+          } else {
+            arma_cov(i, j) = NA_REAL;
           }
           
         } else {
@@ -1148,7 +1128,7 @@ NumericMatrix roll_scale(const NumericMatrix& data, const int& width,
   }
   
   // default 'center' argument subtracts mean of each variable,
-  // otherwise no scaling is done
+  // otherwise zero is used
   if (center) {
     if (parallel_for == "rows") {
       RollMeanRows roll_mean_rows(data, n_rows, n_cols, width, weights,
@@ -1160,6 +1140,24 @@ NumericMatrix roll_scale(const NumericMatrix& data, const int& width,
                                   min_obs, arma_any_na, na_restore,
                                   arma_center);
       parallelFor(0, n_cols, roll_mean_cols);
+    }
+  }
+  
+  // default 'scale' argument divides by the standard deviation of each variable
+  // otherwise no scaling is done
+  if (scale) {
+    if (parallel_for == "rows") {
+      RollVarRows roll_var_rows(data, n_rows, n_cols, width, weights,
+                                center, arma_center,
+                                min_obs, arma_any_na, na_restore,
+                                arma_scale);
+      parallelFor(0, n_rows, roll_var_rows); 
+    } else if (parallel_for == "cols") {
+      RollVarCols roll_var_cols(data, n_rows, n_cols, width, weights,
+                                center, arma_center,
+                                min_obs, arma_any_na, na_restore,
+                                arma_scale);
+      parallelFor(0, n_cols, roll_var_cols);   
     }
   }
   
@@ -2466,7 +2464,7 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
   }
   
   // default 'center' argument subtracts mean of each variable,
-  // otherwise no scaling is done
+  // otherwise zero is used
   if (center_x || center_y) {
     if (parallel_for == "rows") {
       RollMeanRowsCube roll_mean_rows(data, n_rows, n_cols, width, weights,
@@ -2814,7 +2812,7 @@ List roll_eigen(const NumericMatrix& data, const int& width,
   }
   
   // default 'center' argument subtracts mean of each variable,
-  // otherwise no scaling is done
+  // otherwise zero is used
   if (center) {
     if (parallel_for == "rows") {
       RollMeanRowsCube roll_mean_rows(data, n_rows, n_cols, width, weights,
@@ -3096,7 +3094,7 @@ List roll_pcr_z(const NumericMatrix& x, const NumericVector& y,
   }
   
   // default 'center' argument subtracts mean of each variable,
-  // otherwise no scaling is done
+  // otherwise zero is used
   if (center_x || center_y) {
     if (parallel_for == "rows") {
       RollMeanRowsCube roll_mean_rows(data, n_rows, n_cols, width, weights,
@@ -3555,7 +3553,7 @@ NumericMatrix roll_vif(const NumericMatrix& data, const int& width,
   }
   
   // default 'center' argument subtracts mean of each variable,
-  // otherwise no scaling is done
+  // otherwise zero is used
   if (center) {
     if (parallel_for == "rows") {
       RollMeanRowsCube roll_mean_rows(data, n_rows, n_cols, width, weights,
