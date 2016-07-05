@@ -162,14 +162,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_vif
-NumericMatrix roll_vif(const NumericMatrix& data, const int& width, const arma::uvec& comps, const arma::vec& weights, const bool& center, const bool& scale, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
-RcppExport SEXP roll_roll_vif(SEXP dataSEXP, SEXP widthSEXP, SEXP compsSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
+NumericMatrix roll_vif(const NumericMatrix& data, const int& width, const arma::vec& weights, const bool& center, const bool& scale, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
+RcppExport SEXP roll_roll_vif(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< const NumericMatrix& >::type data(dataSEXP);
     Rcpp::traits::input_parameter< const int& >::type width(widthSEXP);
-    Rcpp::traits::input_parameter< const arma::uvec& >::type comps(compsSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type weights(weightsSEXP);
     Rcpp::traits::input_parameter< const bool& >::type center(centerSEXP);
     Rcpp::traits::input_parameter< const bool& >::type scale(scaleSEXP);
@@ -177,7 +176,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const bool& >::type complete_obs(complete_obsSEXP);
     Rcpp::traits::input_parameter< const bool& >::type na_restore(na_restoreSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type parallel_for(parallel_forSEXP);
-    __result = Rcpp::wrap(roll_vif(data, width, comps, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for));
+    __result = Rcpp::wrap(roll_vif(data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for));
     return __result;
 END_RCPP
 }

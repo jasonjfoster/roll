@@ -144,23 +144,6 @@ void check_comps(const arma::uvec& comps, const unsigned int& n_cols) {
   
 }
 
-// this is the same as check_comps except uses < instead of <=
-void check_comps_vif(const arma::uvec& comps, const unsigned int& n_cols) {
-  
-  if (comps.max() > n_cols) {
-    stop("maximum value of 'comps' must be less than number of columns in 'x'");
-  }
-  
-  if (comps.min() < 1) {
-    stop("minimum value of 'comps' must be greater than or equal to one");
-  }
-  
-  if (comps.size() > n_cols) {
-    stop("length of 'comps' must be less than number of columns in 'x'");
-  }
-  
-}
-
 void check_weights(const arma::vec& weights, const unsigned int& width) {
   
   if (weights.size() != width) {
@@ -3326,16 +3309,13 @@ struct RollLmVifSlices : public Worker {
   const arma::cube arma_cov;  // source
   const int n_rows;
   const int n_cols;
-  const arma::uvec arma_cols;
   arma::mat& arma_vif;        // destination (pass by reference)
   
   // initialize with source and destination
   RollLmVifSlices(const arma::cube arma_cov, const int n_rows,
-                  const int n_cols, const arma::uvec arma_cols,
-                  arma::mat& arma_vif)
+                  const int n_cols, arma::mat& arma_vif)
     : arma_cov(arma_cov), n_rows(n_rows),
-      n_cols(n_cols), arma_cols(arma_cols),
-      arma_vif(arma_vif) { }
+      n_cols(n_cols), arma_vif(arma_vif) { }
   
   // function call operator that iterates by slice
   void operator()(std::size_t begin_slice, std::size_t end_slice) {
@@ -3403,114 +3383,12 @@ struct RollLmVifSlices : public Worker {
   
 };
 
-// 'Worker' function for rolling OLS regressions
-struct RollPcrVifSlices : public Worker {
-  
-  const arma::cube arma_cov;    // source
-  const int n_rows;
-  const int n_cols;
-  const arma::uvec arma_cols;
-  const arma::uvec arma_comps;  
-  arma::mat& arma_vif;          // destination (pass by reference)
-  
-  // initialize with source and destination
-  RollPcrVifSlices(const arma::cube arma_cov, const int n_rows,
-                   const int n_cols, const arma::uvec arma_cols,
-                   const arma::uvec arma_comps, arma::mat& arma_vif)
-    : arma_cov(arma_cov), n_rows(n_rows),
-      n_cols(n_cols), arma_cols(arma_cols),
-      arma_comps(arma_comps), arma_vif(arma_vif) { }
-  
-  // function call operator that iterates by slice
-  void operator()(std::size_t begin_slice, std::size_t end_slice) {
-    for (std::size_t i = begin_slice; i < end_slice; i++) {
-      
-      arma::mat x = arma_cov.slice(i);
-      
-      int j = 0;
-      int k = 0;
-      bool any_na = false;
-      
-      // check if missing value is present
-      while ((!any_na) && (j * k < (n_cols - 1) * (n_cols - 1))) {
-        for (j = 0; j < n_cols; j++) {
-          for (k = 0; k < n_cols; k++) {
-            if (std::isnan(x(j, k)))
-              any_na = true;
-          }
-        }
-      }
-      
-      // don't compute if missing value 
-      if (!any_na) {
-        
-        for (int j = 0; j < n_cols; j++) {
-          
-          arma::mat x = arma_cov.slice(i);
-          x.swap_cols(j, n_cols - 1);
-          x.swap_rows(j, n_cols - 1);
-          
-          arma::mat A = x.submat(0, 0, n_cols - 2, n_cols - 2);
-          arma::mat b = x.submat(0, n_cols - 1, n_cols - 2, n_cols - 1);
-          arma::vec eigen_values(n_cols - 1);
-          arma::mat eigen_vectors(n_cols - 1, n_cols - 1);
-          arma::vec gamma(n_cols - 1);
-          
-          // check if eig_sym solution is found
-          bool status1 = arma::eig_sym(eigen_values, eigen_vectors, A);
-          
-          // don't find approximate solution for rank deficient system
-          if (status1) {
-            
-            // reverse order for consistency with R's eigen
-            std::reverse(eigen_values.begin(), eigen_values.end());
-            eigen_vectors = arma::fliplr(eigen_vectors);
-            
-            // check if solution is found
-            bool status2 = arma::solve(gamma, A * eigen_vectors, b);
-            
-            // don't find approximate solution for rank deficient system
-            if (status2) {
-              
-              arma::vec gamma_subset = gamma(arma_comps - 1);
-              arma::vec coef = eigen_vectors.submat(arma_cols, arma_comps - 1) * gamma_subset;
-              
-              // r-squared
-              double rsq = as_scalar((trans(coef) * A * coef) /
-                                       x.submat(n_cols - 1, n_cols - 1, n_cols - 1, n_cols - 1));
-              
-              arma_vif(i, j) = 1 / (1 - rsq);
-              
-            } else if (!status2) {
-              arma_vif(i, j) = NA_REAL;
-            }
-            
-          } else if (!status1) {
-            arma_vif(i, j) = NA_REAL;
-          }
-          
-        }
-        
-      } else {
-        
-        arma::vec no_solution(n_cols);
-        no_solution.fill(NA_REAL);
-        
-        arma_vif.row(i) = trans(no_solution);
-        
-      }
-      
-    }
-  }
-  
-};
-
 // [[Rcpp::export]]
 NumericMatrix roll_vif(const NumericMatrix& data, const int& width,
-                       const arma::uvec& comps, const arma::vec& weights,
-                       const bool& center, const bool& scale,
-                       const int& min_obs, const bool& complete_obs,
-                       const bool& na_restore, const std::string& parallel_for) {
+                       const arma::vec& weights, const bool& center,
+                       const bool& scale, const int& min_obs,
+                       const bool& complete_obs, const bool& na_restore,
+                       const std::string& parallel_for) {
   
   int n_rows = data.nrow();
   int n_cols = data.ncol();
@@ -3532,9 +3410,6 @@ NumericMatrix roll_vif(const NumericMatrix& data, const int& width,
   
   // check 'width' argument for errors
   check_width(width, n_rows);
-  
-  // default 'comps' argument is all components
-  check_comps_vif(comps, n_cols - 1);
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
@@ -3608,16 +3483,8 @@ NumericMatrix roll_vif(const NumericMatrix& data, const int& width,
   }
   
   // compute rolling variance inflation factors
-  arma::uvec arma_cols = seq(n_cols - 1);
-  if (comps.size() == arma_cols.size()) {
-    RollLmVifSlices roll_lm_vif_slices(arma_cov, n_rows, n_cols, arma_cols,
-                                       arma_vif);
-    parallelFor(0, n_rows, roll_lm_vif_slices);
-  } else {
-    RollPcrVifSlices roll_pcr_vif_slices(arma_cov, n_rows, n_cols, arma_cols,
-                                         comps, arma_vif);
-    parallelFor(0, n_rows, roll_pcr_vif_slices);
-  }
+  RollLmVifSlices roll_lm_vif_slices(arma_cov, n_rows, n_cols, arma_vif);
+  parallelFor(0, n_rows, roll_lm_vif_slices);
   
   // create and return a matrix or xts object for variance inflation factors 
   NumericMatrix result(wrap(arma_vif));

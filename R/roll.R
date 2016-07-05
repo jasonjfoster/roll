@@ -526,7 +526,6 @@ roll_pcr <- function(x, y, width, comps = 1:ncol(x), weights = rep(1, width),
 ##' @param data matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
-##' @param comps integer vector. Select a subset of principal components.
 ##' @param center logical. If \code{TRUE} then the weighted mean of each variable is used,
 ##' if \code{FALSE} then zero is used.
 ##' @param scale logical. If \code{TRUE} then the weighted standard deviation of each variable is used,
@@ -549,11 +548,8 @@ roll_pcr <- function(x, y, width, comps = 1:ncol(x), weights = rep(1, width),
 ##' n_obs <- 1000
 ##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' 
-##' # 252-day rolling variance inflation factors (lm)
+##' # 252-day rolling variance inflation factors
 ##' result <- roll_vif(data, 252)
-##' 
-##' # 252-day rolling variance inflation factors (pcr)
-##' result <- roll_vif(data, 252, comps = 1)
 ##' 
 ##' # Equivalent to 'na.rm = TRUE'
 ##' result <- roll_vif(data, 252, min_obs = 1)
@@ -563,15 +559,14 @@ roll_pcr <- function(x, y, width, comps = 1:ncol(x), weights = rep(1, width),
 ##' 
 ##' # Exponential decay
 ##' weights <- 0.9 ^ (251:0)
-##' result <- roll_vif(data, 252, weights = weights, min_obs = 1)
+##' result <- roll_vif(data, 252, weights, min_obs = 1)
 ##' @export
-roll_vif <- function(data, width, comps = 1:(ncol(data) - 1), weights = rep(1, width),
-                     center = TRUE, scale = FALSE, min_obs = width, complete_obs = TRUE,
-                     na_restore = FALSE, parallel_for = c("rows", "cols")) {
+roll_vif <- function(data, width, weights = rep(1, width), center = TRUE, scale = FALSE,
+                     min_obs = width, complete_obs = TRUE, na_restore = FALSE,
+                     parallel_for = c("rows", "cols")) {
   return(.Call('roll_roll_vif', PACKAGE = 'roll',
                data,
                as.integer(width),
-               as.numeric(comps),
                as.numeric(weights),
                as.logical(center),
                as.logical(scale),

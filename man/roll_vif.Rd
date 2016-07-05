@@ -4,16 +4,14 @@
 \alias{roll_vif}
 \title{Rolling Variance Inflation Factors}
 \usage{
-roll_vif(data, width, comps = 1:(ncol(data) - 1), weights = rep(1, width),
-  center = TRUE, scale = FALSE, min_obs = width, complete_obs = TRUE,
+roll_vif(data, width, weights = rep(1, width), center = TRUE,
+  scale = FALSE, min_obs = width, complete_obs = TRUE,
   na_restore = FALSE, parallel_for = c("rows", "cols"))
 }
 \arguments{
 \item{data}{matrix or xts object. Rows are observations and columns are variables.}
 
 \item{width}{integer. Window size.}
-
-\item{comps}{integer vector. Select a subset of principal components.}
 
 \item{weights}{vector. Weights for each observation within a window.}
 
@@ -51,11 +49,8 @@ n_vars <- 10
 n_obs <- 1000
 data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 
-# 252-day rolling variance inflation factors (lm)
+# 252-day rolling variance inflation factors
 result <- roll_vif(data, 252)
-
-# 252-day rolling variance inflation factors (pcr)
-result <- roll_vif(data, 252, comps = 1)
 
 # Equivalent to 'na.rm = TRUE'
 result <- roll_vif(data, 252, min_obs = 1)
@@ -65,7 +60,7 @@ result <- roll_vif(data, n_obs, min_obs = 1)
 
 # Exponential decay
 weights <- 0.9 ^ (251:0)
-result <- roll_vif(data, 252, weights = weights, min_obs = 1)
+result <- roll_vif(data, 252, weights, min_obs = 1)
 }
 \seealso{
 \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.

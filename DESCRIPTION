@@ -2,7 +2,7 @@ Package: roll
 Type: Package
 Title: Rolling Statistics
 Version: 1.0.4
-Date: 2016-06-12
+Date: 2016-07-05
 Author: Jason Foster
 Maintainer: Jason Foster <jason.j.foster@gmail.com>
 Description: Parallel functions for computing rolling statistics of time-series

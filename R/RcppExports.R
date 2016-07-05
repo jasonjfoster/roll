@@ -33,7 +33,7 @@ roll_pcr <- function(x, y, width, comps, weights, center_x, center_y, scale_x, s
     .Call('roll_roll_pcr', PACKAGE = 'roll', x, y, width, comps, weights, center_x, center_y, scale_x, scale_y, min_obs, complete_obs, na_restore, parallel_for)
 }
 
-roll_vif <- function(data, width, comps, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for) {
-    .Call('roll_roll_vif', PACKAGE = 'roll', data, width, comps, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for)
+roll_vif <- function(data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for) {
+    .Call('roll_roll_vif', PACKAGE = 'roll', data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for)
 }
 
