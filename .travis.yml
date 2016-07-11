@@ -31,9 +31,8 @@ env:
      - R_CHECK_ARGS="--as-cran"
      - BOOTSTRAP_LATEX="1"
 
-r_github_packages:
-  - jimhester/covr
-  - codecov/example-r
+r_packages:
+  - covr
 
 after_success:
-  - Rscript -e 'library(covr);codecov()'
+  - Rscript -e 'library(covr); codecov()'
