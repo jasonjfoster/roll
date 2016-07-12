@@ -30,9 +30,3 @@ env:
      - R_BUILD_ARGS=" --compact-vignettes=gs+qpdf" 
      - R_CHECK_ARGS="--as-cran"
      - BOOTSTRAP_LATEX="1"
-
-r_packages:
-  - covr
-
-after_success:
-  - Rscript -e 'library(covr); codecov()'
