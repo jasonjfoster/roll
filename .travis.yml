@@ -6,6 +6,7 @@ cache: packages
 warnings_are_errors: true
 
 before_install:
+  - if [[ "$TRAVIS_R_VERSION_STRING" = 'devel' ]]; then mkdir ~/.R && echo 'CXX1X=g++ -std=c++0x -g -O2 -fPIC' > ~/.R/Makevars; fi
   ## PPA for Rcpp and some other packages
   - sudo add-apt-repository -y ppa:edd/misc
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
