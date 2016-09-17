@@ -1,5 +1,11 @@
 ## News for package 'roll'
 
+### Changes in roll version 1.0.6 (2016-09-19)
+
+* Added `intercept` argument to `roll_lm` and `roll_pcr` functions
+
+* Turned on `CXXSTD = CXX11` to enforce adherence to the C++11 standard
+
 ### Changes in roll version 1.0.5 (2016-08-29)
 
 * Added a section on examples to the `README` file

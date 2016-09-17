@@ -318,6 +318,7 @@ roll_cor <- function(data, width, weights = rep(1, width), center = TRUE, scale 
 ##' @param y matrix or xts object. Rows are observations and columns are the dependent variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
+##' @param intercept logical. Either \code{TRUE} to include or \code{FALSE} to remove the intercept.
 ##' @param center logical. \code{center = z} is shorthand for \code{center_x = z} and
 ##' \code{center_y = z}, where \code{z} is either \code{TRUE} or \code{FALSE}.
 ##' @param center_x logical. If \code{TRUE} then the weighted mean of each \code{x} variable is used,
@@ -339,7 +340,7 @@ roll_cor <- function(data, width, weights = rep(1, width), center = TRUE, scale 
 ##' \item{coefficients}{A list of objects with the rolling coefficients for each \code{y}.
 ##' An object is the same class and dimension (with an added column for the intercept) as \code{x}.}
 ##' \item{r.squared}{A list of objects with the rolling r-squareds for each \code{y}.
-##' An object is the same class as \code{x}}
+##' An object is the same class as \code{x}.}
 ##' @note If users are already taking advantage of parallelism using multithreaded BLAS/LAPACK
 ##' libraries, then limit the number of cores in the RcppParallel package to one with the
 ##' \code{\link[RcppParallel]{setThreadOptions}} function.
@@ -363,8 +364,8 @@ roll_cor <- function(data, width, weights = rep(1, width), center = TRUE, scale 
 ##' weights <- 0.9 ^ (251:0)
 ##' result <- roll_lm(x, y, 252, weights, min_obs = 1)
 ##' @export
-roll_lm <- function(x, y, width, weights = rep(1, width),
-                    center = TRUE, center_x = center, center_y = center,
+roll_lm <- function(x, y, width, weights = rep(1, width), intercept = TRUE, 
+                    center = FALSE, center_x = center, center_y = center,
                     scale = FALSE, scale_x = scale, scale_y = scale,
                     min_obs = width, complete_obs = TRUE,
                     na_restore = FALSE, parallel_for = c("rows", "cols")) {
@@ -373,6 +374,7 @@ roll_lm <- function(x, y, width, weights = rep(1, width),
                y,
                as.integer(width),
                as.numeric(weights),
+               as.logical(intercept),
                as.logical(center_x),
                as.logical(center_y),
                as.logical(scale_x),
@@ -452,6 +454,7 @@ roll_eigen <- function(data, width, weights = rep(1, width), center = TRUE, scal
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param comps integer vector. Select a subset of principal components.
+##' @param intercept logical. Either \code{TRUE} to include or \code{FALSE} to remove the intercept.
 ##' @param center logical. \code{center = z} is shorthand for \code{center_x = z} and
 ##' \code{center_y = z}, where \code{z} is either \code{TRUE} or \code{FALSE}.
 ##' @param center_x logical. If \code{TRUE} then the weighted mean of each \code{x} variable is used,
@@ -473,7 +476,7 @@ roll_eigen <- function(data, width, weights = rep(1, width), center = TRUE, scal
 ##' \item{coefficients}{A list of objects with the rolling coefficients for each \code{y}.
 ##' An object is the same class and dimension (with an added column for the intercept) as \code{x}.}
 ##' \item{r.squared}{A list of objects with the rolling r-squareds for each \code{y}.
-##' An object is the same class as \code{x}}
+##' An object is the same class as \code{x}.}
 ##' @note If users are already taking advantage of parallelism using multithreaded BLAS/LAPACK
 ##' libraries, then limit the number of cores in the RcppParallel package to one with the
 ##' \code{\link[RcppParallel]{setThreadOptions}} function.
@@ -497,8 +500,8 @@ roll_eigen <- function(data, width, weights = rep(1, width), center = TRUE, scal
 ##' weights <- 0.9 ^ (251:0)
 ##' result <- roll_pcr(x, y, 252, comps = 1, weights, min_obs = 1)
 ##' @export
-roll_pcr <- function(x, y, width, comps = 1:ncol(x), weights = rep(1, width),
-                     center = TRUE, center_x = center, center_y = center,
+roll_pcr <- function(x, y, width, comps = 1:ncol(x), weights = rep(1, width), intercept = TRUE, 
+                     center = FALSE, center_x = center, center_y = center,
                      scale = FALSE, scale_x = scale, scale_y = scale,
                      min_obs = width, complete_obs = TRUE,
                      na_restore = FALSE, parallel_for = c("rows", "cols")) {
@@ -508,6 +511,7 @@ roll_pcr <- function(x, y, width, comps = 1:ncol(x), weights = rep(1, width),
                as.integer(width),
                as.numeric(comps),
                as.numeric(weights),
+               as.logical(intercept),
                as.logical(center_x),
                as.logical(center_y),
                as.logical(scale_x),

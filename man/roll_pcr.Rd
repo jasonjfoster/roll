@@ -5,10 +5,10 @@
 \title{Rolling Principal Component Regressions}
 \usage{
 roll_pcr(x, y, width, comps = 1:ncol(x), weights = rep(1, width),
-  center = TRUE, center_x = center, center_y = center, scale = FALSE,
-  scale_x = scale, scale_y = scale, min_obs = width,
-  complete_obs = TRUE, na_restore = FALSE, parallel_for = c("rows",
-  "cols"))
+  intercept = TRUE, center = FALSE, center_x = center,
+  center_y = center, scale = FALSE, scale_x = scale, scale_y = scale,
+  min_obs = width, complete_obs = TRUE, na_restore = FALSE,
+  parallel_for = c("rows", "cols"))
 }
 \arguments{
 \item{x}{matrix or xts object. Rows are observations and columns are the independent variables.}
@@ -20,6 +20,8 @@ roll_pcr(x, y, width, comps = 1:ncol(x), weights = rep(1, width),
 \item{comps}{integer vector. Select a subset of principal components.}
 
 \item{weights}{vector. Weights for each observation within a window.}
+
+\item{intercept}{logical. Either \code{TRUE} to include or \code{FALSE} to remove the intercept.}
 
 \item{center}{logical. \code{center = z} is shorthand for \code{center_x = z} and
 \code{center_y = z}, where \code{z} is either \code{TRUE} or \code{FALSE}.}
@@ -53,7 +55,7 @@ A list containing the following components:
 \item{coefficients}{A list of objects with the rolling coefficients for each \code{y}.
 An object is the same class and dimension (with an added column for the intercept) as \code{x}.}
 \item{r.squared}{A list of objects with the rolling r-squareds for each \code{y}.
-An object is the same class as \code{x}}
+An object is the same class as \code{x}.}
 }
 \description{
 A parallel function for computing rolling principal component regressions of time-series data.
