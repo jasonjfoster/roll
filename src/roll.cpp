@@ -112,10 +112,10 @@ void check_ols(const int& x_n_rows, const int& y_n_rows) {
   
 }
 
-void check_vif(const int& x_n_rows) {
+void check_vif(const int& data_n_cols) {
   
-  if (x_n_rows == 1) {
-    stop("number of columns in 'x' must be greater than one");
+  if (data_n_cols == 1) {
+    stop("number of columns in 'data' must be greater than one");
   }
   
 }
@@ -124,6 +124,14 @@ void check_width(const int& width, const int& n_rows) {
   
   if ((width < 1) || (width > n_rows)) {
     stop("value of 'width' must be between one and number of rows in 'data'");
+  }
+  
+}
+
+void check_width_ols(const int& width, const int& n_rows) {
+  
+  if ((width < 1) || (width > n_rows)) {
+    stop("value of 'width' must be between one and number of rows in 'x' and 'y'");
   }
   
 }
@@ -1383,7 +1391,7 @@ struct RollVarRowsCube : public Worker {
     : data(data), n_rows(n_rows),
       n_cols(n_cols), width(width),
       arma_weights(arma_weights), center_x(center_x),
-      center_y(center_y),  arma_center_j(arma_center_j),
+      center_y(center_y), arma_center_j(arma_center_j),
       arma_center_k(arma_center_k), min_obs(min_obs),
       arma_any_na(arma_any_na), na_restore(na_restore),
       arma_scale_j(arma_scale_j), arma_scale_k(arma_scale_k) { }
@@ -1505,8 +1513,8 @@ struct RollVarColsCube : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::cube& arma_scale_j;     // destination (pass by reference)
-  arma::cube& arma_scale_k;     // destination (pass by reference)
+  arma::cube& arma_scale_j;       // destination (pass by reference)
+  arma::cube& arma_scale_k;       // destination (pass by reference)
   
   // initialize with source and destination
   RollVarColsCube(const NumericMatrix data, const int n_rows,
@@ -1645,8 +1653,8 @@ struct RollInterceptRowsCube : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::cube& arma_intercept_j;     // destination (pass by reference)
-  arma::cube& arma_intercept_k;     // destination (pass by reference)
+  arma::cube& arma_intercept_j;   // destination (pass by reference)
+  arma::cube& arma_intercept_k;   // destination (pass by reference)
   
   // initialize with source and destination
   RollInterceptRowsCube(const NumericMatrix data, const int n_rows,
@@ -1849,8 +1857,8 @@ struct RollInterceptColsCube : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::cube& arma_intercept_j;     // destination (pass by reference)
-  arma::cube& arma_intercept_k;     // destination (pass by reference)
+  arma::cube& arma_intercept_j;   // destination (pass by reference)
+  arma::cube& arma_intercept_k;   // destination (pass by reference)
   
   // initialize with source and destination
   RollInterceptColsCube(const NumericMatrix data, const int n_rows,
@@ -2037,7 +2045,7 @@ struct RollInterceptColsCube : public Worker {
 // 'Worker' function for computing rolling covariance matrices
 struct RollCovRows : public Worker {
   
-  const RMatrix<double> data;     // source
+  const RMatrix<double> data;         // source
   const int n_rows;
   const int n_cols;
   const int width;
@@ -2056,7 +2064,7 @@ struct RollCovRows : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::cube& arma_cov;           // destination (pass by reference)
+  arma::cube& arma_cov;               // destination (pass by reference)
   
   // initialize with source and destination
   RollCovRows(const NumericMatrix data, const int n_rows,
@@ -2324,7 +2332,7 @@ struct RollCovRows : public Worker {
 // 'Worker' function for computing rolling covariance matrices
 struct RollCovCols : public Worker {
   
-  const RMatrix<double> data;     // source
+  const RMatrix<double> data;         // source
   const int n_rows;
   const int n_cols;
   const int width;
@@ -2343,7 +2351,7 @@ struct RollCovCols : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::cube& arma_cov;           // destination (pass by reference)
+  arma::cube& arma_cov;               // destination (pass by reference)
   
   // initialize with source and destination
   RollCovCols(const NumericMatrix data, const int n_rows,
@@ -2726,13 +2734,13 @@ NumericVector roll_cov(const NumericMatrix& data, const int& width,
 // 'Worker' function for rolling ordinary least squares regressions
 struct RollLmSlices : public Worker {
   
-  const arma::cube arma_cov;      // source
+  const arma::cube arma_cov;        // source
   const int n_rows;
   const int n_cols;
   const bool intercept;
   const arma::cube arma_intercept;
-  arma::mat& arma_coef;           // destination (pass by reference)
-  arma::mat& arma_rsq;            // destination (pass by reference)
+  arma::mat& arma_coef;             // destination (pass by reference)
+  arma::mat& arma_rsq;              // destination (pass by reference)
   
   // initialize with source and destination
   RollLmSlices(const arma::cube arma_cov, const int n_rows,
@@ -2852,7 +2860,7 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
   std::copy(y.begin(), y.end(), data.begin() + n_rows * (n_cols - 1));
   
   // check 'width' argument for errors
-  check_width(width, n_rows);
+  check_width_ols(width, n_rows);
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
@@ -3104,11 +3112,11 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
 // 'Worker' function for rolling eigenvalues and eigenvectors
 struct RollEigenSlices : public Worker {
   
-  const arma::cube arma_cov;            // source
+  const arma::cube arma_cov;      // source
   const int n_rows;
   const int n_cols;
-  arma::mat& arma_eigen_values;         // destination (pass by reference)
-  arma::cube& arma_eigen_vectors;       // destination (pass by reference)
+  arma::mat& arma_eigen_values;   // destination (pass by reference)
+  arma::cube& arma_eigen_vectors; // destination (pass by reference)
   
   // initialize with source and destination
   RollEigenSlices(const arma::cube arma_cov, const int n_rows,
@@ -3467,7 +3475,7 @@ List roll_pcr_z(const NumericMatrix& x, const NumericVector& y,
   std::copy(y.begin(), y.end(), data.begin() + n_rows * (n_cols - 1));
   
   // check 'width' argument for errors
-  check_width(width, n_rows);
+  check_width_ols(width, n_rows);
   
   // default 'comps' argument is all components
   check_comps(comps, n_cols - 1);
@@ -3817,7 +3825,7 @@ NumericMatrix roll_vif(const NumericMatrix& data, const int& width,
   bool center_y = center;
   bool scale_x = scale;
   bool scale_y = scale;
-  bool intercept = false;
+  bool intercept = true; // otherwise may not be sensible
   arma::uvec arma_any_na(n_rows);
   arma::cube arma_center_j(n_cols, n_cols, n_rows);
   arma::cube arma_center_k(n_cols, n_cols, n_rows);
@@ -3828,7 +3836,7 @@ NumericMatrix roll_vif(const NumericMatrix& data, const int& width,
   arma::cube arma_cov(n_cols, n_cols, n_rows);
   arma::mat arma_vif(n_rows, n_cols);
   
-  // check 'x' argument for errors
+  // check 'data' argument for errors
   check_vif(n_cols);
   
   // check 'width' argument for errors
@@ -3881,6 +3889,29 @@ NumericMatrix roll_vif(const NumericMatrix& data, const int& width,
                                     min_obs, arma_any_na, na_restore,
                                     arma_scale_j, arma_scale_k);
       parallelFor(0, n_cols, roll_var_cols);
+    }
+  }
+  
+  // compute rolling mean of each variable (centered and scaled)
+  if (intercept) {
+    if (parallel_for == "rows") {
+      RollInterceptRowsCube roll_intercept_rows(data, n_rows, n_cols, width, weights,
+                                                center_x, center_y,
+                                                arma_center_j, arma_center_k,
+                                                scale_x, scale_y,
+                                                arma_scale_j, arma_scale_k,
+                                                min_obs, arma_any_na, na_restore,
+                                                arma_intercept_j, arma_intercept_k);
+      parallelFor(0, n_rows, roll_intercept_rows);
+    } else if (parallel_for == "cols") {
+      RollInterceptColsCube roll_intercept_cols(data, n_rows, n_cols, width, weights,
+                                                center_x, center_y,
+                                                arma_center_j, arma_center_k,
+                                                scale_x, scale_y,
+                                                arma_scale_j, arma_scale_k,
+                                                min_obs, arma_any_na, na_restore,
+                                                arma_intercept_j, arma_intercept_k);
+      parallelFor(0, n_cols, roll_intercept_cols);
     }
   }
   

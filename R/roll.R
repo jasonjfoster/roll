@@ -565,7 +565,7 @@ roll_pcr <- function(x, y, width, comps = 1:ncol(x), weights = rep(1, width), in
 ##' weights <- 0.9 ^ (251:0)
 ##' result <- roll_vif(data, 252, weights, min_obs = 1)
 ##' @export
-roll_vif <- function(data, width, weights = rep(1, width), center = TRUE, scale = FALSE,
+roll_vif <- function(data, width, weights = rep(1, width), center = FALSE, scale = FALSE,
                      min_obs = width, complete_obs = TRUE, na_restore = FALSE,
                      parallel_for = c("rows", "cols")) {
   return(.Call('roll_roll_vif', PACKAGE = 'roll',

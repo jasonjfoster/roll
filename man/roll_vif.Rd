@@ -4,7 +4,7 @@
 \alias{roll_vif}
 \title{Rolling Variance Inflation Factors}
 \usage{
-roll_vif(data, width, weights = rep(1, width), center = TRUE,
+roll_vif(data, width, weights = rep(1, width), center = FALSE,
   scale = FALSE, min_obs = width, complete_obs = TRUE,
   na_restore = FALSE, parallel_for = c("rows", "cols"))
 }
