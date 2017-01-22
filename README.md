@@ -6,7 +6,7 @@ roll is a package for R that provides parallel functions for computing rolling s
 
 
 
-"Multi-asset principal component regression using RcppParallel," R/Finance: Applied Finance with R, May 2016, Chicago, IL: [http://www.rinfinance.com/agenda/2016/talk/JasonFoster.pdf](http://www.rinfinance.com/agenda/2016/talk/JasonFoster.pdf)
+"Multi-asset principal component regression using RcppParallel," R/Finance: Applied Finance with R, May 2016, Chicago, IL: [http://past.rinfinance.com/agenda/2016/talk/JasonFoster.pdf](http://past.rinfinance.com/agenda/2016/talk/JasonFoster.pdf)
 
 ### Installation
 
