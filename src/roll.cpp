@@ -20,46 +20,23 @@ List dimnames_ols(const List& input, const int& n_cols) {
     result(0) = "(Intercept)";
     std::copy(dimnames_cols.begin(), dimnames_cols.end(), result.begin() + 1);
     
-    return(List::create(input[0], result));
+    return List::create(input[0], result);
     
   } else {
     
-    std::string x = "x";
     CharacterVector result(n_cols + 1);
     result(0) = "(Intercept)";
     
     for (int i = 1; i < n_cols + 1; i++) {
       
-      char n[sizeof(i)];
-      
-      sprintf(n, "%d", i);
-      
-      result[i] = x + n;
+      result[i] = "x";
+      result[i] += i;
       
     }
     
-    return(List::create(R_NilValue, result));
+    return List::create(R_NilValue, result);
     
   }
-  
-}
-
-CharacterVector dimnames_pc(const int& n_cols) {
-  
-  std::string x = "PC";
-  CharacterVector result(n_cols);
-  
-  for (int i = 0; i < n_cols; i++) {
-    
-    char n[sizeof(i + 1)];
-    
-    sprintf(n, "%d", i + 1);
-    
-    result[i] = x + n;
-    
-  }
-  
-  return result;
   
 }
 
@@ -176,7 +153,7 @@ arma::uvec seq(const int& size) {
     result[i] = i;
   }
   
-  return(result);
+  return result;
   
 }
 
@@ -242,7 +219,10 @@ struct RollMeanRows : public Worker {
           }
           
         } else {
-          arma_center(i, j) = NA_REAL;
+          
+          // can be either NA or NaN
+          arma_center(i, j) = data(i, j);
+          
         }
         
       }
@@ -316,7 +296,10 @@ struct RollMeanCols : public Worker {
           }
           
         } else {
-          arma_center(i, j) = NA_REAL;
+          
+          // can be either NA or NaN
+          arma_center(i, j) = data(i, j);
+          
         }
         
       }
@@ -325,7 +308,7 @@ struct RollMeanCols : public Worker {
   
 };
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.roll_mean)]]
 NumericMatrix roll_mean(const NumericMatrix& data, const int& width,
                         const arma::vec& weights, const int& min_obs,
                         const bool& complete_obs, const bool& na_restore,
@@ -461,7 +444,10 @@ struct RollVarRows : public Worker {
           }
           
         } else {
-          arma_scale(i, j) = NA_REAL;
+          
+          // can be either NA or NaN
+          arma_scale(i, j) = data(i, j);
+          
         }
         
       }
@@ -551,7 +537,10 @@ struct RollVarCols : public Worker {
           }
           
         } else {
-          arma_scale(i, j) = NA_REAL;
+          
+          // can be either NA or NaN
+          arma_scale(i, j) = data(i, j);
+          
         }
         
       }
@@ -560,7 +549,7 @@ struct RollVarCols : public Worker {
   
 };
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.roll_var)]]
 NumericMatrix roll_var(const NumericMatrix& data, const int& width,
                        const arma::vec& weights, const bool& center,
                        const int& min_obs, const bool& complete_obs,
@@ -717,7 +706,10 @@ struct RollSdRows : public Worker {
           }
           
         } else {
-          arma_scale(i, j) = NA_REAL;
+          
+          // can be either NA or NaN
+          arma_scale(i, j) = data(i, j);
+          
         }
         
       }
@@ -807,7 +799,10 @@ struct RollSdCols : public Worker {
           }
           
         } else {
-          arma_scale(i, j) = NA_REAL;
+          
+          // can be either NA or NaN
+          arma_scale(i, j) = data(i, j);
+          
         }
         
       }
@@ -816,7 +811,7 @@ struct RollSdCols : public Worker {
   
 };
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.roll_sd)]]
 NumericMatrix roll_sd(const NumericMatrix& data, const int& width,
                       const arma::vec& weights, const bool& center,
                       const int& min_obs, const bool& complete_obs,
@@ -980,7 +975,10 @@ struct RollScaleCenterRows : public Worker {
           }
           
         } else {
-          arma_cov(i, j) = NA_REAL;
+          
+          // can be either NA or NaN
+          arma_cov(i, j) = data(i, j);
+          
         }
         
       }
@@ -1076,7 +1074,10 @@ struct RollScaleCenterCols : public Worker {
           }
           
         } else {
-          arma_cov(i, j) = NA_REAL;
+          
+          // can be either NA or NaN
+          arma_cov(i, j) = data(i, j);
+          
         }
         
       }
@@ -1085,7 +1086,7 @@ struct RollScaleCenterCols : public Worker {
   
 };
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.roll_scale)]]
 NumericMatrix roll_scale(const NumericMatrix& data, const int& width,
                          const arma::vec& weights, const bool& center,
                          const bool& scale, const int& min_obs,
@@ -1256,8 +1257,11 @@ struct RollMeanRowsCube : public Worker {
             }
             
           } else {
-            arma_center_j(k, j, i) = NA_REAL;
-            arma_center_k(k, j, i) = NA_REAL;
+            
+            // can be either NA or NaN
+            arma_center_j(k, j, i) = data(i, j);
+            arma_center_k(k, j, i) = data(i, k);
+            
           }
           
           // covariance matrix is symmetric
@@ -1346,8 +1350,11 @@ struct RollMeanColsCube : public Worker {
             }
             
           } else {
-            arma_center_j(k, j, i) = NA_REAL;
-            arma_center_k(k, j, i) = NA_REAL;
+            
+            // can be either NA or NaN
+            arma_center_j(k, j, i) = data(i, j);
+            arma_center_k(k, j, i) = data(i, k);
+            
           }
           
           // covariance matrix is symmetric
@@ -1482,8 +1489,11 @@ struct RollVarRowsCube : public Worker {
             }
             
           } else {
-            arma_scale_j(k, j, i) = NA_REAL;
-            arma_scale_k(k, j, i) = NA_REAL;
+            
+            // can be either NA or NaN
+            arma_scale_j(k, j, i) = data(i, j);
+            arma_scale_k(k, j, i) = data(i, k);
+            
           }
           
           // covariance matrix is symmetric
@@ -1618,8 +1628,11 @@ struct RollVarColsCube : public Worker {
             }
             
           } else {
-            arma_scale_j(k, j, i) = NA_REAL;
-            arma_scale_k(k, j, i) = NA_REAL;
+            
+            // can be either NA or NaN
+            arma_scale_j(k, j, i) = data(i, j);
+            arma_scale_k(k, j, i) = data(i, k);
+            
           }
           
           // covariance matrix is symmetric
@@ -1822,8 +1835,11 @@ struct RollInterceptRowsCube : public Worker {
             }
             
           } else {
-            arma_intercept_j(k, j, i) = NA_REAL;
-            arma_intercept_k(k, j, i) = NA_REAL;
+            
+            // can be either NA or NaN
+            arma_intercept_j(k, j, i) = data(i, j);
+            arma_intercept_k(k, j, i) = data(i, k);
+            
           }
           
           // covariance matrix is symmetric
@@ -2026,8 +2042,11 @@ struct RollInterceptColsCube : public Worker {
             }
             
           } else {
-            arma_intercept_j(k, j, i) = NA_REAL;
-            arma_intercept_k(k, j, i) = NA_REAL;
+            
+            // can be either NA or NaN
+            arma_intercept_j(k, j, i) = data(i, j);
+            arma_intercept_k(k, j, i) = data(i, k);
+            
           }
           
           // covariance matrix is symmetric
@@ -2315,7 +2334,14 @@ struct RollCovRows : public Worker {
             }
             
           } else {
-            arma_cov(k, j, i) = NA_REAL;
+            
+            // can be either NA or NaN
+            if (std::isnan(data(i, k))) {
+              arma_cov(k, j, i) = data(i, k);
+            } else {
+              arma_cov(k, j, i) = data(i, j);
+            }
+            
           }
           
           // covariance matrix is symmetric
@@ -2379,7 +2405,7 @@ struct RollCovCols : public Worker {
   // function call operator that iterates by column
   void operator()(std::size_t begin_col, std::size_t end_col) {
     for (std::size_t j = begin_col; j < end_col; j++) {
-      for (std::size_t k = 0; k <= j; k++) {  
+      for (std::size_t k = 0; k <= j; k++) {
         for (int i = 0; i < n_rows; i++) {
           
           int count = 0;
@@ -2602,7 +2628,14 @@ struct RollCovCols : public Worker {
             }
             
           } else {
-            arma_cov(k, j, i) = NA_REAL;
+            
+            // can be either NA or NaN
+            if (std::isnan(data(i, k))) {
+              arma_cov(k, j, i) = data(i, k);
+            } else {
+              arma_cov(k, j, i) = data(i, j);
+            }
+            
           }
           
           // covariance matrix is symmetric
@@ -2616,7 +2649,7 @@ struct RollCovCols : public Worker {
   
 };
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.roll_cov)]]
 NumericVector roll_cov(const NumericMatrix& data, const int& width,
                        const arma::vec& weights, const bool& center,
                        const bool& scale, const int& min_obs,
@@ -2976,7 +3009,7 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
   
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.roll_lm)]]
 List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
              const int& width, const arma::vec& weights,
              const bool& intercept, const bool& center_x,
@@ -3196,7 +3229,7 @@ struct RollEigenSlices : public Worker {
   
 };
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.roll_eigen)]]
 List roll_eigen(const NumericMatrix& data, const int& width,
                 const arma::vec& weights, const bool& center,
                 const bool& scale, const int& min_obs,
@@ -3308,9 +3341,7 @@ List roll_eigen(const NumericMatrix& data, const int& width,
   NumericMatrix eigen_values(wrap(arma_eigen_values));
   List dimnames = data.attr("dimnames");
   if (dimnames.size() > 1) {
-    eigen_values.attr("dimnames") = List::create(dimnames[0], dimnames_pc(n_cols));
-  } else {
-    eigen_values.attr("dimnames") = List::create(R_NilValue, dimnames_pc(n_cols));
+    eigen_values.attr("dimnames") = List::create(dimnames[0], R_NilValue);
   }
   eigen_values.attr("index") = data.attr("index");
   eigen_values.attr(".indexCLASS") = data.attr(".indexCLASS");
@@ -3323,9 +3354,7 @@ List roll_eigen(const NumericMatrix& data, const int& width,
   NumericVector eigen_vectors(wrap(arma_eigen_vectors));
   eigen_vectors.attr("dim") = IntegerVector::create(n_cols, n_cols, n_rows);
   if (dimnames.size() > 1) {
-    eigen_vectors.attr("dimnames") = List::create(dimnames[1], dimnames_pc(n_cols));
-  } else {
-    eigen_vectors.attr("dimnames") = List::create(R_NilValue, dimnames_pc(n_cols));
+    eigen_vectors.attr("dimnames") = List::create(dimnames[1], R_NilValue);
   }
   
   // create and return a list
@@ -3599,7 +3628,7 @@ List roll_pcr_z(const NumericMatrix& x, const NumericVector& y,
   
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.roll_pcr)]]
 List roll_pcr(const NumericMatrix& x, const NumericMatrix& y,
               const int& width, const arma::uvec& comps,
               const arma::vec& weights, const bool& intercept,
@@ -3812,7 +3841,7 @@ struct RollLmVifSlices : public Worker {
   
 };
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.roll_vif)]]
 NumericMatrix roll_vif(const NumericMatrix& data, const int& width,
                        const arma::vec& weights, const bool& center,
                        const bool& scale, const int& min_obs,
