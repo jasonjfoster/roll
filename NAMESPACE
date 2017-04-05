@@ -1,4 +1,6 @@
-useDynLib(roll)
-exportPattern("^[[:alpha:]]+")
+useDynLib(roll, .registration = TRUE)
+# useDynLib(roll)
+# exportPattern("^[[:alpha:]]+")
+export(roll_cor, roll_cov, roll_eigen, roll_lm, roll_mean, roll_pcr, roll_scale, roll_sd, roll_var, roll_vif)
 importFrom(Rcpp, evalCpp)
 importFrom(RcppParallel, RcppParallelLibs)
