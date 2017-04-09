@@ -1,3 +1,99 @@
+##' Rolling Sums
+##'
+##' A parallel function for computing rolling sums of time-series data.
+##'
+##' @param data matrix or xts object. Rows are observations and columns are variables.
+##' @param width integer. Window size.
+##' @param weights vector. Weights for each observation within a window.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is NA.
+##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
+##' if \code{FALSE} then each value is used.
+##' @param na_restore logical. Should missing values be restored?
+##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
+##' \code{rows} or \code{cols}.
+##' @return An object of the same class and dimension as \code{data} with the rolling sums.
+##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
+##' @examples
+##' n_vars <- 10
+##' n_obs <- 1000
+##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' 
+##' # 252-day rolling sum
+##' result <- roll_sum(data, 252)
+##' 
+##' # Equivalent to 'na.rm = TRUE'
+##' result <- roll_sum(data, 252, min_obs = 1)
+##' 
+##' # Expanding window
+##' result <- roll_sum(data, n_obs, min_obs = 1)
+##' 
+##' # Exponential decay
+##' weights <- 0.9 ^ (251:0)
+##' result <- roll_sum(data, 252, weights, min_obs = 1)
+##' @export
+roll_sum <- function(data, width, weights = rep(1, width),
+                     min_obs = width, complete_obs = FALSE, na_restore = FALSE,
+                     parallel_for = c("rows", "cols")) {
+  return(.Call(roll_roll_sum,
+               data,
+               as.integer(width),
+               as.numeric(weights),
+               as.integer(min_obs),
+               as.logical(complete_obs),
+               as.logical(na_restore),
+               as.character(match.arg(parallel_for))
+  ))
+}
+
+##' Rolling Products
+##'
+##' A parallel function for computing rolling products of time-series data.
+##'
+##' @param data matrix or xts object. Rows are observations and columns are variables.
+##' @param width integer. Window size.
+##' @param weights vector. Weights for each observation within a window.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is NA.
+##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
+##' if \code{FALSE} then each value is used.
+##' @param na_restore logical. Should missing values be restored?
+##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
+##' \code{rows} or \code{cols}.
+##' @return An object of the same class and dimension as \code{data} with the rolling products.
+##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
+##' @examples
+##' n_vars <- 10
+##' n_obs <- 1000
+##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' 
+##' # 252-day rolling product
+##' result <- roll_prod(data, 252)
+##' 
+##' # Equivalent to 'na.rm = TRUE'
+##' result <- roll_prod(data, 252, min_obs = 1)
+##' 
+##' # Expanding window
+##' result <- roll_prod(data, n_obs, min_obs = 1)
+##' 
+##' # Exponential decay
+##' weights <- 0.9 ^ (251:0)
+##' result <- roll_prod(data, 252, weights, min_obs = 1)
+##' @export
+roll_prod <- function(data, width, weights = rep(1, width),
+                      min_obs = width, complete_obs = FALSE, na_restore = FALSE,
+                      parallel_for = c("rows", "cols")) {
+  return(.Call(roll_roll_prod,
+               data,
+               as.integer(width),
+               as.numeric(weights),
+               as.integer(min_obs),
+               as.logical(complete_obs),
+               as.logical(na_restore),
+               as.character(match.arg(parallel_for))
+  ))
+}
+
 ##' Rolling Means
 ##'
 ##' A parallel function for computing rolling means of time-series data.

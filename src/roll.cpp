@@ -157,6 +157,422 @@ arma::uvec seq(const int& size) {
   
 }
 
+// 'Worker' function for computing rolling sums
+struct RollSumRows : public Worker {
+  
+  const RMatrix<double> data;   // source
+  const int n_rows;
+  const int n_cols;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const arma::uvec arma_any_na;
+  const bool na_restore;
+  arma::mat& arma_sum;          // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollSumRows(const NumericMatrix data, const int n_rows,
+              const int n_cols, const int width,
+              const arma::vec arma_weights, const int min_obs,
+              const arma::uvec arma_any_na, const bool na_restore,
+              arma::mat& arma_sum)
+    : data(data), n_rows(n_rows),
+      n_cols(n_cols), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
+      arma_any_na(arma_any_na), na_restore(na_restore),
+      arma_sum(arma_sum) { }
+  
+  // function call operator that iterates by row 
+  void operator()(std::size_t begin_row, std::size_t end_row) {
+    for (std::size_t i = begin_row; i < end_row; i++) {
+      for (int j = 0; j < n_cols; j++) {
+        
+        int count = 0;
+        int n_obs = 0;
+        double sum_data = 0;
+        
+        // don't compute if missing value and 'na_restore' argument is true
+        if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
+          
+          // number of observations is either the window size or,
+          // for partial results, the number of the current row
+          while ((width > count) && (i >= (unsigned)count)) {
+            
+            // don't include if missing value and 'any_na' argument is 1
+            // note: 'any_na' is set to 0 if 'complete_obs' argument is false
+            if ((arma_any_na[i - count] == 0) && !std::isnan(data(i - count, j))) {
+              
+              // compute the rolling sum
+              sum_data += data(i - count, j) * arma_weights[width - count - 1];
+              n_obs += 1;
+              
+            }
+            
+            count += 1;
+            
+          }
+          
+          // compute the sum
+          if (n_obs >= min_obs) {
+            arma_sum(i, j) = sum_data;
+          } else {
+            // sum over empty set is zero for consistency with R's sum
+            arma_sum(i, j) = 0;
+          }
+          
+        } else {
+          
+          // can be either NA or NaN
+          arma_sum(i, j) = data(i, j);
+          
+        }
+        
+      }
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling sums
+struct RollSumCols : public Worker {
+  
+  const RMatrix<double> data;   // source
+  const int n_rows;
+  const int n_cols;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const arma::uvec arma_any_na;
+  const bool na_restore;
+  arma::mat& arma_sum;          // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollSumCols(const NumericMatrix data, const int n_rows,
+              const int n_cols, const int width,
+              const arma::vec arma_weights, const int min_obs,
+              const arma::uvec arma_any_na, const bool na_restore,
+              arma::mat& arma_sum)
+    : data(data), n_rows(n_rows),
+      n_cols(n_cols), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
+      arma_any_na(arma_any_na), na_restore(na_restore),
+      arma_sum(arma_sum) { }
+  
+  // function call operator that iterates by column 
+  void operator()(std::size_t begin_col, std::size_t end_col) {
+    for (std::size_t j = begin_col; j < end_col; j++) {
+      for (int i = 0; i < n_rows; i++) {
+        
+        int count = 0;
+        int n_obs = 0;
+        double sum_data = 0;
+        
+        // don't compute if missing value and 'na_restore' argument is true
+        if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
+          
+          // number of observations is either the window size or,
+          // for partial results, the number of the current row
+          while ((width > count) && (i >= count)) {
+            
+            // don't include if missing value and 'any_na' argument is 1
+            // note: 'any_na' is set to 0 if 'complete_obs' argument is false
+            if ((arma_any_na[i - count] == 0) && !std::isnan(data(i - count, j))) {
+              
+              // compute the rolling sum
+              sum_data += data(i - count, j) * arma_weights[width - count - 1];
+              n_obs += 1;
+              
+            }
+            
+            count += 1;
+            
+          }
+          
+          // compute the sum
+          if (n_obs >= min_obs) {
+            arma_sum(i, j) = sum_data;
+          } else {
+            // sum over empty set is zero for consistency with R's sum
+            arma_sum(i, j) = 0;
+          }
+          
+        } else {
+          
+          // can be either NA or NaN
+          arma_sum(i, j) = data(i, j);
+          
+        }
+        
+      }
+    }
+  }
+  
+};
+
+// [[Rcpp::export(.roll_sum)]]
+NumericMatrix roll_sum(const NumericMatrix& data, const int& width,
+                       const arma::vec& weights, const int& min_obs,
+                       const bool& complete_obs, const bool& na_restore,
+                       const std::string& parallel_for) {
+  
+  int n_rows = data.nrow();
+  int n_cols = data.ncol();
+  arma::uvec arma_any_na(n_rows);
+  arma::mat arma_sum(n_rows, n_cols);
+  
+  // check 'width' argument for errors
+  check_width(width, n_rows);
+  
+  // default 'weights' argument is equal-weighted,
+  // otherwise check argument for errors
+  check_weights(weights, width);
+  
+  // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
+  // otherwise check argument for errors
+  check_min_obs(min_obs, width);
+  
+  // default 'complete_obs' argument is 'false' (equivalent to 'pairwise'),
+  // otherwise check argument for errors
+  if (complete_obs) {
+    arma_any_na = any_na(data);
+  } else {
+    arma_any_na.fill(0);
+  }
+  
+  // compute rolling sums
+  if (parallel_for == "rows") {
+    RollSumRows roll_sum_rows(data, n_rows, n_cols, width, weights,
+                              min_obs, arma_any_na, na_restore, arma_sum);
+    parallelFor(0, n_rows, roll_sum_rows);
+  } else if (parallel_for == "cols") {
+    RollSumCols roll_sum_cols(data, n_rows, n_cols, width, weights,
+                              min_obs, arma_any_na, na_restore, arma_sum);
+    parallelFor(0, n_cols, roll_sum_cols);
+  }
+  
+  // create and return a matrix or xts object
+  NumericMatrix result(wrap(arma_sum));
+  List dimnames = data.attr("dimnames");
+  result.attr("dimnames") = dimnames;
+  result.attr("index") = data.attr("index");
+  result.attr(".indexCLASS") = data.attr(".indexCLASS");
+  result.attr(".indexTZ") = data.attr(".indexTZ");
+  result.attr("tclass") = data.attr("tclass");
+  result.attr("tzone") = data.attr("tzone");
+  result.attr("class") = data.attr("class");
+  
+  return result;
+  
+}
+
+// 'Worker' function for computing rolling products
+struct RollProdRows : public Worker {
+  
+  const RMatrix<double> data;   // source
+  const int n_rows;
+  const int n_cols;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const arma::uvec arma_any_na;
+  const bool na_restore;
+  arma::mat& arma_prod;         // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollProdRows(const NumericMatrix data, const int n_rows,
+               const int n_cols, const int width,
+               const arma::vec arma_weights, const int min_obs,
+               const arma::uvec arma_any_na, const bool na_restore,
+               arma::mat& arma_prod)
+    : data(data), n_rows(n_rows),
+      n_cols(n_cols), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
+      arma_any_na(arma_any_na), na_restore(na_restore),
+      arma_prod(arma_prod) { }
+  
+  // function call operator that iterates by row 
+  void operator()(std::size_t begin_row, std::size_t end_row) {
+    for (std::size_t i = begin_row; i < end_row; i++) {
+      for (int j = 0; j < n_cols; j++) {
+        
+        int count = 0;
+        int n_obs = 0;
+        double prod_data = 1;
+        
+        // don't compute if missing value and 'na_restore' argument is true
+        if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
+          
+          // number of observations is either the window size or,
+          // for partial results, the number of the current row
+          while ((width > count) && (i >= (unsigned)count)) {
+            
+            // don't include if missing value and 'any_na' argument is 1
+            // note: 'any_na' is set to 0 if 'complete_obs' argument is false
+            if ((arma_any_na[i - count] == 0) && !std::isnan(data(i - count, j))) {
+              
+              // compute the rolling product
+              prod_data *= data(i - count, j) * arma_weights[width - count - 1];
+              n_obs += 1;
+              
+            }
+            
+            count += 1;
+            
+          }
+          
+          // compute the product
+          if (n_obs >= min_obs) {
+            arma_prod(i, j) = prod_data;
+          } else {
+            // product of empty set is one for consistency with R's prod
+            arma_prod(i, j) = 1;
+          }
+          
+        } else {
+          
+          // can be either NA or NaN
+          arma_prod(i, j) = data(i, j);
+          
+        }
+        
+      }
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling products
+struct RollProdCols : public Worker {
+  
+  const RMatrix<double> data;   // source
+  const int n_rows;
+  const int n_cols;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const arma::uvec arma_any_na;
+  const bool na_restore;
+  arma::mat& arma_prod;         // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollProdCols(const NumericMatrix data, const int n_rows,
+               const int n_cols, const int width,
+               const arma::vec arma_weights, const int min_obs,
+               const arma::uvec arma_any_na, const bool na_restore,
+               arma::mat& arma_prod)
+    : data(data), n_rows(n_rows),
+      n_cols(n_cols), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
+      arma_any_na(arma_any_na), na_restore(na_restore),
+      arma_prod(arma_prod) { }
+  
+  // function call operator that iterates by column 
+  void operator()(std::size_t begin_col, std::size_t end_col) {
+    for (std::size_t j = begin_col; j < end_col; j++) {
+      for (int i = 0; i < n_rows; i++) {
+        
+        int count = 0;
+        int n_obs = 0;
+        double prod_data = 1;
+        
+        // don't compute if missing value and 'na_restore' argument is true
+        if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
+          
+          // number of observations is either the window size or,
+          // for partial results, the number of the current row
+          while ((width > count) && (i >= count)) {
+            
+            // don't include if missing value and 'any_na' argument is 1
+            // note: 'any_na' is set to 0 if 'complete_obs' argument is false
+            if ((arma_any_na[i - count] == 0) && !std::isnan(data(i - count, j))) {
+              
+              // compute the rolling product
+              prod_data *= data(i - count, j) * arma_weights[width - count - 1];
+              n_obs += 1;
+              
+            }
+            
+            count += 1;
+            
+          }
+          
+          // compute the product
+          if (n_obs >= min_obs) {
+            arma_prod(i, j) = prod_data;
+          } else {
+            // product of empty set is one for consistency with R's prod
+            arma_prod(i, j) = 1;
+          }
+          
+        } else {
+          
+          // can be either NA or NaN
+          arma_prod(i, j) = data(i, j);
+          
+        }
+        
+      }
+    }
+  }
+  
+};
+
+// [[Rcpp::export(.roll_prod)]]
+NumericMatrix roll_prod(const NumericMatrix& data, const int& width,
+                        const arma::vec& weights, const int& min_obs,
+                        const bool& complete_obs, const bool& na_restore,
+                        const std::string& parallel_for) {
+  
+  int n_rows = data.nrow();
+  int n_cols = data.ncol();
+  arma::uvec arma_any_na(n_rows);
+  arma::mat arma_prod(n_rows, n_cols);
+  
+  // check 'width' argument for errors
+  check_width(width, n_rows);
+  
+  // default 'weights' argument is equal-weighted,
+  // otherwise check argument for errors
+  check_weights(weights, width);
+  
+  // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
+  // otherwise check argument for errors
+  check_min_obs(min_obs, width);
+  
+  // default 'complete_obs' argument is 'false' (equivalent to 'pairwise'),
+  // otherwise check argument for errors
+  if (complete_obs) {
+    arma_any_na = any_na(data);
+  } else {
+    arma_any_na.fill(0);
+  }
+  
+  // compute rolling products
+  if (parallel_for == "rows") {
+    RollProdRows roll_prod_rows(data, n_rows, n_cols, width, weights,
+                                min_obs, arma_any_na, na_restore, arma_prod);
+    parallelFor(0, n_rows, roll_prod_rows);
+  } else if (parallel_for == "cols") {
+    RollProdCols roll_prod_cols(data, n_rows, n_cols, width, weights,
+                                min_obs, arma_any_na, na_restore, arma_prod);
+    parallelFor(0, n_cols, roll_prod_cols);
+  }
+  
+  // create and return a matrix or xts object
+  NumericMatrix result(wrap(arma_prod));
+  List dimnames = data.attr("dimnames");
+  result.attr("dimnames") = dimnames;
+  result.attr("index") = data.attr("index");
+  result.attr(".indexCLASS") = data.attr(".indexCLASS");
+  result.attr(".indexTZ") = data.attr(".indexTZ");
+  result.attr("tclass") = data.attr("tclass");
+  result.attr("tzone") = data.attr("tzone");
+  result.attr("class") = data.attr("class");
+  
+  return result;
+  
+}
+
 // 'Worker' function for computing rolling means
 struct RollMeanRows : public Worker {
   
@@ -202,9 +618,12 @@ struct RollMeanRows : public Worker {
             // don't include if missing value and 'any_na' argument is 1
             // note: 'any_na' is set to 0 if 'complete_obs' argument is false
             if ((arma_any_na[i - count] == 0) && !std::isnan(data(i - count, j))) {
+              
+              // compute the rolling sum
               sum_data += data(i - count, j) * arma_weights[width - count - 1];
               sum_weights += arma_weights[width - count - 1];
               n_obs += 1;
+              
             }
             
             count += 1;
@@ -215,7 +634,8 @@ struct RollMeanRows : public Worker {
           if (n_obs >= min_obs) {
             arma_center(i, j) = sum_data / sum_weights;
           } else {
-            arma_center(i, j) = NA_REAL;
+            // mean of empty set is NaN for consistency with R's mean
+            arma_center(i, j) = arma::datum::nan;
           }
           
         } else {
@@ -292,7 +712,8 @@ struct RollMeanCols : public Worker {
           if (n_obs >= min_obs) {
             arma_center(i, j) = sum_data / sum_weights;
           } else {
-            arma_center(i, j) = NA_REAL;
+            // mean of empty set is NaN for consistency with R's mean
+            arma_center(i, j) = arma::datum::nan;
           }
           
         } else {
@@ -438,7 +859,7 @@ struct RollVarRows : public Worker {
           // compute the unbiased estimate of variance
           if (n_obs >= min_obs) {
             arma_scale(i, j) = ((sum_data / sum_weights) /
-                                  (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
+              (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
           } else {
             arma_scale(i, j) = NA_REAL;
           }
@@ -531,7 +952,7 @@ struct RollVarCols : public Worker {
           // compute the unbiased estimate of variance
           if (n_obs >= min_obs) {
             arma_scale(i, j) = ((sum_data / sum_weights) /
-                                  (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
+              (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
           } else {
             arma_scale(i, j) = NA_REAL;
           }
@@ -700,7 +1121,7 @@ struct RollSdRows : public Worker {
           // compute the unbiased estimate of standard deviation
           if (n_obs >= min_obs) {
             arma_scale(i, j) = sqrt((sum_data / sum_weights) /
-                                      (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
+              (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
           } else {
             arma_scale(i, j) = NA_REAL;
           }
@@ -793,7 +1214,7 @@ struct RollSdCols : public Worker {
           // compute the unbiased estimate of standard deviation
           if (n_obs >= min_obs) {
             arma_scale(i, j) = sqrt((sum_data / sum_weights) /
-                                      (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
+              (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
           } else {
             arma_scale(i, j) = NA_REAL;
           }
@@ -1480,9 +1901,9 @@ struct RollVarRowsCube : public Worker {
             // compute the mean
             if (n_obs >= min_obs) {
               arma_scale_j(k, j, i) = ((sum_j / sum_weights) /
-                                         (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
+                (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
               arma_scale_k(k, j, i) = ((sum_k / sum_weights) /
-                                         (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
+                (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
             } else {
               arma_scale_j(k, j, i) = NA_REAL;
               arma_scale_k(k, j, i) = NA_REAL;
@@ -1619,9 +2040,9 @@ struct RollVarColsCube : public Worker {
             // compute the mean
             if (n_obs >= min_obs) {
               arma_scale_j(k, j, i) = ((sum_j / sum_weights) /
-                                         (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
+                (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
               arma_scale_k(k, j, i) = ((sum_k / sum_weights) /
-                                         (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
+                (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
             } else {
               arma_scale_j(k, j, i) = NA_REAL;
               arma_scale_k(k, j, i) = NA_REAL;
@@ -2328,7 +2749,7 @@ struct RollCovRows : public Worker {
             // compute the unbiased estimate of covariance
             if (n_obs >= min_obs) {
               arma_cov(k, j, i) = ((sum_data / sum_weights) / 
-                                     (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
+                (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
             } else {
               arma_cov(k, j, i) = NA_REAL;
             }
@@ -2622,7 +3043,7 @@ struct RollCovCols : public Worker {
             // compute the unbiased estimate of covariance
             if (n_obs >= min_obs) {
               arma_cov(k, j, i) = ((sum_data / sum_weights) / 
-                                     (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
+                (1 - (sum_weights_sq / pow(sum_weights, 2.0))));
             } else {
               arma_cov(k, j, i) = NA_REAL;
             }
@@ -2821,20 +3242,23 @@ struct RollLmSlices : public Worker {
           arma::mat intercept_mat = arma_intercept.slice(i);
           arma::vec intercept_diag = intercept_mat.diag();
           
+          // transpose coefficients to matrix
+          arma::mat trans_coef = trans(coef);
+          
           // intercept
           if (intercept) {
             arma_coef(i, 0) = intercept_diag(n_cols - 1) -
-              as_scalar(trans(coef) * intercept_diag.subvec(0, n_cols - 2));
+              as_scalar(trans_coef * intercept_diag.subvec(0, n_cols - 2));
           } else {
             arma_coef(i, 0) = NA_REAL;
           }
           
           // coefficients
-          arma_coef.submat(i, 1, i, n_cols - 1) = trans(coef);
+          arma_coef.submat(i, 1, i, n_cols - 1) = trans_coef;
           
           // r-squared
-          arma_rsq(i, 0) = as_scalar((trans(coef) * A * coef) /
-                                       x.submat(n_cols - 1, n_cols - 1, n_cols - 1, n_cols - 1));
+          arma_rsq(i, 0) = as_scalar((trans_coef * A * coef) /
+            x.submat(n_cols - 1, n_cols - 1, n_cols - 1, n_cols - 1));
           
         } else if (!status) {
           
@@ -3431,20 +3855,23 @@ struct RollPcrSlices : public Worker {
           arma::vec gamma_subset = gamma(arma_comps - 1);
           arma::vec coef = eigen_vectors.submat(arma_cols, arma_comps - 1) * gamma_subset;
           
+          // transpose coefficients to matrix
+          arma::mat trans_coef = trans(coef);
+          
           // intercept
           if (intercept) {
             arma_coef(i, 0) = intercept_diag(n_cols - 1) -
-              as_scalar(trans(coef) * intercept_diag.subvec(0, n_cols - 2));
+              as_scalar(trans_coef * intercept_diag.subvec(0, n_cols - 2));
           } else {
             arma_coef(i, 0) = NA_REAL;
           }
           
           // coefficients
-          arma_coef.submat(i, 1, i, n_cols - 1) = trans(coef);
+          arma_coef.submat(i, 1, i, n_cols - 1) = trans_coef;
           
           // r-squared
-          arma_rsq(i, 0) = as_scalar((trans(coef) * A * coef) /
-                                       x.submat(n_cols - 1, n_cols - 1, n_cols - 1, n_cols - 1));
+          arma_rsq(i, 0) = as_scalar((trans_coef * A * coef) /
+            x.submat(n_cols - 1, n_cols - 1, n_cols - 1, n_cols - 1));
           
         } else if (!status) {
           
@@ -3814,9 +4241,12 @@ struct RollLmVifSlices : public Worker {
           // don't find approximate solution for rank deficient system
           if (status) {
             
+            // transpose coefficients to matrix
+            arma::mat trans_coef = trans(coef);
+            
             // r-squared
-            double rsq = as_scalar((trans(coef) * A * coef) /
-                                     x.submat(n_cols - 1, n_cols - 1, n_cols - 1, n_cols - 1));
+            double rsq = as_scalar((trans_coef * A * coef) /
+                                   x.submat(n_cols - 1, n_cols - 1, n_cols - 1, n_cols - 1));
             
             arma_vif(i, j) = 1 / (1 - rsq);
             

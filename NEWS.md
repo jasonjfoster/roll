@@ -1,5 +1,11 @@
 ## News for package 'roll'
 
+### Changes in roll version 1.07 (YYYY-MM-DD)
+
+* Added file `init.c` with calls to `R_registerRoutines()` and `R_useDynamicSymbols()`; also uses `.registration = TRUE` in `useDynLib` in `NAMESPACE`
+
+* New `roll_sum` and `roll_prod` functions for computing rolling sums and products of time-series data
+
 ### Changes in roll version 1.0.6 (2016-09-19)
 
 * Added `intercept` argument to `roll_lm` and `roll_pcr` functions
@@ -16,8 +22,8 @@
 
 * `roll_lm` and `roll_pcr` functions have been enhanced:
 
-    * `y` can now be a matrix or xts object with multiple dependent variables.
+    * `y` can now be a matrix or xts object with multiple dependent variables
 
-    * Added shorthand arguments for `center` and `scale`.
+    * Added shorthand arguments for `center` and `scale`
 
-* New `roll_scale` function for computing rolling scaling and centering of time-series data.
+* New `roll_scale` function for computing rolling scaling and centering of time-series data

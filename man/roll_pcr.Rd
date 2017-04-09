@@ -87,4 +87,3 @@ result <- roll_pcr(x, y, 252, comps = 1, weights, min_obs = 1)
 \seealso{
 \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 }
-

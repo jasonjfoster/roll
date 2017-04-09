@@ -53,4 +53,3 @@ result <- roll_mean(data, 252, weights, min_obs = 1)
 \seealso{
 \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 }
-
