@@ -3215,19 +3215,8 @@ struct RollLmSlices : public Worker {
       arma::mat b = x.submat(0, n_cols - 1, n_cols - 2, n_cols - 1);
       arma::vec coef(n_cols - 1);
       
-      int j = 0;
-      int k = 0;
-      bool any_na = false;
-      
       // check if missing value is present
-      while ((!any_na) && (j * k < (n_cols - 1) * (n_cols - 1))) {
-        for (j = 0; j < n_cols; j++) {
-          for (k = 0; k < n_cols; k++) {
-            if (std::isnan(x(j, k)))
-              any_na = true;
-          }
-        }
-      }
+      bool any_na = x.has_nan();
       
       // don't compute if missing value 
       if (!any_na) {
@@ -3592,19 +3581,8 @@ struct RollEigenSlices : public Worker {
       arma::vec eigen_values(n_cols);
       arma::mat eigen_vectors(n_cols, n_cols);
       
-      int j = 0;
-      int k = 0;
-      bool any_na = false;
-      
       // check if missing value is present
-      while ((!any_na) && (j * k < (n_cols - 1) * (n_cols - 1))) {
-        for (j = 0; j < n_cols; j++) {
-          for (k = 0; k < n_cols; k++) {
-            if (std::isnan(x(j, k)))
-              any_na = true;
-          }
-        }
-      }
+      bool any_na = x.has_nan();
       
       // don't compute if missing value 
       if (!any_na) {
@@ -3825,19 +3803,8 @@ struct RollPcrSlices : public Worker {
       arma::vec gamma(n_cols - 1);
       arma::mat eigen_vectors = arma_eigen_vectors.slice(i);
       
-      int j = 0;
-      int k = 0;
-      bool any_na = false;
-      
       // check if missing value is present
-      while ((!any_na) && (j * k < (n_cols - 1) * (n_cols - 1))) {
-        for (j = 0; j < n_cols; j++) {
-          for (k = 0; k < n_cols; k++) {
-            if (std::isnan(x(j, k)))
-              any_na = true;
-          }
-        }
-      }
+      bool any_na = x.has_nan();
       
       // don't compute if missing value 
       if (!any_na) {
@@ -4208,19 +4175,8 @@ struct RollLmVifSlices : public Worker {
       
       arma::mat x = arma_cov.slice(i);
       
-      int j = 0;
-      int k = 0;
-      bool any_na = false;
-      
       // check if missing value is present
-      while ((!any_na) && (j * k < (n_cols - 1) * (n_cols - 1))) {
-        for (j = 0; j < n_cols; j++) {
-          for (k = 0; k < n_cols; k++) {
-            if (std::isnan(x(j, k)))
-              any_na = true;
-          }
-        }
-      }
+      bool any_na = x.has_nan();
       
       // don't compute if missing value 
       if (!any_na) {

@@ -1,10 +1,10 @@
 ## News for package 'roll'
 
-### Changes in roll version 1.07 (YYYY-MM-DD)
+### Changes in roll version 1.0.7 (YYYY-MM-DD)
 
-* Added file `init.c` with calls to `R_registerRoutines()` and `R_useDynamicSymbols()`; also uses `.registration = TRUE` in `useDynLib` in `NAMESPACE`
+* New `roll_sum` and `roll_prod` functions for computing rolling sums and products, respectively, of time-series data
 
-* New `roll_sum` and `roll_prod` functions for computing rolling sums and products of time-series data
+* Added `init.c` files with calls to `R_registerRoutines()` and `R_useDynamicSymbols()`; also uses `.registration = TRUE` in `useDynLib` in `NAMESPACE`
 
 ### Changes in roll version 1.0.6 (2016-09-19)
 
