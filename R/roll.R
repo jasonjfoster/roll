@@ -6,7 +6,7 @@
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
-##' otherwise result is NA.
+##' otherwise result is \code{NA}.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
@@ -54,7 +54,7 @@ roll_sum <- function(data, width, weights = rep(1, width),
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
-##' otherwise result is NA.
+##' otherwise result is \code{NA}.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
@@ -102,7 +102,7 @@ roll_prod <- function(data, width, weights = rep(1, width),
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
-##' otherwise result is NA.
+##' otherwise result is \code{NA}.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
@@ -152,7 +152,7 @@ roll_mean <- function(data, width, weights = rep(1, width),
 ##' @param center logical. If \code{TRUE} then the weighted mean of each variable is used,
 ##' if \code{FALSE} then zero is used.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
-##' otherwise result is NA.
+##' otherwise result is \code{NA}.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
@@ -203,7 +203,7 @@ roll_var <- function(data, width, weights = rep(1, width), center = TRUE,
 ##' @param center logical. If \code{TRUE} then the weighted mean of each variable is used,
 ##' if \code{FALSE} then zero is used.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
-##' otherwise result is NA.
+##' otherwise result is \code{NA}.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
@@ -256,7 +256,7 @@ roll_sd <- function(data, width, weights = rep(1, width), center = TRUE,
 ##' @param scale logical. If \code{TRUE} then the weighted standard deviation of each variable is used,
 ##' if \code{FALSE} then no scaling is done.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
-##' otherwise result is NA.
+##' otherwise result is \code{NA}.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
@@ -309,8 +309,8 @@ roll_scale <- function(data, width, weights = rep(1, width), center = TRUE, scal
 ##' if \code{FALSE} then zero is used.
 ##' @param scale logical. If \code{TRUE} then the weighted standard deviation of each variable is used,
 ##' if \code{FALSE} then no scaling is done.
-##' @param min_obs integer. Minimum number of observations required to have a value within a window, 
-##' otherwise result is NA.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is \code{NA}.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
 ##' if \code{FALSE} then pairwise is used.
 ##' @param na_restore logical. Should missing values be restored?
@@ -363,8 +363,8 @@ roll_cov <- function(data, width, weights = rep(1, width), center = TRUE, scale 
 ##' if \code{FALSE} then zero is used.
 ##' @param scale logical. If \code{TRUE} then the weighted standard deviation of each variable is used,
 ##' if \code{FALSE} then no scaling is done.
-##' @param min_obs integer. Minimum number of observations required to have a value within a window, 
-##' otherwise result is NA.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is \code{NA}.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
 ##' if \code{FALSE} then pairwise is used.
 ##' @param na_restore logical. Should missing values be restored?
@@ -425,8 +425,8 @@ roll_cor <- function(data, width, weights = rep(1, width), center = TRUE, scale 
 ##' @param scale_x logical. If \code{TRUE} then the weighted standard deviation of each \code{x} 
 ##' variable is used, if \code{FALSE} then no scaling is done.
 ##' @param scale_y logical. Analogous to \code{scale_x}.
-##' @param min_obs integer. Minimum number of observations required to have a value within a window, 
-##' otherwise result is NA.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is \code{NA}.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
 ##' if \code{FALSE} then pairwise is used.
 ##' @param na_restore logical. Should missing values be restored?
@@ -493,8 +493,8 @@ roll_lm <- function(x, y, width, weights = rep(1, width), intercept = TRUE,
 ##' if \code{FALSE} then zero is used.
 ##' @param scale logical. If \code{TRUE} then the weighted standard deviation of each variable is used,
 ##' if \code{FALSE} then no scaling is done.
-##' @param min_obs integer. Minimum number of observations required to have a value within a window, 
-##' otherwise result is NA.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is \code{NA}.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
 ##' if \code{FALSE} then pairwise is used.
 ##' @param na_restore logical. Should missing values be restored?
@@ -561,8 +561,8 @@ roll_eigen <- function(data, width, weights = rep(1, width), center = TRUE, scal
 ##' @param scale_x logical. If \code{TRUE} then the weighted standard deviation of each \code{x} 
 ##' variable is used, if \code{FALSE} then no scaling is done.
 ##' @param scale_y logical. Analogous to \code{scale_x}.
-##' @param min_obs integer. Minimum number of observations required to have a value within a window, 
-##' otherwise result is NA.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is \code{NA}.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
 ##' if \code{FALSE} then pairwise is used.
 ##' @param na_restore logical. Should missing values be restored?
@@ -630,8 +630,8 @@ roll_pcr <- function(x, y, width, comps = 1:ncol(x), weights = rep(1, width), in
 ##' if \code{FALSE} then zero is used.
 ##' @param scale logical. If \code{TRUE} then the weighted standard deviation of each variable is used,
 ##' if \code{FALSE} then no scaling is done.
-##' @param min_obs integer. Minimum number of observations required to have a value within a window, 
-##' otherwise result is NA.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is \code{NA}.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
 ##' if \code{FALSE} then pairwise is used.
 ##' @param na_restore logical. Should missing values be restored?

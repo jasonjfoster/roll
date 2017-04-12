@@ -216,8 +216,7 @@ struct RollSumRows : public Worker {
           if (n_obs >= min_obs) {
             arma_sum(i, j) = sum_data;
           } else {
-            // sum over empty set is zero for consistency with R's sum
-            arma_sum(i, j) = 0;
+            arma_sum(i, j) = NA_REAL;
           }
           
         } else {
@@ -292,8 +291,7 @@ struct RollSumCols : public Worker {
           if (n_obs >= min_obs) {
             arma_sum(i, j) = sum_data;
           } else {
-            // sum over empty set is zero for consistency with R's sum
-            arma_sum(i, j) = 0;
+            arma_sum(i, j) = NA_REAL;
           }
           
         } else {
@@ -424,8 +422,7 @@ struct RollProdRows : public Worker {
           if (n_obs >= min_obs) {
             arma_prod(i, j) = prod_data;
           } else {
-            // product of empty set is one for consistency with R's prod
-            arma_prod(i, j) = 1;
+            arma_prod(i, j) = NA_REAL;
           }
           
         } else {
@@ -500,8 +497,7 @@ struct RollProdCols : public Worker {
           if (n_obs >= min_obs) {
             arma_prod(i, j) = prod_data;
           } else {
-            // product of empty set is one for consistency with R's prod
-            arma_prod(i, j) = 1;
+            arma_prod(i, j) = NA_REAL;
           }
           
         } else {
@@ -634,8 +630,7 @@ struct RollMeanRows : public Worker {
           if (n_obs >= min_obs) {
             arma_center(i, j) = sum_data / sum_weights;
           } else {
-            // mean of empty set is NaN for consistency with R's mean
-            arma_center(i, j) = arma::datum::nan;
+            arma_center(i, j) = NA_REAL;
           }
           
         } else {
@@ -712,8 +707,7 @@ struct RollMeanCols : public Worker {
           if (n_obs >= min_obs) {
             arma_center(i, j) = sum_data / sum_weights;
           } else {
-            // mean of empty set is NaN for consistency with R's mean
-            arma_center(i, j) = arma::datum::nan;
+            arma_center(i, j) = NA_REAL;
           }
           
         } else {

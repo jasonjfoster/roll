@@ -19,7 +19,7 @@ roll_sd(data, width, weights = rep(1, width), center = TRUE,
 if \code{FALSE} then zero is used.}
 
 \item{min_obs}{integer. Minimum number of observations required to have a value within a window,
-otherwise result is NA.}
+otherwise result is \code{NA}.}
 
 \item{complete_obs}{logical. If \code{TRUE} then rows containing any missing values are removed,
 if \code{FALSE} then each value is used.}

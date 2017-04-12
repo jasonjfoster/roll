@@ -21,8 +21,8 @@ if \code{FALSE} then zero is used.}
 \item{scale}{logical. If \code{TRUE} then the weighted standard deviation of each variable is used,
 if \code{FALSE} then no scaling is done.}
 
-\item{min_obs}{integer. Minimum number of observations required to have a value within a window, 
-otherwise result is NA.}
+\item{min_obs}{integer. Minimum number of observations required to have a value within a window,
+otherwise result is \code{NA}.}
 
 \item{complete_obs}{logical. If \code{TRUE} then rows containing any missing values are removed,
 if \code{FALSE} then pairwise is used.}
