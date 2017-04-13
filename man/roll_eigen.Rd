@@ -50,18 +50,12 @@ n_vars <- 10
 n_obs <- 1000
 data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 
-# 252-day rolling eigenvalues and eigenvectors
+# Rolling eigenvalues and eigenvectors
 result <- roll_eigen(data, 252)
 
-# Equivalent to 'na.rm = TRUE'
-result <- roll_eigen(data, 252, min_obs = 1)
-
-# Expanding window
-result <- roll_eigen(data, n_obs, min_obs = 1)
-
-# Exponential decay
+# Rolling eigenvalues and eigenvectors with exponential decay
 weights <- 0.9 ^ (251:0)
-result <- roll_eigen(data, 252, weights, min_obs = 1)
+result <- roll_eigen(data, 252, weights)
 }
 \seealso{
 \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.

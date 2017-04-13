@@ -69,18 +69,12 @@ n_obs <- 1000
 x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 y <- matrix(rnorm(n_obs), nrow = n_obs, ncol = 1)
 
-# 252-day rolling regression
+# Rolling regressions
 result <- roll_lm(x, y, 252)
 
-# Equivalent to 'na.rm = TRUE'
-result <- roll_lm(x, y, 252, min_obs = 1)
-
-# Expanding window
-result <- roll_lm(x, y, n_obs, min_obs = 1)
-
-# Exponential decay
+# Rolling regressions with exponential decay
 weights <- 0.9 ^ (251:0)
-result <- roll_lm(x, y, 252, weights, min_obs = 1)
+result <- roll_lm(x, y, 252, weights)
 }
 \seealso{
 \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.

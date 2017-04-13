@@ -19,18 +19,12 @@
 ##' n_obs <- 1000
 ##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' 
-##' # 252-day rolling sum
+##' # Rolling sums
 ##' result <- roll_sum(data, 252)
 ##' 
-##' # Equivalent to 'na.rm = TRUE'
-##' result <- roll_sum(data, 252, min_obs = 1)
-##' 
-##' # Expanding window
-##' result <- roll_sum(data, n_obs, min_obs = 1)
-##' 
-##' # Exponential decay
+##' # Rolling sums with exponential decay
 ##' weights <- 0.9 ^ (251:0)
-##' result <- roll_sum(data, 252, weights, min_obs = 1)
+##' result <- roll_sum(data, 252, weights)
 ##' @export
 roll_sum <- function(data, width, weights = rep(1, width),
                      min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -67,18 +61,12 @@ roll_sum <- function(data, width, weights = rep(1, width),
 ##' n_obs <- 1000
 ##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' 
-##' # 252-day rolling product
+##' # Rolling products
 ##' result <- roll_prod(data, 252)
 ##' 
-##' # Equivalent to 'na.rm = TRUE'
-##' result <- roll_prod(data, 252, min_obs = 1)
-##' 
-##' # Expanding window
-##' result <- roll_prod(data, n_obs, min_obs = 1)
-##' 
-##' # Exponential decay
+##' # Rolling products with exponential decay
 ##' weights <- 0.9 ^ (251:0)
-##' result <- roll_prod(data, 252, weights, min_obs = 1)
+##' result <- roll_prod(data, 252, weights)
 ##' @export
 roll_prod <- function(data, width, weights = rep(1, width),
                       min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -115,18 +103,12 @@ roll_prod <- function(data, width, weights = rep(1, width),
 ##' n_obs <- 1000
 ##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' 
-##' # 252-day rolling mean
+##' # Rolling means
 ##' result <- roll_mean(data, 252)
 ##' 
-##' # Equivalent to 'na.rm = TRUE'
-##' result <- roll_mean(data, 252, min_obs = 1)
-##' 
-##' # Expanding window
-##' result <- roll_mean(data, n_obs, min_obs = 1)
-##' 
-##' # Exponential decay
+##' # Rolling means with exponential decay
 ##' weights <- 0.9 ^ (251:0)
-##' result <- roll_mean(data, 252, weights, min_obs = 1)
+##' result <- roll_mean(data, 252, weights)
 ##' @export
 roll_mean <- function(data, width, weights = rep(1, width),
                       min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -165,18 +147,12 @@ roll_mean <- function(data, width, weights = rep(1, width),
 ##' n_obs <- 1000
 ##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' 
-##' # 252-day rolling variance
+##' # Rolling variances
 ##' result <- roll_var(data, 252)
 ##' 
-##' # Equivalent to 'na.rm = TRUE'
-##' result <- roll_var(data, 252, min_obs = 1)
-##' 
-##' # Expanding window
-##' result <- roll_var(data, n_obs, min_obs = 1)
-##' 
-##' # Exponential decay
+##' # Rolling variances with exponential decay
 ##' weights <- 0.9 ^ (251:0)
-##' result <- roll_var(data, 252, weights, min_obs = 1)
+##' result <- roll_var(data, 252, weights)
 ##' @export
 roll_var <- function(data, width, weights = rep(1, width), center = TRUE,
                      min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -216,18 +192,12 @@ roll_var <- function(data, width, weights = rep(1, width), center = TRUE,
 ##' n_obs <- 1000
 ##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' 
-##' # 252-day rolling standard deviation
+##' # Rolling standard deviations
 ##' result <- roll_sd(data, 252)
 ##' 
-##' # Equivalent to 'na.rm = TRUE'
-##' result <- roll_sd(data, 252, min_obs = 1)
-##' 
-##' # Expanding window
-##' result <- roll_sd(data, n_obs, min_obs = 1)
-##' 
-##' # Exponential decay
+##' # Rolling standard deviations with exponential decay
 ##' weights <- 0.9 ^ (251:0)
-##' result <- roll_sd(data, 252, weights, min_obs = 1)
+##' result <- roll_sd(data, 252, weights)
 ##' @export
 roll_sd <- function(data, width, weights = rep(1, width), center = TRUE,
                     min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -269,18 +239,12 @@ roll_sd <- function(data, width, weights = rep(1, width), center = TRUE,
 ##' n_obs <- 1000
 ##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' 
-##' # 252-day rolling z-score
+##' # Rolling z-scores
 ##' result <- roll_scale(data, 252)
-##' 
-##' # Equivalent to 'na.rm = TRUE'
-##' result <- roll_scale(data, 252, min_obs = 1)
-##' 
-##' # Expanding window
-##' result <- roll_scale(data, n_obs, min_obs = 1)
-##' 
-##' # Exponential decay
+##'
+##' # Rolling z-scores with exponential decay
 ##' weights <- 0.9 ^ (251:0)
-##' result <- roll_scale(data, 252, weights, min_obs = 1)
+##' result <- roll_scale(data, 252, weights)
 ##' @export
 roll_scale <- function(data, width, weights = rep(1, width), center = TRUE, scale = TRUE,
                        min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -323,18 +287,12 @@ roll_scale <- function(data, width, weights = rep(1, width), center = TRUE, scal
 ##' n_obs <- 1000
 ##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' 
-##' # 252-day rolling covariance matrix
+##' # Rolling covariance matrices
 ##' result <- roll_cov(data, 252)
 ##' 
-##' # Equivalent to 'na.rm = TRUE'
-##' result <- roll_cov(data, 252, min_obs = 1)
-##' 
-##' # Expanding window
-##' result <- roll_cov(data, n_obs, min_obs = 1)
-##' 
-##' # Exponential decay
+##' # Rolling covariance matrices with exponential decay
 ##' weights <- 0.9 ^ (251:0)
-##' result <- roll_cov(data, 252, weights, min_obs = 1)
+##' result <- roll_cov(data, 252, weights)
 ##' @export
 roll_cov <- function(data, width, weights = rep(1, width), center = TRUE, scale = FALSE,
                      min_obs = width, complete_obs = TRUE, na_restore = FALSE,
@@ -377,18 +335,12 @@ roll_cov <- function(data, width, weights = rep(1, width), center = TRUE, scale 
 ##' n_obs <- 1000
 ##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' 
-##' # 252-day rolling correlation matrix
+##' # Rolling correlation matrices
 ##' result <- roll_cor(data, 252)
 ##' 
-##' # Equivalent to 'na.rm = TRUE'
-##' result <- roll_cor(data, 252, min_obs = 1)
-##' 
-##' # Expanding window
-##' result <- roll_cor(data, n_obs, min_obs = 1)
-##' 
-##' # Exponential decay
+##' # Rolling correlation matrices with exponential decay
 ##' weights <- 0.9 ^ (251:0)
-##' result <- roll_cor(data, 252, weights, min_obs = 1)
+##' result <- roll_cor(data, 252, weights)
 ##' @export
 roll_cor <- function(data, width, weights = rep(1, width), center = TRUE, scale = TRUE,
                      min_obs = width, complete_obs = TRUE, na_restore = FALSE,
@@ -447,18 +399,12 @@ roll_cor <- function(data, width, weights = rep(1, width), center = TRUE, scale 
 ##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' y <- matrix(rnorm(n_obs), nrow = n_obs, ncol = 1)
 ##' 
-##' # 252-day rolling regression
+##' # Rolling regressions
 ##' result <- roll_lm(x, y, 252)
 ##' 
-##' # Equivalent to 'na.rm = TRUE'
-##' result <- roll_lm(x, y, 252, min_obs = 1)
-##' 
-##' # Expanding window
-##' result <- roll_lm(x, y, n_obs, min_obs = 1)
-##' 
-##' # Exponential decay
+##' # Rolling regressions with exponential decay
 ##' weights <- 0.9 ^ (251:0)
-##' result <- roll_lm(x, y, 252, weights, min_obs = 1)
+##' result <- roll_lm(x, y, 252, weights)
 ##' @export
 roll_lm <- function(x, y, width, weights = rep(1, width), intercept = TRUE, 
                     center = FALSE, center_x = center, center_y = center,
@@ -512,18 +458,12 @@ roll_lm <- function(x, y, width, weights = rep(1, width), intercept = TRUE,
 ##' n_obs <- 1000
 ##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' 
-##' # 252-day rolling eigenvalues and eigenvectors
+##' # Rolling eigenvalues and eigenvectors
 ##' result <- roll_eigen(data, 252)
 ##' 
-##' # Equivalent to 'na.rm = TRUE'
-##' result <- roll_eigen(data, 252, min_obs = 1)
-##' 
-##' # Expanding window
-##' result <- roll_eigen(data, n_obs, min_obs = 1)
-##' 
-##' # Exponential decay
+##' # Rolling eigenvalues and eigenvectors with exponential decay
 ##' weights <- 0.9 ^ (251:0)
-##' result <- roll_eigen(data, 252, weights, min_obs = 1)
+##' result <- roll_eigen(data, 252, weights)
 ##' @export
 roll_eigen <- function(data, width, weights = rep(1, width), center = TRUE, scale = FALSE,
                        min_obs = width, complete_obs = TRUE, na_restore = FALSE,
@@ -583,18 +523,12 @@ roll_eigen <- function(data, width, weights = rep(1, width), center = TRUE, scal
 ##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' y <- matrix(rnorm(n_obs), nrow = n_obs, ncol = 1)
 ##' 
-##' # 252-day rolling principal component regression
+##' # Rolling principal component regressions
 ##' result <- roll_pcr(x, y, 252, comps = 1)
 ##' 
-##' # Equivalent to 'na.rm = TRUE'
-##' result <- roll_pcr(x, y, 252, comps = 1, min_obs = 1)
-##' 
-##' # Expanding window
-##' result <- roll_pcr(x, y, n_obs, comps = 1, min_obs = 1)
-##' 
-##' # Exponential decay
+##' # Rolling principal component regressions with exponential decay
 ##' weights <- 0.9 ^ (251:0)
-##' result <- roll_pcr(x, y, 252, comps = 1, weights, min_obs = 1)
+##' result <- roll_pcr(x, y, 252, comps = 1, weights)
 ##' @export
 roll_pcr <- function(x, y, width, comps = 1:ncol(x), weights = rep(1, width), intercept = TRUE, 
                      center = FALSE, center_x = center, center_y = center,
@@ -648,18 +582,12 @@ roll_pcr <- function(x, y, width, comps = 1:ncol(x), weights = rep(1, width), in
 ##' n_obs <- 1000
 ##' data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' 
-##' # 252-day rolling variance inflation factors
+##' # Rolling variance inflation factors
 ##' result <- roll_vif(data, 252)
 ##' 
-##' # Equivalent to 'na.rm = TRUE'
-##' result <- roll_vif(data, 252, min_obs = 1)
-##' 
-##' # Expanding window
-##' result <- roll_vif(data, n_obs, min_obs = 1)
-##' 
-##' # Exponential decay
+##' # Rolling variance inflation factors with exponential decay
 ##' weights <- 0.9 ^ (251:0)
-##' result <- roll_vif(data, 252, weights, min_obs = 1)
+##' result <- roll_vif(data, 252, weights)
 ##' @export
 roll_vif <- function(data, width, weights = rep(1, width), center = FALSE, scale = FALSE,
                      min_obs = width, complete_obs = TRUE, na_restore = FALSE,

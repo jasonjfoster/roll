@@ -71,18 +71,12 @@ n_obs <- 1000
 x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 y <- matrix(rnorm(n_obs), nrow = n_obs, ncol = 1)
 
-# 252-day rolling principal component regression
+# Rolling principal component regressions
 result <- roll_pcr(x, y, 252, comps = 1)
 
-# Equivalent to 'na.rm = TRUE'
-result <- roll_pcr(x, y, 252, comps = 1, min_obs = 1)
-
-# Expanding window
-result <- roll_pcr(x, y, n_obs, comps = 1, min_obs = 1)
-
-# Exponential decay
+# Rolling principal component regressions with exponential decay
 weights <- 0.9 ^ (251:0)
-result <- roll_pcr(x, y, 252, comps = 1, weights, min_obs = 1)
+result <- roll_pcr(x, y, 252, comps = 1, weights)
 }
 \seealso{
 \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
