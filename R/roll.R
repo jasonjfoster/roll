@@ -12,8 +12,15 @@
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
+##' @details The numerical calculations use RcppParallel to parallelize rolling sums of time-series data. 
+##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
+##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
+##' 
+##' By default, all the available cores on a machine are used for parallel algorithms. If users are 
+##' either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
+##' threads, then set the number of threads in the RcppParallel package with the 
+##' \code{\link[RcppParallel]{setThreadOptions}} function.
 ##' @return An object of the same class and dimension as \code{data} with the rolling sums.
-##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 ##' @examples
 ##' n_vars <- 10
 ##' n_obs <- 1000
@@ -54,8 +61,15 @@ roll_sum <- function(data, width, weights = rep(1, width),
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
+##' @details The numerical calculations use RcppParallel to parallelize rolling products of time-series data. 
+##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
+##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
+##' 
+##' By default, all the available cores on a machine are used for parallel algorithms. If users are 
+##' either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
+##' threads, then set the number of threads in the RcppParallel package with the 
+##' \code{\link[RcppParallel]{setThreadOptions}} function.
 ##' @return An object of the same class and dimension as \code{data} with the rolling products.
-##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 ##' @examples
 ##' n_vars <- 10
 ##' n_obs <- 1000
@@ -96,8 +110,15 @@ roll_prod <- function(data, width, weights = rep(1, width),
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
+##' @details The numerical calculations use RcppParallel to parallelize rolling means of time-series data. 
+##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
+##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
+##' 
+##' By default, all the available cores on a machine are used for parallel algorithms. If users are 
+##' either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
+##' threads, then set the number of threads in the RcppParallel package with the 
+##' \code{\link[RcppParallel]{setThreadOptions}} function.
 ##' @return An object of the same class and dimension as \code{data} with the rolling means.
-##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 ##' @examples
 ##' n_vars <- 10
 ##' n_obs <- 1000
@@ -140,8 +161,15 @@ roll_mean <- function(data, width, weights = rep(1, width),
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
+##' @details The numerical calculations use RcppParallel to parallelize rolling variances of time-series data. 
+##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
+##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
+##' 
+##' By default, all the available cores on a machine are used for parallel algorithms. If users are 
+##' either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
+##' threads, then set the number of threads in the RcppParallel package with the 
+##' \code{\link[RcppParallel]{setThreadOptions}} function.
 ##' @return An object of the same class and dimension as \code{data} with the rolling variances.
-##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 ##' @examples
 ##' n_vars <- 10
 ##' n_obs <- 1000
@@ -185,8 +213,15 @@ roll_var <- function(data, width, weights = rep(1, width), center = TRUE,
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
+##' @details The numerical calculations use RcppParallel to parallelize rolling standard deviations of time-series data. 
+##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
+##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
+##' 
+##' By default, all the available cores on a machine are used for parallel algorithms. If users are 
+##' either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
+##' threads, then set the number of threads in the RcppParallel package with the 
+##' \code{\link[RcppParallel]{setThreadOptions}} function.
 ##' @return An object of the same class and dimension as \code{data} with the rolling standard deviations.
-##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 ##' @examples
 ##' n_vars <- 10
 ##' n_obs <- 1000
@@ -232,8 +267,15 @@ roll_sd <- function(data, width, weights = rep(1, width), center = TRUE,
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
+##' @details The numerical calculations use RcppParallel to parallelize rolling scaling and centering of time-series data. 
+##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
+##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
+##' 
+##' By default, all the available cores on a machine are used for parallel algorithms. If users are 
+##' either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
+##' threads, then set the number of threads in the RcppParallel package with the 
+##' \code{\link[RcppParallel]{setThreadOptions}} function.
 ##' @return An object of the same class and dimension as \code{data} with the rolling scaling and centering.
-##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 ##' @examples
 ##' n_vars <- 10
 ##' n_obs <- 1000
@@ -280,8 +322,15 @@ roll_scale <- function(data, width, weights = rep(1, width), center = TRUE, scal
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
+##' @details The numerical calculations use RcppParallel to parallelize rolling covariance matrices of time-series data. 
+##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
+##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
+##' 
+##' By default, all the available cores on a machine are used for parallel algorithms. If users are 
+##' either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
+##' threads, then set the number of threads in the RcppParallel package with the 
+##' \code{\link[RcppParallel]{setThreadOptions}} function.
 ##' @return A cube with each slice the rolling covariance matrix.
-##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 ##' @examples
 ##' n_vars <- 10
 ##' n_obs <- 1000
@@ -328,8 +377,15 @@ roll_cov <- function(data, width, weights = rep(1, width), center = TRUE, scale 
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
+##' @details The numerical calculations use RcppParallel to parallelize rolling correlation matrices of time-series data. 
+##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
+##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
+##' 
+##' By default, all the available cores on a machine are used for parallel algorithms. If users are 
+##' either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
+##' threads, then set the number of threads in the RcppParallel package with the 
+##' \code{\link[RcppParallel]{setThreadOptions}} function.
 ##' @return A cube with each slice the rolling correlation matrix.
-##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 ##' @examples
 ##' n_vars <- 10
 ##' n_obs <- 1000
@@ -384,15 +440,19 @@ roll_cor <- function(data, width, weights = rep(1, width), center = TRUE, scale 
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
+##' @details The numerical calculations use RcppParallel to parallelize rolling linear models of time-series data. 
+##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
+##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
+##' 
+##' By default, all the available cores on a machine are used for parallel algorithms. If users are 
+##' either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
+##' threads, then set the number of threads in the RcppParallel package with the 
+##' \code{\link[RcppParallel]{setThreadOptions}} function.
 ##' @return A list containing the following components:
 ##' \item{coefficients}{A list of objects with the rolling coefficients for each \code{y}.
 ##' An object is the same class and dimension (with an added column for the intercept) as \code{x}.}
 ##' \item{r.squared}{A list of objects with the rolling r-squareds for each \code{y}.
 ##' An object is the same class as \code{x}.}
-##' @note If users are already taking advantage of parallelism using multithreaded BLAS/LAPACK
-##' libraries, then limit the number of cores in the RcppParallel package to one with the
-##' \code{\link[RcppParallel]{setThreadOptions}} function.
-##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 ##' @examples
 ##' n_vars <- 10
 ##' n_obs <- 1000
@@ -446,13 +506,17 @@ roll_lm <- function(x, y, width, weights = rep(1, width), intercept = TRUE,
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
+##' @details The numerical calculations use RcppParallel to parallelize rolling eigenvalues and eigenvectors of time-series data. 
+##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
+##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
+##' 
+##' By default, all the available cores on a machine are used for parallel algorithms. If users are 
+##' either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
+##' threads, then set the number of threads in the RcppParallel package with the 
+##' \code{\link[RcppParallel]{setThreadOptions}} function.
 ##' @return A list containing the following components:
 ##' \item{values}{An object of the same class and dimension as \code{data} with the rolling eigenvalues.}
 ##' \item{vectors}{A cube with each slice the rolling eigenvectors.}
-##' @note If users are already taking advantage of parallelism using multithreaded BLAS/LAPACK
-##' libraries, then limit the number of cores in the RcppParallel package to one with the
-##' \code{\link[RcppParallel]{setThreadOptions}} function.
-##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 ##' @examples
 ##' n_vars <- 10
 ##' n_obs <- 1000
@@ -508,15 +572,19 @@ roll_eigen <- function(data, width, weights = rep(1, width), center = TRUE, scal
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
+##' @details The numerical calculations use RcppParallel to parallelize rolling principal component regressions of time-series data. 
+##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
+##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
+##' 
+##' By default, all the available cores on a machine are used for parallel algorithms. If users are 
+##' either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
+##' threads, then set the number of threads in the RcppParallel package with the 
+##' \code{\link[RcppParallel]{setThreadOptions}} function.
 ##' @return A list containing the following components:
 ##' \item{coefficients}{A list of objects with the rolling coefficients for each \code{y}.
 ##' An object is the same class and dimension (with an added column for the intercept) as \code{x}.}
 ##' \item{r.squared}{A list of objects with the rolling r-squareds for each \code{y}.
 ##' An object is the same class as \code{x}.}
-##' @note If users are already taking advantage of parallelism using multithreaded BLAS/LAPACK
-##' libraries, then limit the number of cores in the RcppParallel package to one with the
-##' \code{\link[RcppParallel]{setThreadOptions}} function.
-##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 ##' @examples
 ##' n_vars <- 10
 ##' n_obs <- 1000
@@ -571,12 +639,16 @@ roll_pcr <- function(x, y, width, comps = 1:ncol(x), weights = rep(1, width), in
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
+##' @details The numerical calculations use RcppParallel to parallelize rolling variance inflation factors of time-series data. 
+##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
+##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
+##' 
+##' By default, all the available cores on a machine are used for parallel algorithms. If users are 
+##' either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
+##' threads, then set the number of threads in the RcppParallel package with the 
+##' \code{\link[RcppParallel]{setThreadOptions}} function.
 ##' @return An object of the same class and dimension as \code{data} with the rolling variance
 ##' inflation factors.
-##' @note If users are already taking advantage of parallelism using multithreaded BLAS/LAPACK
-##' libraries, then limit the number of cores in the RcppParallel package to one with the
-##' \code{\link[RcppParallel]{setThreadOptions}} function.
-##' @seealso \code{\link[RcppParallel]{setThreadOptions}} for thread options via RcppParallel.
 ##' @examples
 ##' n_vars <- 10
 ##' n_obs <- 1000
