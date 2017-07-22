@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // roll_sum
 NumericMatrix roll_sum(const NumericMatrix& data, const int& width, const arma::vec& weights, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
-RcppExport SEXP roll_roll_sum(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
+RcppExport SEXP _roll_roll_sum(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -25,7 +25,7 @@ END_RCPP
 }
 // roll_prod
 NumericMatrix roll_prod(const NumericMatrix& data, const int& width, const arma::vec& weights, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
-RcppExport SEXP roll_roll_prod(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
+RcppExport SEXP _roll_roll_prod(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -42,7 +42,7 @@ END_RCPP
 }
 // roll_mean
 NumericMatrix roll_mean(const NumericMatrix& data, const int& width, const arma::vec& weights, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
-RcppExport SEXP roll_roll_mean(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
+RcppExport SEXP _roll_roll_mean(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -59,7 +59,7 @@ END_RCPP
 }
 // roll_var
 NumericMatrix roll_var(const NumericMatrix& data, const int& width, const arma::vec& weights, const bool& center, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
-RcppExport SEXP roll_roll_var(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
+RcppExport SEXP _roll_roll_var(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -77,7 +77,7 @@ END_RCPP
 }
 // roll_sd
 NumericMatrix roll_sd(const NumericMatrix& data, const int& width, const arma::vec& weights, const bool& center, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
-RcppExport SEXP roll_roll_sd(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
+RcppExport SEXP _roll_roll_sd(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -95,7 +95,7 @@ END_RCPP
 }
 // roll_scale
 NumericMatrix roll_scale(const NumericMatrix& data, const int& width, const arma::vec& weights, const bool& center, const bool& scale, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
-RcppExport SEXP roll_roll_scale(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
+RcppExport SEXP _roll_roll_scale(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -114,7 +114,7 @@ END_RCPP
 }
 // roll_cov
 NumericVector roll_cov(const NumericMatrix& data, const int& width, const arma::vec& weights, const bool& center, const bool& scale, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
-RcppExport SEXP roll_roll_cov(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
+RcppExport SEXP _roll_roll_cov(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -133,7 +133,7 @@ END_RCPP
 }
 // roll_lm
 List roll_lm(const NumericMatrix& x, const NumericMatrix& y, const int& width, const arma::vec& weights, const bool& intercept, const bool& center_x, const bool& center_y, const bool& scale_x, const bool& scale_y, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
-RcppExport SEXP roll_roll_lm(SEXP xSEXP, SEXP ySEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP interceptSEXP, SEXP center_xSEXP, SEXP center_ySEXP, SEXP scale_xSEXP, SEXP scale_ySEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
+RcppExport SEXP _roll_roll_lm(SEXP xSEXP, SEXP ySEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP interceptSEXP, SEXP center_xSEXP, SEXP center_ySEXP, SEXP scale_xSEXP, SEXP scale_ySEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -156,7 +156,7 @@ END_RCPP
 }
 // roll_eigen
 List roll_eigen(const NumericMatrix& data, const int& width, const arma::vec& weights, const bool& center, const bool& scale, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
-RcppExport SEXP roll_roll_eigen(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
+RcppExport SEXP _roll_roll_eigen(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -175,7 +175,7 @@ END_RCPP
 }
 // roll_pcr
 List roll_pcr(const NumericMatrix& x, const NumericMatrix& y, const int& width, const arma::uvec& comps, const arma::vec& weights, const bool& intercept, const bool& center_x, const bool& center_y, const bool& scale_x, const bool& scale_y, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
-RcppExport SEXP roll_roll_pcr(SEXP xSEXP, SEXP ySEXP, SEXP widthSEXP, SEXP compsSEXP, SEXP weightsSEXP, SEXP interceptSEXP, SEXP center_xSEXP, SEXP center_ySEXP, SEXP scale_xSEXP, SEXP scale_ySEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
+RcppExport SEXP _roll_roll_pcr(SEXP xSEXP, SEXP ySEXP, SEXP widthSEXP, SEXP compsSEXP, SEXP weightsSEXP, SEXP interceptSEXP, SEXP center_xSEXP, SEXP center_ySEXP, SEXP scale_xSEXP, SEXP scale_ySEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -199,7 +199,7 @@ END_RCPP
 }
 // roll_vif
 NumericMatrix roll_vif(const NumericMatrix& data, const int& width, const arma::vec& weights, const bool& center, const bool& scale, const int& min_obs, const bool& complete_obs, const bool& na_restore, const std::string& parallel_for);
-RcppExport SEXP roll_roll_vif(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
+RcppExport SEXP _roll_roll_vif(SEXP dataSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP parallel_forSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;

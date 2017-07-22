@@ -2,46 +2,46 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 .roll_sum <- function(data, width, weights, min_obs, complete_obs, na_restore, parallel_for) {
-    .Call('roll_roll_sum', PACKAGE = 'roll', data, width, weights, min_obs, complete_obs, na_restore, parallel_for)
+    .Call(`_roll_roll_sum`, data, width, weights, min_obs, complete_obs, na_restore, parallel_for)
 }
 
 .roll_prod <- function(data, width, weights, min_obs, complete_obs, na_restore, parallel_for) {
-    .Call('roll_roll_prod', PACKAGE = 'roll', data, width, weights, min_obs, complete_obs, na_restore, parallel_for)
+    .Call(`_roll_roll_prod`, data, width, weights, min_obs, complete_obs, na_restore, parallel_for)
 }
 
 .roll_mean <- function(data, width, weights, min_obs, complete_obs, na_restore, parallel_for) {
-    .Call('roll_roll_mean', PACKAGE = 'roll', data, width, weights, min_obs, complete_obs, na_restore, parallel_for)
+    .Call(`_roll_roll_mean`, data, width, weights, min_obs, complete_obs, na_restore, parallel_for)
 }
 
 .roll_var <- function(data, width, weights, center, min_obs, complete_obs, na_restore, parallel_for) {
-    .Call('roll_roll_var', PACKAGE = 'roll', data, width, weights, center, min_obs, complete_obs, na_restore, parallel_for)
+    .Call(`_roll_roll_var`, data, width, weights, center, min_obs, complete_obs, na_restore, parallel_for)
 }
 
 .roll_sd <- function(data, width, weights, center, min_obs, complete_obs, na_restore, parallel_for) {
-    .Call('roll_roll_sd', PACKAGE = 'roll', data, width, weights, center, min_obs, complete_obs, na_restore, parallel_for)
+    .Call(`_roll_roll_sd`, data, width, weights, center, min_obs, complete_obs, na_restore, parallel_for)
 }
 
 .roll_scale <- function(data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for) {
-    .Call('roll_roll_scale', PACKAGE = 'roll', data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for)
+    .Call(`_roll_roll_scale`, data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for)
 }
 
 .roll_cov <- function(data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for) {
-    .Call('roll_roll_cov', PACKAGE = 'roll', data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for)
+    .Call(`_roll_roll_cov`, data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for)
 }
 
 .roll_lm <- function(x, y, width, weights, intercept, center_x, center_y, scale_x, scale_y, min_obs, complete_obs, na_restore, parallel_for) {
-    .Call('roll_roll_lm', PACKAGE = 'roll', x, y, width, weights, intercept, center_x, center_y, scale_x, scale_y, min_obs, complete_obs, na_restore, parallel_for)
+    .Call(`_roll_roll_lm`, x, y, width, weights, intercept, center_x, center_y, scale_x, scale_y, min_obs, complete_obs, na_restore, parallel_for)
 }
 
 .roll_eigen <- function(data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for) {
-    .Call('roll_roll_eigen', PACKAGE = 'roll', data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for)
+    .Call(`_roll_roll_eigen`, data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for)
 }
 
 .roll_pcr <- function(x, y, width, comps, weights, intercept, center_x, center_y, scale_x, scale_y, min_obs, complete_obs, na_restore, parallel_for) {
-    .Call('roll_roll_pcr', PACKAGE = 'roll', x, y, width, comps, weights, intercept, center_x, center_y, scale_x, scale_y, min_obs, complete_obs, na_restore, parallel_for)
+    .Call(`_roll_roll_pcr`, x, y, width, comps, weights, intercept, center_x, center_y, scale_x, scale_y, min_obs, complete_obs, na_restore, parallel_for)
 }
 
 .roll_vif <- function(data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for) {
-    .Call('roll_roll_vif', PACKAGE = 'roll', data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for)
+    .Call(`_roll_roll_vif`, data, width, weights, center, scale, min_obs, complete_obs, na_restore, parallel_for)
 }
 

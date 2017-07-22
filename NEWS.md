@@ -1,5 +1,11 @@
 ## News for package 'roll'
 
+### Changes in roll version 1.0.8 (YYYY-MM-DD)
+
+* Updated `src/Makevars` and `src/Makevars.win` files to what the `RcppArmadillo` skeleton default now uses to more fully utilize OpenMP
+
+    * Note: if users take advantage of parallelism using multithreaded libraries, then limit the number of cores in the `RcppParallel` package to one with the `setThreadOptions` function
+
 ### Changes in roll version 1.0.7 (2017-05-01)
 
 * New `roll_sum` and `roll_prod` functions for computing rolling sums and products, respectively, of time-series data
