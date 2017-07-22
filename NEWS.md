@@ -2,6 +2,8 @@
 
 ### Changes in roll version 1.0.8 (YYYY-MM-DD)
 
+* Simplified checks for `width` and `min_obs` arguments ([#3](https://github.com/jjf234/roll/issues/3))
+
 * Updated `src/Makevars` and `src/Makevars.win` files to what the `RcppArmadillo` skeleton default now uses to more fully utilize OpenMP
 
     * Note: if users take advantage of parallelism using multithreaded libraries, then limit the number of cores in the `RcppParallel` package to one with the `setThreadOptions` function

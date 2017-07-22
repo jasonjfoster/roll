@@ -97,18 +97,10 @@ void check_vif(const int& data_n_cols) {
   
 }
 
-void check_width(const int& width, const int& n_rows) {
+void check_width(const int& width) {
   
-  if ((width < 1) || (width > n_rows)) {
-    stop("value of 'width' must be between one and number of rows in 'data'");
-  }
-  
-}
-
-void check_width_ols(const int& width, const int& n_rows) {
-  
-  if ((width < 1) || (width > n_rows)) {
-    stop("value of 'width' must be between one and number of rows in 'x' and 'y'");
+  if (width < 1) {
+    stop("value of 'width' must be greater than zero");
   }
   
 }
@@ -137,10 +129,15 @@ void check_weights(const arma::vec& weights, const unsigned int& width) {
   
 }
 
-void check_min_obs(const int& min_obs, const int& width) {
+void check_min_obs(const int& min_obs, const int& width, const int& n_rows) {
   
-  if ((min_obs < 1) || (min_obs > width)) {
-    stop("value of 'min_obs' must be between one and 'width'");
+  // default 'min_obs' argument is 'width'
+  if ((width == min_obs) && (min_obs > n_rows)) {
+    stop("value of 'width' must be between one and the number of rows in 'data'");
+  }
+  
+  if ((width != min_obs) && ((min_obs < 1) || (min_obs > std::min(width, n_rows)))) {
+    stop("value of 'min_obs' must be between one and the minimum of either the number of rows in 'data' or 'width'");
   }
   
 }
@@ -319,7 +316,7 @@ NumericMatrix roll_sum(const NumericMatrix& data, const int& width,
   arma::mat arma_sum(n_rows, n_cols);
   
   // check 'width' argument for errors
-  check_width(width, n_rows);
+  check_width(width);
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
@@ -327,7 +324,7 @@ NumericMatrix roll_sum(const NumericMatrix& data, const int& width,
   
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
-  check_min_obs(min_obs, width);
+  check_min_obs(min_obs, width, n_rows);
   
   // default 'complete_obs' argument is 'false' (equivalent to 'pairwise'),
   // otherwise check argument for errors
@@ -525,7 +522,7 @@ NumericMatrix roll_prod(const NumericMatrix& data, const int& width,
   arma::mat arma_prod(n_rows, n_cols);
   
   // check 'width' argument for errors
-  check_width(width, n_rows);
+  check_width(width);
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
@@ -533,7 +530,7 @@ NumericMatrix roll_prod(const NumericMatrix& data, const int& width,
   
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
-  check_min_obs(min_obs, width);
+  check_min_obs(min_obs, width, n_rows);
   
   // default 'complete_obs' argument is 'false' (equivalent to 'pairwise'),
   // otherwise check argument for errors
@@ -735,7 +732,7 @@ NumericMatrix roll_mean(const NumericMatrix& data, const int& width,
   arma::mat arma_center(n_rows, n_cols);
   
   // check 'width' argument for errors
-  check_width(width, n_rows);
+  check_width(width);
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
@@ -743,7 +740,7 @@ NumericMatrix roll_mean(const NumericMatrix& data, const int& width,
   
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
-  check_min_obs(min_obs, width);
+  check_min_obs(min_obs, width, n_rows);
   
   // default 'complete_obs' argument is 'false' (equivalent to 'pairwise'),
   // otherwise check argument for errors
@@ -977,7 +974,7 @@ NumericMatrix roll_var(const NumericMatrix& data, const int& width,
   arma::mat arma_scale(n_rows, n_cols);
   
   // check 'width' argument for errors
-  check_width(width, n_rows);
+  check_width(width);
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
@@ -985,7 +982,7 @@ NumericMatrix roll_var(const NumericMatrix& data, const int& width,
   
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
-  check_min_obs(min_obs, width);
+  check_min_obs(min_obs, width, n_rows);
   
   // default 'complete_obs' argument is 'false' (equivalent to 'pairwise'),
   // otherwise check argument for errors
@@ -1239,7 +1236,7 @@ NumericMatrix roll_sd(const NumericMatrix& data, const int& width,
   arma::mat arma_scale(n_rows, n_cols);
   
   // check 'width' argument for errors
-  check_width(width, n_rows);
+  check_width(width);
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
@@ -1247,7 +1244,7 @@ NumericMatrix roll_sd(const NumericMatrix& data, const int& width,
   
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
-  check_min_obs(min_obs, width);
+  check_min_obs(min_obs, width, n_rows);
   
   // default 'complete_obs' argument is 'false' (equivalent to 'pairwise'),
   // otherwise check argument for errors
@@ -1516,7 +1513,7 @@ NumericMatrix roll_scale(const NumericMatrix& data, const int& width,
   arma::mat arma_cov(n_rows, n_cols);
   
   // check 'width' argument for errors
-  check_width(width, n_rows);
+  check_width(width);
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
@@ -1524,7 +1521,7 @@ NumericMatrix roll_scale(const NumericMatrix& data, const int& width,
   
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
-  check_min_obs(min_obs, width);
+  check_min_obs(min_obs, width, n_rows);
   
   // default 'complete_obs' argument is 'false' (equivalent to 'pairwise'),
   // otherwise check argument for errors
@@ -3088,7 +3085,7 @@ NumericVector roll_cov(const NumericMatrix& data, const int& width,
   arma::cube arma_cov(n_cols, n_cols, n_rows);
   
   // check 'width' argument for errors
-  check_width(width, n_rows);
+  check_width(width);
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
@@ -3096,7 +3093,7 @@ NumericVector roll_cov(const NumericMatrix& data, const int& width,
   
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
-  check_min_obs(min_obs, width);
+  check_min_obs(min_obs, width, n_rows);
   
   // default 'complete_obs' argument is 'true' (equivalent to 'complete'),
   // otherwise check argument for errors
@@ -3300,7 +3297,7 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
   std::copy(y.begin(), y.end(), data.begin() + n_rows * (n_cols - 1));
   
   // check 'width' argument for errors
-  check_width_ols(width, n_rows);
+  check_width(width);
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
@@ -3308,7 +3305,7 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
   
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
-  check_min_obs(min_obs, width);
+  check_min_obs(min_obs, width, n_rows);
   
   // default 'complete_obs' argument is 'true' (equivalent to 'complete'),
   // otherwise check argument for errors
@@ -3651,7 +3648,7 @@ List roll_eigen(const NumericMatrix& data, const int& width,
   arma::cube arma_eigen_vectors(n_cols, n_cols, n_rows);
   
   // check 'width' argument for errors
-  check_width(width, n_rows);
+  check_width(width);
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
@@ -3659,7 +3656,7 @@ List roll_eigen(const NumericMatrix& data, const int& width,
   
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
-  check_min_obs(min_obs, width);
+  check_min_obs(min_obs, width, n_rows);
   
   // default 'complete_obs' argument is 'true' (equivalent to 'complete'),
   // otherwise check argument for errors
@@ -3892,7 +3889,7 @@ List roll_pcr_z(const NumericMatrix& x, const NumericVector& y,
   std::copy(y.begin(), y.end(), data.begin() + n_rows * (n_cols - 1));
   
   // check 'width' argument for errors
-  check_width_ols(width, n_rows);
+  check_width(width);
   
   // default 'comps' argument is all components
   check_comps(comps, n_cols - 1);
@@ -3903,7 +3900,7 @@ List roll_pcr_z(const NumericMatrix& x, const NumericVector& y,
   
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
-  check_min_obs(min_obs, width);
+  check_min_obs(min_obs, width, n_rows);
   
   // default 'complete_obs' argument is 'true' (equivalent to 'complete'),
   // otherwise check argument for errors
@@ -4249,7 +4246,7 @@ NumericMatrix roll_vif(const NumericMatrix& data, const int& width,
   check_vif(n_cols);
   
   // check 'width' argument for errors
-  check_width(width, n_rows);
+  check_width(width);
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
@@ -4257,7 +4254,7 @@ NumericMatrix roll_vif(const NumericMatrix& data, const int& width,
   
   // default 'min_obs' argument is 'width' (equivalent to 'na.rm = FALSE'),
   // otherwise check argument for errors
-  check_min_obs(min_obs, width);
+  check_min_obs(min_obs, width, n_rows);
   
   // default 'complete_obs' argument is 'true' (equivalent to 'complete'),
   // otherwise check argument for errors
