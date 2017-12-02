@@ -993,7 +993,7 @@ NumericMatrix roll_var(const NumericMatrix& data, const int& width,
   }
   
   // default 'center' argument subtracts mean of each variable,
-  // otherwise no scaling is done
+  // otherwise zero is used
   if (center) {
     if (parallel_for == "rows") {
       RollMeanRows roll_mean_rows(data, n_rows, n_cols, width, weights,
@@ -1255,7 +1255,7 @@ NumericMatrix roll_sd(const NumericMatrix& data, const int& width,
   }
   
   // default 'center' argument subtracts mean of each variable,
-  // otherwise no scaling is done
+  // otherwise zero is used
   if (center) {
     if (parallel_for == "rows") {
       RollMeanRows roll_mean_rows(data, n_rows, n_cols, width, weights,
@@ -3104,7 +3104,7 @@ NumericVector roll_cov(const NumericMatrix& data, const int& width,
   }
   
   // default 'center' argument subtracts mean of each variable,
-  // otherwise no scaling is done
+  // otherwise zero is used
   if (center) {
     if (parallel_for == "rows") {
       RollMeanRowsCube roll_mean_rows(data, n_rows, n_cols, width, weights,
