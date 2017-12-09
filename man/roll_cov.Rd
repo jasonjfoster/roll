@@ -39,6 +39,9 @@ A cube with each slice the rolling covariance matrix.
 A parallel function for computing rolling covariance matrices of time-series data.
 }
 \details{
+The denominator used gives an unbiased estimate of the covariance, so if the weights are the 
+default then the divisor \code{n - 1} is obtained.
+ 
 The numerical calculations use RcppParallel to parallelize rolling covariance matrices of time-series data. 
 RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
 algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.

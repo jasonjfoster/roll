@@ -39,6 +39,15 @@ An object of the same class and dimension as \code{data} with the rolling scalin
 A parallel function for computing rolling scaling and centering of time-series data.
 }
 \details{
+If \code{center} is \code{TRUE} then centering is done by subtracting the weighted mean from 
+each variable, if \code{FALSE} then zero is used. After centering, if \code{scale} is \code{TRUE} then 
+scaling is done by dividing by the weighted standard deviation for each variable if \code{center} is 
+\code{TRUE}, and the root mean square otherwise. If \code{scale} is \code{FALSE} then no scaling is 
+done.
+
+The denominator used gives an unbiased estimate of the standard deviation, so if the weights are the 
+default then the divisor \code{n - 1} is obtained.
+
 The numerical calculations use RcppParallel to parallelize rolling scaling and centering of time-series data. 
 RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
 algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.

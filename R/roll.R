@@ -161,7 +161,10 @@ roll_mean <- function(data, width, weights = rep(1, width),
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
-##' @details The numerical calculations use RcppParallel to parallelize rolling variances of time-series data. 
+##' @details The denominator used gives an unbiased estimate of the variance, so if the weights are the 
+##' default then the divisor \code{n - 1} is obtained.
+##' 
+##' The numerical calculations use RcppParallel to parallelize rolling variances of time-series data. 
 ##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
 ##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
 ##' 
@@ -213,7 +216,10 @@ roll_var <- function(data, width, weights = rep(1, width), center = TRUE,
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
-##' @details The numerical calculations use RcppParallel to parallelize rolling standard deviations of time-series data. 
+##' @details The denominator used gives an unbiased estimate of the standard deviation, so if the weights are the 
+##' default then the divisor \code{n - 1} is obtained.
+##' 
+##' The numerical calculations use RcppParallel to parallelize rolling standard deviations of time-series data. 
 ##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
 ##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
 ##' 
@@ -267,7 +273,16 @@ roll_sd <- function(data, width, weights = rep(1, width), center = TRUE,
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
-##' @details The numerical calculations use RcppParallel to parallelize rolling scaling and centering of time-series data. 
+##' @details If \code{center} is \code{TRUE} then centering is done by subtracting the weighted mean from 
+##' each variable, if \code{FALSE} then zero is used. After centering, if \code{scale} is \code{TRUE} then 
+##' scaling is done by dividing by the weighted standard deviation for each variable if \code{center} is 
+##' \code{TRUE}, and the root mean square otherwise. If \code{scale} is \code{FALSE} then no scaling is 
+##' done.
+##' 
+##' The denominator used gives an unbiased estimate of the standard deviation, so if the weights are the 
+##' default then the divisor \code{n - 1} is obtained.
+##' 
+##' The numerical calculations use RcppParallel to parallelize rolling scaling and centering of time-series data. 
 ##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
 ##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
 ##' 
@@ -322,7 +337,10 @@ roll_scale <- function(data, width, weights = rep(1, width), center = TRUE, scal
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
-##' @details The numerical calculations use RcppParallel to parallelize rolling covariance matrices of time-series data. 
+##' @details The denominator used gives an unbiased estimate of the covariance, so if the weights are the 
+##' default then the divisor \code{n - 1} is obtained.
+##'  
+##' The numerical calculations use RcppParallel to parallelize rolling covariance matrices of time-series data. 
 ##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
 ##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
 ##' 
@@ -377,7 +395,10 @@ roll_cov <- function(data, width, weights = rep(1, width), center = TRUE, scale 
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param parallel_for character. Executes a "for" loop in which iterations run in parallel by
 ##' \code{rows} or \code{cols}.
-##' @details The numerical calculations use RcppParallel to parallelize rolling correlation matrices of time-series data. 
+##' @details The denominator used gives an unbiased estimate of the covariance, so if the weights are the 
+##' default then the divisor \code{n - 1} is obtained.
+##' 
+##' The numerical calculations use RcppParallel to parallelize rolling correlation matrices of time-series data. 
 ##' RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
 ##' algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
 ##' 
