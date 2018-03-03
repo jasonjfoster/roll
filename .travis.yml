@@ -8,7 +8,8 @@ warnings_are_errors: true
 
 apt_packages:
   - qpdf
-r_github_packages: hadley/devtools
+r_packages:
+  - devtools
   
 before_install:
   - mkdir ~/.R && echo 'CXX11=g++ -std=c++11 -g -O2 -fPIC' > ~/.R/Makevars
