@@ -5,10 +5,8 @@
 \title{Rolling Linear Models}
 \usage{
 roll_lm(x, y, width, weights = rep(1, width), intercept = TRUE,
-  center = FALSE, center_x = center, center_y = center, scale = FALSE,
-  scale_x = scale, scale_y = scale, min_obs = width,
-  complete_obs = TRUE, na_restore = FALSE, parallel_for = c("rows",
-  "cols"))
+  min_obs = width, complete_obs = TRUE, na_restore = FALSE,
+  online = TRUE)
 }
 \arguments{
 \item{x}{matrix or xts object. Rows are observations and columns are the independent variables.}
@@ -21,22 +19,6 @@ roll_lm(x, y, width, weights = rep(1, width), intercept = TRUE,
 
 \item{intercept}{logical. Either \code{TRUE} to include or \code{FALSE} to remove the intercept.}
 
-\item{center}{logical. \code{center = z} is shorthand for \code{center_x = z} and
-\code{center_y = z}, where \code{z} is either \code{TRUE} or \code{FALSE}.}
-
-\item{center_x}{logical. If \code{TRUE} then the weighted mean of each \code{x} variable is used,
-if \code{FALSE} then zero is used.}
-
-\item{center_y}{logical. Analogous to \code{center_x}.}
-
-\item{scale}{logical. \code{scale = z} is shorthand for \code{scale_x = z} and
-\code{scale_y = z}, where \code{z} is either \code{TRUE} or \code{FALSE}.}
-
-\item{scale_x}{logical. If \code{TRUE} then the weighted standard deviation of each \code{x} 
-variable is used, if \code{FALSE} then no scaling is done.}
-
-\item{scale_y}{logical. Analogous to \code{scale_x}.}
-
 \item{min_obs}{integer. Minimum number of observations required to have a value within a window,
 otherwise result is \code{NA}.}
 
@@ -45,8 +27,7 @@ if \code{FALSE} then pairwise is used.}
 
 \item{na_restore}{logical. Should missing values be restored?}
 
-\item{parallel_for}{character. Executes a "for" loop in which iterations run in parallel by
-\code{rows} or \code{cols}.}
+\item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
 A list containing the following components:
@@ -54,6 +35,8 @@ A list containing the following components:
 An object is the same class and dimension (with an added column for the intercept) as \code{x}.}
 \item{r.squared}{A list of objects with the rolling r-squareds for each \code{y}.
 An object is the same class as \code{x}.}
+\item{std.error}{A list of objects with the rolling standard errors for each \code{y}.
+An object is the same class and dimension (with an added column for the intercept) as \code{x}.}
 }
 \description{
 A parallel function for computing rolling linear models of time-series data.
@@ -69,15 +52,15 @@ threads, then set the number of threads in the RcppParallel package with the
 \code{\link[RcppParallel]{setThreadOptions}} function.
 }
 \examples{
-n_vars <- 10
-n_obs <- 1000
+n_vars <- 5
+n_obs <- 100
 x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 y <- matrix(rnorm(n_obs), nrow = n_obs, ncol = 1)
 
-# Rolling regressions
-result <- roll_lm(x, y, 252)
+# rolling regressions
+result <- roll_lm(x, y, 10)
 
-# Rolling regressions with exponential decay
-weights <- 0.9 ^ (251:0)
-result <- roll_lm(x, y, 252, weights)
+# rolling regressions with exponential decay
+weights <- 0.9 ^ (10:1)
+result <- roll_lm(x, y, 10, weights)
 }

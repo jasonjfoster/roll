@@ -4,12 +4,12 @@
 \alias{roll_var}
 \title{Rolling Variances}
 \usage{
-roll_var(data, width, weights = rep(1, width), center = TRUE,
+roll_var(x, width, weights = rep(1, width), center = TRUE,
   min_obs = width, complete_obs = FALSE, na_restore = FALSE,
-  parallel_for = c("rows", "cols"))
+  online = TRUE)
 }
 \arguments{
-\item{data}{matrix or xts object. Rows are observations and columns are variables.}
+\item{x}{matrix or xts object. Rows are observations and columns are variables.}
 
 \item{width}{integer. Window size.}
 
@@ -26,11 +26,10 @@ if \code{FALSE} then each value is used.}
 
 \item{na_restore}{logical. Should missing values be restored?}
 
-\item{parallel_for}{character. Executes a "for" loop in which iterations run in parallel by
-\code{rows} or \code{cols}.}
+\item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
-An object of the same class and dimension as \code{data} with the rolling variances.
+An object of the same class and dimension as \code{x} with the rolling variances.
 }
 \description{
 A parallel function for computing rolling variances of time-series data.
@@ -49,14 +48,14 @@ threads, then set the number of threads in the RcppParallel package with the
 \code{\link[RcppParallel]{setThreadOptions}} function.
 }
 \examples{
-n_vars <- 10
-n_obs <- 1000
-data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+n_vars <- 5
+n_obs <- 100
+x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 
-# Rolling variances
-result <- roll_var(data, 252)
+# rolling variances
+result <- roll_var(x, 10)
 
-# Rolling variances with exponential decay
-weights <- 0.9 ^ (251:0)
-result <- roll_var(data, 252, weights)
+# rolling variances with exponential decay
+weights <- 0.9 ^ (10:1)
+result <- roll_var(x, 10, weights)
 }

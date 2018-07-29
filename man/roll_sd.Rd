@@ -4,12 +4,12 @@
 \alias{roll_sd}
 \title{Rolling Standard Deviations}
 \usage{
-roll_sd(data, width, weights = rep(1, width), center = TRUE,
+roll_sd(x, width, weights = rep(1, width), center = TRUE,
   min_obs = width, complete_obs = FALSE, na_restore = FALSE,
-  parallel_for = c("rows", "cols"))
+  online = TRUE)
 }
 \arguments{
-\item{data}{matrix or xts object. Rows are observations and columns are variables.}
+\item{x}{matrix or xts object. Rows are observations and columns are variables.}
 
 \item{width}{integer. Window size.}
 
@@ -26,11 +26,10 @@ if \code{FALSE} then each value is used.}
 
 \item{na_restore}{logical. Should missing values be restored?}
 
-\item{parallel_for}{character. Executes a "for" loop in which iterations run in parallel by
-\code{rows} or \code{cols}.}
+\item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
-An object of the same class and dimension as \code{data} with the rolling standard deviations.
+An object of the same class and dimension as \code{x} with the rolling standard deviations.
 }
 \description{
 A parallel function for computing rolling standard deviations of time-series data.
@@ -49,14 +48,14 @@ threads, then set the number of threads in the RcppParallel package with the
 \code{\link[RcppParallel]{setThreadOptions}} function.
 }
 \examples{
-n_vars <- 10
-n_obs <- 1000
-data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+n_vars <- 5
+n_obs <- 100
+x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 
-# Rolling standard deviations
-result <- roll_sd(data, 252)
+# rolling standard deviations
+result <- roll_sd(x, 10)
 
-# Rolling standard deviations with exponential decay
-weights <- 0.9 ^ (251:0)
-result <- roll_sd(data, 252, weights)
+# rolling standard deviations with exponential decay
+weights <- 0.9 ^ (10:1)
+result <- roll_sd(x, 10, weights)
 }

@@ -1,8 +1,8 @@
 Package: roll
 Type: Package
 Title: Rolling Statistics
-Version: 1.0.7
-Date: 2017-05-01
+Version: 1.1.0
+Date: 2018-09-01
 Author: Jason Foster
 Maintainer: Jason Foster <jason.j.foster@gmail.com>
 Description: Parallel functions for computing rolling statistics of time-series
@@ -15,4 +15,5 @@ Imports:
     RcppParallel
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
 SystemRequirements: GNU make, C++11
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
+Encoding: UTF-8

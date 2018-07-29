@@ -4,12 +4,14 @@
 \alias{roll_cor}
 \title{Rolling Correlation Matrices}
 \usage{
-roll_cor(data, width, weights = rep(1, width), center = TRUE,
+roll_cor(x, y = NULL, width, weights = rep(1, width), center = TRUE,
   scale = TRUE, min_obs = width, complete_obs = TRUE,
-  na_restore = FALSE, parallel_for = c("rows", "cols"))
+  na_restore = FALSE, online = TRUE)
 }
 \arguments{
-\item{data}{matrix or xts object. Rows are observations and columns are variables.}
+\item{x}{matrix or xts object. Rows are observations and columns are variables.}
+
+\item{y}{matrix or xts object. Rows are observations and columns are variables.}
 
 \item{width}{integer. Window size.}
 
@@ -29,8 +31,7 @@ if \code{FALSE} then pairwise is used.}
 
 \item{na_restore}{logical. Should missing values be restored?}
 
-\item{parallel_for}{character. Executes a "for" loop in which iterations run in parallel by
-\code{rows} or \code{cols}.}
+\item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
 A cube with each slice the rolling correlation matrix.
@@ -52,14 +53,14 @@ threads, then set the number of threads in the RcppParallel package with the
 \code{\link[RcppParallel]{setThreadOptions}} function.
 }
 \examples{
-n_vars <- 10
-n_obs <- 1000
-data <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+n_vars <- 5
+n_obs <- 100
+x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 
-# Rolling correlation matrices
-result <- roll_cor(data, 252)
+# rolling correlation matrices
+result <- roll_cor(x, width = 10)
 
-# Rolling correlation matrices with exponential decay
-weights <- 0.9 ^ (251:0)
-result <- roll_cor(data, 252, weights)
+# rolling correlation matrices with exponential decay
+weights <- 0.9 ^ (10:1)
+result <- roll_cor(x, width = 10, weights = weights)
 }
