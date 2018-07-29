@@ -1,5 +1,3 @@
-// Google C++ Style Guide: https://google.github.io/styleguide/cppguide.html
-
 #define ARMA_DONT_PRINT_ERRORS
 
 // [[Rcpp::depends(RcppArmadillo)]]
@@ -186,7 +184,7 @@ struct RollSumRows : public Worker {
         
         int count = 0;
         int n_obs = 0;
-        double sum_data = 0;
+        long double sum_data = 0;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
@@ -261,7 +259,7 @@ struct RollSumCols : public Worker {
         
         int count = 0;
         int n_obs = 0;
-        double sum_data = 0;
+        long double sum_data = 0;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
@@ -392,7 +390,7 @@ struct RollProdRows : public Worker {
         
         int count = 0;
         int n_obs = 0;
-        double prod_data = 1;
+        long double prod_data = 1;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
@@ -467,7 +465,7 @@ struct RollProdCols : public Worker {
         
         int count = 0;
         int n_obs = 0;
-        double prod_data = 1;
+        long double prod_data = 1;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
@@ -598,8 +596,8 @@ struct RollMeanRows : public Worker {
         
         int count = 0;
         int n_obs = 0;
-        double sum_data = 0;
-        double sum_weights = 0;
+        long double sum_data = 0;
+        long double sum_weights = 0;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
@@ -675,8 +673,8 @@ struct RollMeanCols : public Worker {
         
         int count = 0;
         int n_obs = 0;
-        double sum_data = 0;
-        double sum_weights = 0;
+        long double sum_data = 0;
+        long double sum_weights = 0;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
@@ -812,9 +810,9 @@ struct RollVarRows : public Worker {
         
         int count = 0;
         int n_obs = 0;
-        double sum_data = 0;
-        double sum_weights = 0;
-        double sum_weights_sq = 0;
+        long double sum_data = 0;
+        long double sum_weights = 0;
+        long double sum_weights_sq = 0;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
@@ -904,9 +902,9 @@ struct RollVarCols : public Worker {
         
         int count = 0;
         int n_obs = 0;
-        double sum_data = 0;
-        double sum_weights = 0;
-        double sum_weights_sq = 0;
+        long double sum_data = 0;
+        long double sum_weights = 0;
+        long double sum_weights_sq = 0;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
@@ -1074,9 +1072,9 @@ struct RollSdRows : public Worker {
         
         int count = 0;
         int n_obs = 0;
-        double sum_data = 0;
-        double sum_weights = 0;
-        double sum_weights_sq = 0;
+        long double sum_data = 0;
+        long double sum_weights = 0;
+        long double sum_weights_sq = 0;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
@@ -1166,9 +1164,9 @@ struct RollSdCols : public Worker {
         
         int count = 0;
         int n_obs = 0;
-        double sum_data = 0;
-        double sum_weights = 0;
-        double sum_weights_sq = 0;
+        long double sum_data = 0;
+        long double sum_weights = 0;
+        long double sum_weights_sq = 0;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
@@ -1341,7 +1339,7 @@ struct RollScaleCenterRows : public Worker {
         int count = 0;
         int n_obs = 0;
         bool any_data = false;
-        double sum_data = 0;
+        long double sum_data = 0;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
@@ -1440,7 +1438,7 @@ struct RollScaleCenterCols : public Worker {
         int count = 0;
         int n_obs = 0;
         bool any_data = false;
-        double sum_data = 0;
+        long double sum_data = 0;
         
         // don't compute if missing value and 'na_restore' argument is true
         if ((!na_restore) || (na_restore && !std::isnan(data(i, j)))) {
@@ -1629,9 +1627,9 @@ struct RollMeanRowsCube : public Worker {
           
           int count = 0;
           int n_obs = 0;
-          double sum_j = 0;
-          double sum_k = 0;
-          double sum_weights = 0;
+          long double sum_j = 0;
+          long double sum_k = 0;
+          long double sum_weights = 0;
           
           // don't compute if missing value and 'na_restore' argument is true
           if ((!na_restore) ||
@@ -1722,9 +1720,9 @@ struct RollMeanColsCube : public Worker {
           
           int count = 0;
           int n_obs = 0;
-          double sum_j = 0;
-          double sum_k = 0;
-          double sum_weights = 0;
+          long double sum_j = 0;
+          long double sum_k = 0;
+          long double sum_weights = 0;
           
           // don't compute if missing value and 'na_restore' argument is true
           if ((!na_restore) ||
@@ -1823,10 +1821,10 @@ struct RollVarRowsCube : public Worker {
           
           int count = 0;
           int n_obs = 0;
-          double sum_j = 0;
-          double sum_k = 0;
-          double sum_weights = 0;
-          double sum_weights_sq = 0;
+          long double sum_j = 0;
+          long double sum_k = 0;
+          long double sum_weights = 0;
+          long double sum_weights_sq = 0;
           
           // don't compute if missing value and 'na_restore' argument is true
           if ((!na_restore) ||
@@ -1962,10 +1960,10 @@ struct RollVarColsCube : public Worker {
           
           int count = 0;
           int n_obs = 0;
-          double sum_j = 0;
-          double sum_k = 0;
-          double sum_weights = 0;
-          double sum_weights_sq = 0;
+          long double sum_j = 0;
+          long double sum_k = 0;
+          long double sum_weights = 0;
+          long double sum_weights_sq = 0;
           
           // don't compute if missing value and 'na_restore' argument is true
           if ((!na_restore) ||
@@ -2109,9 +2107,9 @@ struct RollInterceptRowsCube : public Worker {
           
           int count = 0;
           int n_obs = 0;
-          double sum_j = 0;
-          double sum_k = 0;
-          double sum_weights = 0;
+          long double sum_j = 0;
+          long double sum_k = 0;
+          long double sum_weights = 0;
           
           // don't compute if missing value and 'na_restore' argument is true
           if ((!na_restore) ||
@@ -2316,9 +2314,9 @@ struct RollInterceptColsCube : public Worker {
           
           int count = 0;
           int n_obs = 0;
-          double sum_j = 0;
-          double sum_k = 0;
-          double sum_weights = 0;
+          long double sum_j = 0;
+          long double sum_k = 0;
+          long double sum_weights = 0;
           
           // don't compute if missing value and 'na_restore' argument is true
           if ((!na_restore) ||
@@ -2528,11 +2526,11 @@ struct RollCovRows : public Worker {
           
           int count = 0;
           int n_obs = 0;
-          double sum_x = 0;
-          double sum_y = 0;
-          double sum_data = 0;
-          double sum_weights = 0;
-          double sum_weights_sq = 0;
+          long double sum_x = 0;
+          long double sum_y = 0;
+          long double sum_data = 0;
+          long double sum_weights = 0;
+          long double sum_weights_sq = 0;
           
           // don't compute if missing value and 'na_restore' argument is true
           if ((!na_restore) ||
@@ -2822,11 +2820,11 @@ struct RollCovCols : public Worker {
           
           int count = 0;
           int n_obs = 0;
-          double sum_x = 0;
-          double sum_y = 0;
-          double sum_data = 0;
-          double sum_weights = 0;
-          double sum_weights_sq = 0;
+          long double sum_x = 0;
+          long double sum_y = 0;
+          long double sum_data = 0;
+          long double sum_weights = 0;
+          long double sum_weights_sq = 0;
           
           // don't compute if missing value and 'na_restore' argument is true
           if ((!na_restore) ||
@@ -4192,8 +4190,8 @@ struct RollLmVifSlices : public Worker {
             arma::mat trans_coef = trans(coef);
             
             // r-squared
-            double rsq = as_scalar((trans_coef * A * coef) /
-                                   x.submat(n_cols - 1, n_cols - 1, n_cols - 1, n_cols - 1));
+            long double rsq = as_scalar((trans_coef * A * coef) /
+                                        x.submat(n_cols - 1, n_cols - 1, n_cols - 1, n_cols - 1));
             
             arma_vif(i, j) = 1 / (1 - rsq);
             
