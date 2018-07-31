@@ -748,7 +748,7 @@ struct RollVarOnline : public Worker {
           
           sum_w = lambda * sum_w + w_new;
           sum_x = lambda * sum_x + w_new * x_new;
-          sumsq_w = pow(lambda, 2.0) * sumsq_w + pow(w_new, 2.0);
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
           
           if (center && (n_obs > 0)) {
             
@@ -771,7 +771,7 @@ struct RollVarOnline : public Worker {
           } else if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) &&
             (n_obs == 1) && !center) {
             
-            sumsq_x = w_new * pow(x_new, 2.0);
+            sumsq_x = w_new * pow(x_new, (long double)2.0);
             
           }
           
@@ -808,7 +808,8 @@ struct RollVarOnline : public Worker {
           
           sum_w = lambda * sum_w + w_new - lambda * w_old;
           sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-          sumsq_w = pow(lambda, 2.0) * sumsq_w + pow(w_new, 2.0) - pow(lambda * w_old, 2.0);
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+            pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
           
           if (center && (n_obs > 0)) {
             
@@ -961,7 +962,7 @@ struct RollVarParallel : public Worker {
             // compute the rolling sum of squares with 'center' argument
             if (center) {
               sumsq_x += arma_weights[n - count - 1] *
-                pow(x(i - count, j) - mean_x, 2.0);
+                pow(x(i - count, j) - mean_x, (long double)2.0);
             } else if (!center) {
               sumsq_x += arma_weights[n - count - 1] *
                 pow(x(i - count, j), 2.0);
@@ -1071,7 +1072,7 @@ struct RollSdOnline : public Worker {
           
           sum_w = lambda * sum_w + w_new;
           sum_x = lambda * sum_x + w_new * x_new;
-          sumsq_w = pow(lambda, 2.0) * sumsq_w + pow(w_new, 2.0);
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
           
           if (center && (n_obs > 0)) {
             
@@ -1094,7 +1095,7 @@ struct RollSdOnline : public Worker {
           } else if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) &&
             (n_obs == 1) && !center) {
             
-            sumsq_x = w_new * pow(x_new, 2.0);
+            sumsq_x = w_new * pow(x_new, (long double)2.0);
             
           }
           
@@ -1131,7 +1132,8 @@ struct RollSdOnline : public Worker {
           
           sum_w = lambda * sum_w + w_new - lambda * w_old;
           sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-          sumsq_w = pow(lambda, 2.0) * sumsq_w + pow(w_new, 2.0) - pow(lambda * w_old, 2.0);
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+            pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
           
           if (center && (n_obs > 0)) {
             
@@ -1284,7 +1286,7 @@ struct RollSdParallel : public Worker {
             // compute the rolling sum of squares with 'center' argument
             if (center) {
               sumsq_x += arma_weights[n - count - 1] *
-                pow(x(i - count, j) - mean_x, 2.0);
+                pow(x(i - count, j) - mean_x, (long double)2.0);
             } else if (!center) {
               sumsq_x += arma_weights[n - count - 1] *
                 pow(x(i - count, j), 2.0);
@@ -1398,7 +1400,7 @@ struct RollScaleOnline : public Worker {
           
           sum_w = lambda * sum_w + w_new;
           sum_x = lambda * sum_x + w_new * x_new;
-          sumsq_w = pow(lambda, 2.0) * sumsq_w + pow(w_new, 2.0);
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
           
           if (center && (n_obs > 0)) {
             
@@ -1423,7 +1425,7 @@ struct RollScaleOnline : public Worker {
             } else if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) &&
               (n_obs == 1) && !center) {
               
-              sumsq_x = w_new * pow(x_new, 2.0);
+              sumsq_x = w_new * pow(x_new, (long double)2.0);
               
             }
             
@@ -1464,7 +1466,8 @@ struct RollScaleOnline : public Worker {
           
           sum_w = lambda * sum_w + w_new - lambda * w_old;
           sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-          sumsq_w = pow(lambda, 2.0) * sumsq_w + pow(w_new, 2.0) - pow(lambda * w_old, 2.0);
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+            pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
           
           if (center && (n_obs > 0)) {
             
@@ -1640,7 +1643,7 @@ struct RollScaleParallel : public Worker {
               // compute the rolling sum of squares with 'center' argument
               if (center) {
                 sumsq_x += arma_weights[n - count - 1] *
-                  pow(x(i - count, j) - mean_x, 2.0);
+                  pow(x(i - count, j) - mean_x, (long double)2.0);
               } else if (!center) {
                 sumsq_x += arma_weights[n - count - 1] *
                   pow(x(i - count, j), 2.0);
@@ -1807,7 +1810,7 @@ struct RollCovOnlineXX : public Worker {
             sum_w = lambda * sum_w + w_new;
             sum_x = lambda * sum_x + w_new * x_new;
             sum_y = lambda * sum_y + w_new * y_new;
-            sumsq_w = pow(lambda, 2.0) * sumsq_w + pow(w_new, 2.0);
+            sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
             
             if (center && (n_obs > 0)) {
               
@@ -1837,8 +1840,8 @@ struct RollCovOnlineXX : public Worker {
               } else if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) && !std::isnan(x(i, k)) &&
                 (n_obs == 1) && !center) {
                 
-                sumsq_x = w_new * pow(x_new, 2.0);
-                sumsq_y = w_new * pow(y_new, 2.0);
+                sumsq_x = w_new * pow(x_new, (long double)2.0);
+                sumsq_y = w_new * pow(y_new, (long double)2.0);
                 
               }
               
@@ -1897,7 +1900,8 @@ struct RollCovOnlineXX : public Worker {
             sum_w = lambda * sum_w + w_new - lambda * w_old;
             sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
             sum_y = lambda * sum_y + w_new * y_new - lambda * w_old * y_old;
-            sumsq_w = pow(lambda, 2.0) * sumsq_w + pow(w_new, 2.0) - pow(lambda * w_old, 2.0);
+            sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+              pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
             
             if (center && (n_obs > 0)) {
               
@@ -2117,7 +2121,7 @@ struct RollCovOnlineXY : public Worker {
             sum_w = lambda * sum_w + w_new;
             sum_x = lambda * sum_x + w_new * x_new;
             sum_y = lambda * sum_y + w_new * y_new;
-            sumsq_w = pow(lambda, 2.0) * sumsq_w + pow(w_new, 2.0);
+            sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
             
             if (center && (n_obs > 0)) {
               
@@ -2147,8 +2151,8 @@ struct RollCovOnlineXY : public Worker {
               } else if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) && !std::isnan(y(i, k)) &&
                 (n_obs == 1) && !center) {
                 
-                sumsq_x = w_new * pow(x_new, 2.0);
-                sumsq_y = w_new * pow(y_new, 2.0);
+                sumsq_x = w_new * pow(x_new, (long double)2.0);
+                sumsq_y = w_new * pow(y_new, (long double)2.0);
                 
               }
               
@@ -2207,7 +2211,8 @@ struct RollCovOnlineXY : public Worker {
             sum_w = lambda * sum_w + w_new - lambda * w_old;
             sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
             sum_y = lambda * sum_y + w_new * y_new - lambda * w_old * y_old;
-            sumsq_w = pow(lambda, 2.0) * sumsq_w + pow(w_new, 2.0) - pow(lambda * w_old, 2.0);
+            sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+              pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
             
             if (center && (n_obs > 0)) {
               
@@ -2369,7 +2374,8 @@ struct RollCovParallelXX : public Worker {
       int n_unique = n_cols_x * (n_cols_x + 1) / 2;
       int i = z / n_unique;
       int z_unique = z % n_unique;
-      int k = n_cols_x - floor((sqrt(4 * n_cols_x * (n_cols_x + 1) - (7 + 8 * z_unique)) - 1) / 2) - 1;
+      int k = n_cols_x -
+        floor((sqrt((long double)(4 * n_cols_x * (n_cols_x + 1) - (7 + 8 * z_unique))) - 1) / 2) - 1;
       int j = z_unique - n_cols_x * k + k * (k + 1) / 2;
       
       long double mean_x = 0;
@@ -2433,9 +2439,9 @@ struct RollCovParallelXX : public Worker {
                   if (center) {
                     
                     sumsq_x += arma_weights[n - count - 1] *
-                      pow(x(i - count, j) - mean_x, 2.0);
+                      pow(x(i - count, j) - mean_x, (long double)2.0);
                     sumsq_y += arma_weights[n - count - 1] *
-                      pow(x(i - count, k) - mean_y, 2.0);
+                      pow(x(i - count, k) - mean_y, (long double)2.0);
                     
                   } else if (!center) {
                     
@@ -2637,9 +2643,9 @@ struct RollCovParallelXY : public Worker {
                   if (center) {
                     
                     sumsq_x += arma_weights[n - count - 1] *
-                      pow(x(i - count, j) - mean_x, 2.0);
+                      pow(x(i - count, j) - mean_x, (long double)2.0);
                     sumsq_y += arma_weights[n - count - 1] *
-                      pow(y(i - count, k) - mean_y, 2.0);
+                      pow(y(i - count, k) - mean_y, (long double)2.0);
                     
                   } else if (!center) {
                     
@@ -2827,7 +2833,7 @@ struct RollCovOnlineLm : public Worker {
             sum_w = lambda * sum_w + w_new;
             sum_x = lambda * sum_x + w_new * x_new;
             sum_y = lambda * sum_y + w_new * y_new;
-            sumsq_w = pow(lambda, 2.0) * sumsq_w + pow(w_new, 2.0);
+            sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
             
             if (intercept && (n_obs > 0)) {
               
@@ -2892,7 +2898,8 @@ struct RollCovOnlineLm : public Worker {
             sum_w = lambda * sum_w + w_new - lambda * w_old;
             sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
             sum_y = lambda * sum_y + w_new * y_new - lambda * w_old * y_old;
-            sumsq_w = pow(lambda, 2.0) * sumsq_w + pow(w_new, 2.0) - pow(lambda * w_old, 2.0);
+            sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+              pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
             
             if (intercept && (n_obs > 0)) {
               
@@ -3021,7 +3028,8 @@ struct RollCovParallelLm : public Worker {
       int n_unique = n_cols_x * (n_cols_x + 1) / 2;
       int i = z / n_unique;
       int z_unique = z % n_unique;
-      int k = n_cols_x - floor((sqrt(4 * n_cols_x * (n_cols_x + 1) - (7 + 8 * z_unique)) - 1) / 2) - 1;
+      int k = n_cols_x -
+        floor((sqrt((long double)(4 * n_cols_x * (n_cols_x + 1) - (7 + 8 * z_unique))) - 1) / 2) - 1;
       int j = z_unique - n_cols_x * k + k * (k + 1) / 2;
       
       long double mean_x = 0;

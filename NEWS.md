@@ -6,9 +6,9 @@
 
 * `roll_lm` function now returns standard errors ([#7](https://github.com/jjf234/roll/issues/7))
 
-* Added `y` argument to `roll_cov` and `roll_cor` functions ([#2](https://github.com/jjf234/roll/issues/2))
-
 * Simplified checks for `width` and `min_obs` arguments ([#3](https://github.com/jjf234/roll/issues/3))
+
+* Added `y` argument to `roll_cov` and `roll_cor` functions ([#2](https://github.com/jjf234/roll/issues/2))
 
 * Updated `src/Makevars` and `src/Makevars.win` files to what the `RcppArmadillo` skeleton default now uses to more fully utilize OpenMP
 

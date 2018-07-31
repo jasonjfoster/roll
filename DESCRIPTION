@@ -5,8 +5,7 @@ Version: 1.1.0
 Date: 2018-09-01
 Author: Jason Foster
 Maintainer: Jason Foster <jason.j.foster@gmail.com>
-Description: Parallel functions for computing rolling statistics of time-series
-    data.
+Description: Fast and efficient computation of rolling statistics for time-series data.
 License: GPL (>= 2)
 URL: https://github.com/jjf234/roll
 BugReports: https://github.com/jjf234/roll/issues
