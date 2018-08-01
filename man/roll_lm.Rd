@@ -39,7 +39,7 @@ An object is the same class as \code{x}.}
 An object is the same class and dimension (with an added column for the intercept) as \code{x}.}
 }
 \description{
-A parallel function for computing rolling linear models of time-series data.
+A function for computing rolling linear models of time-series data.
 }
 \examples{
 n_vars <- 3

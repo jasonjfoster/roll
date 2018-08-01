@@ -32,7 +32,7 @@ if \code{FALSE} then each value is used.}
 An object of the same class and dimension as \code{x} with the rolling standard deviations.
 }
 \description{
-A parallel function for computing rolling standard deviations of time-series data.
+A function for computing rolling standard deviations of time-series data.
 }
 \details{
 The denominator used gives an unbiased estimate of the standard deviation, so if the weights are the 

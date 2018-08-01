@@ -1,6 +1,6 @@
 ##' Rolling Sums
 ##'
-##' A parallel function for computing rolling sums of time-series data.
+##' A function for computing rolling sums of time-series data.
 ##'
 ##' @param x matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -40,7 +40,7 @@ roll_sum <- function(x, width, weights = rep(1, width),
 
 ##' Rolling Products
 ##'
-##' A parallel function for computing rolling products of time-series data.
+##' A function for computing rolling products of time-series data.
 ##'
 ##' @param x matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -80,7 +80,7 @@ roll_prod <- function(x, width, weights = rep(1, width),
 
 ##' Rolling Means
 ##'
-##' A parallel function for computing rolling means of time-series data.
+##' A function for computing rolling means of time-series data.
 ##'
 ##' @param x matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -120,7 +120,7 @@ roll_mean <- function(x, width, weights = rep(1, width),
 
 ##' Rolling Variances
 ##'
-##' A parallel function for computing rolling variances of time-series data.
+##' A function for computing rolling variances of time-series data.
 ##'
 ##' @param x matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -165,7 +165,7 @@ roll_var <- function(x, width, weights = rep(1, width), center = TRUE,
 
 ##' Rolling Standard Deviations
 ##'
-##' A parallel function for computing rolling standard deviations of time-series data.
+##' A function for computing rolling standard deviations of time-series data.
 ##'
 ##' @param x matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -210,7 +210,7 @@ roll_sd <- function(x, width, weights = rep(1, width), center = TRUE,
 
 ##' Rolling Scaling and Centering
 ##'
-##' A parallel function for computing rolling scaling and centering of time-series data.
+##' A function for computing rolling scaling and centering of time-series data.
 ##'
 ##' @param x matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -264,7 +264,7 @@ roll_scale <- function(x, width, weights = rep(1, width), center = TRUE, scale =
 
 ##' Rolling Covariance Matrices
 ##'
-##' A parallel function for computing rolling covariance matrices of time-series data.
+##' A function for computing rolling covariance matrices of time-series data.
 ##' 
 ##' @param x matrix or xts object. Rows are observations and columns are variables.
 ##' @param y matrix or xts object. Rows are observations and columns are variables.
@@ -313,7 +313,7 @@ roll_cov <- function(x, y = NULL, width, weights = rep(1, width), center = TRUE,
 
 ##' Rolling Correlation Matrices
 ##'
-##' A parallel function for computing rolling correlation matrices of time-series data.
+##' A function for computing rolling correlation matrices of time-series data.
 ##' 
 ##' @param x matrix or xts object. Rows are observations and columns are variables.
 ##' @param y matrix or xts object. Rows are observations and columns are variables.
@@ -362,7 +362,7 @@ roll_cor <- function(x, y = NULL, width, weights = rep(1, width), center = TRUE,
 
 ##' Rolling Linear Models
 ##'
-##' A parallel function for computing rolling linear models of time-series data.
+##' A function for computing rolling linear models of time-series data.
 ##' 
 ##' @param x matrix or xts object. Rows are observations and columns are the independent variables.
 ##' @param y matrix or xts object. Rows are observations and columns are the dependent variables.

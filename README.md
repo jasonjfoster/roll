@@ -1,6 +1,6 @@
 ## roll ![](https://api.travis-ci.org/jjf234/roll.png?branch=master) ![](http://www.r-pkg.org/badges/version/roll)
 
-roll is a package for R that provides parallel functions for computing rolling statistics of time-series data.
+roll is a package for R that provides fast and efficient computation of rolling statistics for time-series data.
 
 ### Installation
 
