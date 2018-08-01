@@ -30,25 +30,15 @@ An object of the same class and dimension as \code{x} with the rolling products.
 \description{
 A parallel function for computing rolling products of time-series data.
 }
-\details{
-The numerical calculations use RcppParallel to parallelize rolling products of time-series data. 
-RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
-algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
-
-By default, all the available cores on a machine are used for parallel algorithms. If users are 
-either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
-threads, then set the number of threads in the RcppParallel package with the 
-\code{\link[RcppParallel]{setThreadOptions}} function.
-}
 \examples{
-n_vars <- 5
-n_obs <- 100
+n_vars <- 3
+n_obs <- 15
 x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 
 # rolling products
-result <- roll_prod(x, 10)
+result <- roll_prod(x, 5)
 
 # rolling products with exponential decay
-weights <- 0.9 ^ (10:1)
-result <- roll_prod(x, 10, weights)
+weights <- 0.9 ^ (5:1)
+result <- roll_prod(x, 5, weights)
 }

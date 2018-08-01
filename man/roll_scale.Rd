@@ -46,25 +46,16 @@ done.
 
 The denominator used gives an unbiased estimate of the standard deviation, so if the weights are the 
 default then the divisor \code{n - 1} is obtained.
-
-The numerical calculations use RcppParallel to parallelize rolling scaling and centering of time-series data. 
-RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
-algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries.
-
-By default, all the available cores on a machine are used for parallel algorithms. If users are 
-either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
-threads, then set the number of threads in the RcppParallel package with the 
-\code{\link[RcppParallel]{setThreadOptions}} function.
 }
 \examples{
-n_vars <- 5
-n_obs <- 100
+n_vars <- 3
+n_obs <- 15
 x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 
 # rolling z-scores
-result <- roll_scale(x, 10)
+result <- roll_scale(x, 5)
 
 # rolling z-scores with exponential decay
-weights <- 0.9 ^ (10:1)
-result <- roll_scale(x, 10, weights)
+weights <- 0.9 ^ (5:1)
+result <- roll_scale(x, 5, weights)
 }
