@@ -69,7 +69,8 @@ void check_lm(const int& n_rows_x, const int& n_rows_y) {
   
 }
 
-List x_dimnames_lm(const List& input, const int& n_cols_x, const bool& intercept) {
+List x_dimnames_lm(const List& input, const int& n_cols_x,
+                   const bool& intercept) {
   
   if (intercept && (input.size() > 1)) {
     
@@ -167,7 +168,7 @@ arma::uvec any_na_x(const NumericMatrix& x) {
 
 arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
   
-  int n_rows_xy = x.nrow(); // check that x and y are the same!
+  int n_rows_xy = x.nrow();
   int n_cols_x = x.ncol();
   int n_cols_y = y.ncol();
   arma::uvec result(n_rows_xy);
@@ -764,8 +765,8 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
   if (status && online) {
     
     RollCovOnlineLm roll_cov_online(data, n, n_rows_xy, n_cols_x, width,
-                                    weights, intercept,
-                                    min_obs, arma_any_na, na_restore,
+                                    weights, intercept, min_obs,
+                                    arma_any_na, na_restore,
                                     arma_n_obs, arma_sum_w, arma_mean,
                                     arma_cov);
     parallelFor(0, n_cols_x, roll_cov_online);
@@ -773,8 +774,8 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
   } else {
     
     RollCovParallelLm roll_cov_parallel(data, n, n_rows_xy, n_cols_x, width,
-                                        weights, intercept,
-                                        min_obs, arma_any_na, na_restore,
+                                        weights, intercept, min_obs,
+                                        arma_any_na, na_restore,
                                         arma_n_obs, arma_sum_w, arma_mean,
                                         arma_cov);
     parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_parallel);
@@ -839,9 +840,8 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
   // otherwise a list of lists
   if (n_cols_y == 1) {
     
-    result_z = roll_lm_z(x, y(_, 0),
-                         width, weights,
-                         intercept, min_obs,
+    result_z = roll_lm_z(x, y(_, 0), width,
+                         weights, intercept, min_obs,
                          complete_obs, na_restore,
                          online);
     
@@ -896,9 +896,8 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
     
     for (int z = 0; z < n_cols_y; z++) {
       
-      result_z = roll_lm_z(x, y(_, z),
-                           width, weights,
-                           intercept, min_obs,
+      result_z = roll_lm_z(x, y(_, z), width,
+                           weights, intercept, min_obs,
                            complete_obs, na_restore,
                            online);
       

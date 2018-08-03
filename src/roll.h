@@ -304,7 +304,7 @@ struct RollSumOnline : public Worker {
   
 };
 
-// 'Worker' function for computing rolling sums
+// 'Worker' function for computing rolling sums using a standard algorithm
 struct RollSumParallel : public Worker {
   
   const RMatrix<double> x;      // source
@@ -382,7 +382,7 @@ struct RollSumParallel : public Worker {
   
 };
 
-// 'Worker' function for computing rolling products
+// 'Worker' function for computing rolling products using a standard algorithm
 struct RollProdParallel : public Worker {
   
   const RMatrix<double> x;      // source
@@ -591,7 +591,7 @@ struct RollMeanOnline : public Worker {
   
 };
 
-// 'Worker' function for computing rolling means
+// 'Worker' function for computing rolling means using a standard algorithm
 struct RollMeanParallel : public Worker {
   
   const RMatrix<double> x;      // source
@@ -871,7 +871,7 @@ struct RollVarOnline : public Worker {
   
 };
 
-// 'Worker' function for computing rolling variances
+// 'Worker' function for computing rolling variances using a standard algorithm
 struct RollVarParallel : public Worker {
   
   const RMatrix<double> x;      // source
@@ -1195,7 +1195,7 @@ struct RollSdOnline : public Worker {
   
 };
 
-// 'Worker' function for computing rolling standard deviations
+// 'Worker' function for computing rolling standard deviations using a standard algorithm
 struct RollSdParallel : public Worker {
   
   const RMatrix<double> x;      // source
@@ -1548,7 +1548,7 @@ struct RollScaleOnline : public Worker {
   
 };
 
-// 'Worker' function for computing rolling centering and scaling
+// 'Worker' function for computing rolling centering and scaling using a standard algorithm
 struct RollScaleParallel : public Worker {
   
   const RMatrix<double> x;      // source
@@ -1825,7 +1825,8 @@ struct RollCovOnlineXX : public Worker {
             if (scale) {
               
               // compute the sum of squares
-              if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) && !std::isnan(x(i, k)) && (n_obs > 1)) {
+              if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) && !std::isnan(x(i, k)) &&
+                  (n_obs > 1)) {
                 
                 sumsq_x = lambda * sumsq_x +
                   w_new * (x_new - mean_x) * (x_new - mean_prev_x);
@@ -1848,7 +1849,8 @@ struct RollCovOnlineXX : public Worker {
             }
             
             // compute the sum of squares
-            if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) && !std::isnan(x(i, k)) && (n_obs > 1)) {
+            if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) && !std::isnan(x(i, k)) &&
+                (n_obs > 1)) {
               
               sumsq_xy = lambda * sumsq_xy +
                 w_new * (x_new - mean_x) * (y_new - mean_prev_y);
@@ -2136,7 +2138,8 @@ struct RollCovOnlineXY : public Worker {
             if (scale) {
               
               // compute the sum of squares
-              if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) && !std::isnan(y(i, k)) && (n_obs > 1)) {
+              if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) && !std::isnan(y(i, k)) &&
+                  (n_obs > 1)) {
                 
                 sumsq_x = lambda * sumsq_x +
                   w_new * (x_new - mean_x) * (x_new - mean_prev_x);
@@ -2159,7 +2162,8 @@ struct RollCovOnlineXY : public Worker {
             }
             
             // compute the sum of squares
-            if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) && !std::isnan(y(i, k)) && (n_obs > 1)) {
+            if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) && !std::isnan(y(i, k)) &&
+                (n_obs > 1)) {
               
               sumsq_xy = lambda * sumsq_xy +
                 w_new * (x_new - mean_x) * (y_new - mean_prev_y);
@@ -2336,7 +2340,7 @@ struct RollCovOnlineXY : public Worker {
   
 };
 
-// 'Worker' function for computing rolling covariances
+// 'Worker' function for computing rolling covariances using a standard algorithm
 struct RollCovParallelXX : public Worker {
   
   const RMatrix<double> x;       // source
@@ -2539,7 +2543,7 @@ struct RollCovParallelXX : public Worker {
   
 };
 
-// 'Worker' function for computing rolling covariances
+// 'Worker' function for computing rolling covariances using a standard algorithm
 struct RollCovParallelXY : public Worker {
   
   const RMatrix<double> x;       // source
@@ -2791,8 +2795,6 @@ struct RollCovOnlineLm : public Worker {
         long double sum_x = 0;
         long double sum_y = 0;
         long double sumsq_w = 0;
-        // long double sumsq_x = 0;
-        // long double sumsq_y = 0;
         long double sumsq_xy = 0;
         // long double mean_prev_x = 0;
         long double mean_prev_y = 0;
@@ -2986,7 +2988,7 @@ struct RollCovOnlineLm : public Worker {
   
 };
 
-// 'Worker' function for computing rolling covariances
+// 'Worker' function for computing rolling covariances using a standard algorithm
 struct RollCovParallelLm : public Worker {
   
   const RMatrix<double> x;      // source
@@ -3146,7 +3148,7 @@ struct RollCovParallelLm : public Worker {
   
 };
 
-// 'Worker' function for rolling ordinary least squares regressions
+// 'Worker' function for rolling linear models
 struct RollLmInterceptTRUE : public Worker {
   
   const arma::cube arma_cov;    // source
@@ -3267,7 +3269,7 @@ struct RollLmInterceptTRUE : public Worker {
   
 };
 
-// 'Worker' function for rolling ordinary least squares regressions
+// 'Worker' function for rolling linear models
 struct RollLmInterceptFALSE : public Worker {
   
   const arma::cube arma_cov;    // source

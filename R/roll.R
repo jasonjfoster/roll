@@ -396,8 +396,8 @@ roll_cor <- function(x, y = NULL, width, weights = rep(1, width), center = TRUE,
 ##' result <- roll_lm(x, y, 5, weights)
 ##' @export
 roll_lm <- function(x, y, width, weights = rep(1, width), intercept = TRUE,
-                    min_obs = width, complete_obs = TRUE,
-                    na_restore = FALSE, online = TRUE) {
+                    min_obs = width, complete_obs = TRUE, na_restore = FALSE,
+                    online = TRUE) {
   return(.Call(`_roll_roll_lm`,
                x, y,
                as.integer(width),
