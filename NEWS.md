@@ -2,7 +2,7 @@
 
 ### Changes in roll version 1.1.0 (YYYY-MM-DD)
 
-* Added `online` argument to process observations using an online algorithm
+* Added `online` argument to process observations using an online algorithm by default
 
 * `roll_lm` function now returns standard errors ([#7](https://github.com/jjf234/roll/issues/7))
 
@@ -14,7 +14,7 @@
 
     * Note: if users take advantage of parallelism using multithreaded libraries, then limit the number of cores in the `RcppParallel` package to one with the `setThreadOptions` function
     
-* Deprecated less common functions (`roll_eigen`, `roll_vif`, `roll_pcr`) and arguments (`scale` and `center` in the `roll_lm` function); also removed the `parallel_for` argument in favor of a new approach used internally 
+* Deprecated less common functions (`roll_eigen`, `roll_vif`, `roll_pcr`) and arguments (`scale` and `center` in the `roll_lm` function); also removed the `parallel_for` argument in favor of a new approach used internally
 
 ### Changes in roll version 1.0.7 (2017-05-01)
 

@@ -8,12 +8,34 @@ void check_width(const int& width) {
   
 }
 
-bool check_weights(const int& n_rows_xy, const int& width,
-                   const arma::vec& weights, const bool& online) {
+void check_weights_x(const int& n_rows_x, const int& width,
+                     const arma::vec& weights) {
+  
+  if ((int)weights.size() < std::min(width, n_rows_x)) {
+    stop("length of 'weights' must equal either the number of rows in 'x' or 'width'");
+  }
+  
+}
+
+void check_weights_xy(const int& n_rows_xy, const int& width,
+                      const arma::vec& weights) {
   
   if ((int)weights.size() < std::min(width, n_rows_xy)) {
-    stop("length of 'weights' must be greater than or equal to either the number of rows or 'width'");
+    stop("length of 'weights' must equal either the number of rows in 'x' (and 'y', if applicable) or 'width'");
   }
+  
+}
+
+void check_weights_lm(const int& n_rows_xy, const int& width,
+                      const arma::vec& weights) {
+  
+  if ((int)weights.size() < std::min(width, n_rows_xy)) {
+    stop("length of 'weights' must equal either the number of rows in 'x' (and 'y') or 'width'");
+  }
+  
+}
+
+bool check_lambda(const arma::vec& weights, const bool& online) {
   
   // check if equal-weights
   bool status_eq = all(weights == weights[0]);
@@ -69,7 +91,7 @@ void check_lm(const int& n_rows_x, const int& n_rows_y) {
   
 }
 
-List x_dimnames_lm(const List& input, const int& n_cols_x,
+List dimnames_lm_x(const List& input, const int& n_cols_x,
                    const bool& intercept) {
   
   if (intercept && (input.size() > 1)) {
@@ -117,7 +139,7 @@ List x_dimnames_lm(const List& input, const int& n_cols_x,
   
 }
 
-CharacterVector y_dimnames_lm(const List& input, const int& n_cols_y) {
+CharacterVector dimnames_lm_y(const List& input, const int& n_cols_y) {
   
   if (input.size() > 1) {
     
@@ -218,7 +240,8 @@ NumericMatrix roll_sum(const NumericMatrix& x, const int& width,
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
-  bool status = check_weights(n_rows_x, width, weights, online);
+  check_weights_x(n_rows_x, width, weights);
+  bool status = check_lambda(weights, online);
   
   // default 'min_obs' argument is 'width',
   // otherwise check argument for errors
@@ -283,7 +306,8 @@ NumericMatrix roll_prod(const NumericMatrix& x, const int& width,
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
-  bool status = check_weights(n_rows_x, width, weights, online);
+  check_weights_x(n_rows_x, width, weights);
+  bool status = check_lambda(weights, online);
   
   // default 'min_obs' argument is 'width',
   // otherwise check argument for errors
@@ -348,7 +372,8 @@ NumericMatrix roll_mean(const NumericMatrix& x, const int& width,
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
-  bool status = check_weights(n_rows_x, width, weights, online);
+  check_weights_x(n_rows_x, width, weights);
+  bool status = check_lambda(weights, online);
   
   // default 'min_obs' argument is 'width',
   // otherwise check argument for errors
@@ -413,7 +438,8 @@ NumericMatrix roll_var(const NumericMatrix& x, const int& width,
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
-  bool status = check_weights(n_rows_x, width, weights, online);
+  check_weights_x(n_rows_x, width, weights);
+  bool status = check_lambda(weights, online);
   
   // default 'min_obs' argument is 'width',
   // otherwise check argument for errors
@@ -478,7 +504,8 @@ NumericMatrix roll_sd(const NumericMatrix& x, const int& width,
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
-  bool status = check_weights(n_rows_x, width, weights, online);
+  check_weights_x(n_rows_x, width, weights);
+  bool status = check_lambda(weights, online);
   
   // default 'min_obs' argument is 'width',
   // otherwise check argument for errors
@@ -544,7 +571,8 @@ NumericMatrix roll_scale(const NumericMatrix& x, const int& width,
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
-  bool status = check_weights(n_rows_x, width, weights, online);
+  check_weights_x(n_rows_x, width, weights);
+  bool status = check_lambda(weights, online);
   
   // default 'min_obs' argument is 'width',
   // otherwise check argument for errors
@@ -614,7 +642,8 @@ NumericVector roll_cov_z(const NumericMatrix& x, const NumericMatrix& y,
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
-  bool status = check_weights(n_rows_xy, width, weights, online);
+  check_weights_xy(n_rows_xy, width, weights);
+  bool status = check_lambda(weights, online);
   
   // default 'min_obs' argument is 'width',
   // otherwise check argument for errors
@@ -739,7 +768,8 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
   
   // default 'weights' argument is equal-weighted,
   // otherwise check argument for errors
-  bool status = check_weights(n_rows_xy, width, weights, online);
+  check_weights_lm(n_rows_xy, width, weights);
+  bool status = check_lambda(weights, online);
   
   // default 'min_obs' argument is 'width',
   // otherwise check argument for errors
@@ -756,7 +786,7 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
     arma_any_na = any_na_x(data);
   } else {
     
-    warning("pairwise regression is not currently supported");
+    warning("'complete_obs = FALSE' is not supported");
     arma_any_na = any_na_x(data);
     
   }
@@ -852,8 +882,8 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
     // create and return a matrix or xts object for coefficients
     NumericVector coef(wrap(arma_coef_z));
     coef.attr("dim") = IntegerVector::create(n_rows_xy, n_cols_x);
-    List x_dimnames = x.attr("dimnames");
-    coef.attr("dimnames") = x_dimnames_lm(x_dimnames, n_cols_x, intercept);
+    List dimnames_x = x.attr("dimnames");
+    coef.attr("dimnames") = dimnames_lm_x(dimnames_x, n_cols_x, intercept);
     coef.attr("index") = x.attr("index");
     coef.attr(".indexCLASS") = x.attr(".indexCLASS");
     coef.attr(".indexTZ") = x.attr(".indexTZ");
@@ -864,8 +894,8 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
     // create and return a matrix or xts object for r-squareds
     NumericVector rsq(wrap(arma_rsq_z));
     rsq.attr("dim") = IntegerVector::create(n_rows_xy, 1);
-    if (x_dimnames.size() > 1) {
-      rsq.attr("dimnames") = List::create(x_dimnames[0], "R-squared");
+    if (dimnames_x.size() > 1) {
+      rsq.attr("dimnames") = List::create(dimnames_x[0], "R-squared");
     } else {
       rsq.attr("dimnames") = List::create(R_NilValue, "R-squared");
     }
@@ -908,8 +938,8 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
       // create and return a matrix or xts object for coefficients
       NumericVector coef(wrap(arma_coef_z));
       coef.attr("dim") = IntegerVector::create(n_rows_xy, n_cols_x);
-      List x_dimnames = x.attr("dimnames");
-      coef.attr("dimnames") = x_dimnames_lm(x_dimnames, n_cols_x, intercept);
+      List dimnames_x = x.attr("dimnames");
+      coef.attr("dimnames") = dimnames_lm_x(dimnames_x, n_cols_x, intercept);
       coef.attr("index") = x.attr("index");
       coef.attr(".indexCLASS") = x.attr(".indexCLASS");
       coef.attr(".indexTZ") = x.attr(".indexTZ");
@@ -920,8 +950,8 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
       // create and return a matrix or xts object for r-squareds
       NumericVector rsq(wrap(arma_rsq_z));
       rsq.attr("dim") = IntegerVector::create(n_rows_xy, 1);
-      if (x_dimnames.size() > 1) {
-        rsq.attr("dimnames") = List::create(x_dimnames[0], "R-squared");
+      if (dimnames_x.size() > 1) {
+        rsq.attr("dimnames") = List::create(dimnames_x[0], "R-squared");
       } else {
         rsq.attr("dimnames") = List::create(R_NilValue, "R-squared");
       }
@@ -950,8 +980,8 @@ List roll_lm(const NumericMatrix& x, const NumericMatrix& y,
     }
     
     // add names to each list
-    List y_dimnames = y.attr("dimnames");
-    result_coef.attr("names") = y_dimnames_lm(y_dimnames, n_cols_y);
+    List dimnames_y = y.attr("dimnames");
+    result_coef.attr("names") = dimnames_lm_y(dimnames_y, n_cols_y);
     result_rsq.attr("names") = result_coef.attr("names");
     result_se.attr("names") = result_coef.attr("names");
     
