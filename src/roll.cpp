@@ -522,18 +522,18 @@ NumericMatrix roll_sd(const NumericMatrix& x, const int& width,
   // compute rolling standard deviations
   if (status && online) {
     
-    RollVarOnline roll_sd_online(x, n, n_rows_x, n_cols_x, width,
-                                 weights, center, min_obs,
-                                 arma_any_na, na_restore,
-                                 arma_sd);
+    RollSdOnline roll_sd_online(x, n, n_rows_x, n_cols_x, width,
+                                weights, center, min_obs,
+                                arma_any_na, na_restore,
+                                arma_sd);
     parallelFor(0, n_cols_x, roll_sd_online);
     
   } else {
     
-    RollVarParallel roll_sd_parallel(x, n, n_rows_x, n_cols_x, width,
-                                     weights, center, min_obs,
-                                     arma_any_na, na_restore,
-                                     arma_sd);
+    RollSdParallel roll_sd_parallel(x, n, n_rows_x, n_cols_x, width,
+                                    weights, center, min_obs,
+                                    arma_any_na, na_restore,
+                                    arma_sd);
     parallelFor(0, n_rows_x * n_cols_x, roll_sd_parallel);
     
   }
