@@ -1,6 +1,6 @@
 ## News for package 'roll'
 
-### Changes in roll version 1.1.0 (YYYY-MM-DD)
+### Changes in roll version 1.1.0 (2018-08-10)
 
 * Added `online` argument to process observations using an online algorithm by default
 
