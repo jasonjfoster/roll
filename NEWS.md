@@ -14,7 +14,7 @@
 
     * Note: if users take advantage of parallelism using multithreaded libraries, then limit the number of cores in the `RcppParallel` package to one with the `setThreadOptions` function
     
-* Deprecated less common functions (`roll_eigen`, `roll_vif`, `roll_pcr`) and arguments (`scale` and `center` in the `roll_lm` function); also removed the `parallel_for` argument in favor of a new approach used internally
+* Deprecated less common functions (`roll_eigen`, `roll_vif`, and `roll_pcr`) and arguments (`scale` and `center` in the `roll_lm` function); also removed the `parallel_for` argument in favor of a new approach used internally
 
 ### Changes in roll version 1.0.7 (2017-05-01)
 
