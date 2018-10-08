@@ -1,3 +1,53 @@
+##' Rolling Any
+##'
+##' A function for computing rolling any of time-series data.
+##'
+##' @param x logical matrix or xts object. Rows are observations and columns are variables.
+##' @param width integer. Window size.
+##' @param online logical. Process observations using an online algorithm.
+##' @return An object of the same class and dimension as \code{x} with the rolling any
+##' @examples
+##' n_vars <- 3
+##' n_obs <- 15
+##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' 
+##' # rolling any
+##' result <- roll_any(x < 0, 5)
+##' 
+##' @export
+roll_any <- function(x, width, online = TRUE) {
+  return(.Call(`_roll_roll_any`,
+               x,
+               as.integer(width),
+               as.logical(online)
+  ))
+}
+
+##' Rolling All
+##'
+##' A function for computing rolling all of time-series data.
+##'
+##' @param x logical matrix or xts object. Rows are observations and columns are variables.
+##' @param width integer. Window size.
+##' @param online logical. Process observations using an online algorithm.
+##' @return An object of the same class and dimension as \code{x} with the rolling all
+##' @examples
+##' n_vars <- 3
+##' n_obs <- 15
+##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' 
+##' # rolling all
+##' result <- roll_all(x < 0, 5)
+##' 
+##' @export
+roll_all <- function(x, width, online = TRUE) {
+  return(.Call(`_roll_roll_all`,
+               x,
+               as.integer(width),
+               as.logical(online)
+  ))
+}
+
 ##' Rolling Sums
 ##'
 ##' A function for computing rolling sums of time-series data.

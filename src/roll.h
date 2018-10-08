@@ -8,167 +8,285 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
-// 'Worker' function for computing rolling products using an online algorithm
-struct RollProdOnline : public Worker {
+// 'Worker' function for computing rolling any using an online algorithm
+struct RollAnyOnline : public Worker {
   
-  const RMatrix<double> x;      // source
-  const int n;
+  const RMatrix<int> x;         // source
   const int n_rows_x;
   const int n_cols_x;
   const int width;
-  const arma::vec arma_weights;
-  const int min_obs;
-  const arma::uvec arma_any_na;
-  const bool na_restore;
-  arma::mat& arma_prod;         // destination (pass by reference)
+  RMatrix<int> rcpp_any;        // destination (pass by reference)
   
   // initialize with source and destination
-  RollProdOnline(const NumericMatrix x, const int n,
-                 const int n_rows_x, const int n_cols_x,
-                 const int width, const arma::vec arma_weights,
-                 const int min_obs, const arma::uvec arma_any_na,
-                 const bool na_restore, arma::mat& arma_prod)
-    : x(x), n(n),
-      n_rows_x(n_rows_x), n_cols_x(n_cols_x),
-      width(width), arma_weights(arma_weights),
-      min_obs(min_obs), arma_any_na(arma_any_na),
-      na_restore(na_restore), arma_prod(arma_prod) { }
+  RollAnyOnline(const IntegerMatrix x, const int n_rows_x,
+                const int n_cols_x, const int width,
+                IntegerMatrix rcpp_any)
+    : x(x), n_rows_x(n_rows_x),
+      n_cols_x(n_cols_x), width(width),
+      rcpp_any(rcpp_any) { }
   
   // function call operator that iterates by column
   void operator()(std::size_t begin_col, std::size_t end_col) {
     for (std::size_t j = begin_col; j < end_col; j++) {
       
-      int n_obs = 0;
-      long double lambda = 0;
-      long double n_new = 0;
-      long double n_old = 0;
-      long double n_exp = 0;
-      long double w_new = 0;
-      long double w_old = 0;
-      long double x_new = 0;
-      long double x_old = 0;
-      long double prod_w = 1;
-      long double prod_x = 1;
-      
-      if (width > 1) {
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed!
-      } else {
-        lambda = arma_weights[n - 1];
-      }
+      int n_na = 0;
+      int x_new = 0;
+      int x_old = 0;
+      int sum_x = 0;
       
       for (int i = 0; i < n_rows_x; i++) {
+        
+        if ((x(i, j) != NA_INTEGER) && (x(i, j) == 1)) {
+          x_new = 1;
+        } else {
+          x_new = 0;
+        }
         
         // expanding window
         if (i < width) {
           
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
-            n_obs += 1;
+          if (x(i, j) == NA_INTEGER) {
+            n_na += 1;
           }
           
-          if ((arma_any_na[i] != 0) || std::isnan(x(i, j))) {
-            
-            n_new = n_obs;
-            w_new = 1;
-            x_new = 1;
-            
-          } else {
-            
-            n_new = n_obs - 1;
-            w_new = arma_weights[n - 1];
-            x_new = x(i, j);
-            
-          }
-          
-          if (n_new == 0) {
-            n_exp = 1;
-          } else if (n_new > n_old) {
-            n_exp = n_exp * lambda;
-          } else if (n_new < n_old) {
-            n_exp = n_exp / lambda;
-          }
-          
-          n_old = n_new;
-          prod_w *= w_new * n_exp;
-          prod_x *= x_new;
+          sum_x = sum_x + x_new;
           
         }
         
         // rolling window
         if (i >= width) {
           
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) &&
-              ((arma_any_na[i - width] != 0) || std::isnan(x(i - width, j)))) {
-            
-            n_obs += 1;
-            
-          } else if (((arma_any_na[i] != 0) || std::isnan(x(i, j))) &&
-            (arma_any_na[i - width] == 0) && !std::isnan(x(i - width, j))) {
-            
-            n_obs -= 1;
-            
+          if ((x(i, j) == NA_INTEGER) && (x(i - width, j) != NA_INTEGER)) {
+            n_na += 1;
+          } else if ((x(i, j) != NA_INTEGER) && (x(i - width, j) == NA_INTEGER)) {
+            n_na -= 1;
           }
           
-          if ((arma_any_na[i] != 0) || std::isnan(x(i, j))) {
-            
-            n_new = n_obs;
-            w_new = 1;
-            x_new = 1;
-            
-          } else {
-            
-            n_new = n_obs - 1;
-            w_new = arma_weights[n - 1];
-            x_new = x(i, j);
-            
-          }
-          
-          if ((arma_any_na[i - width] != 0) || std::isnan(x(i - width, j))) {
-            
-            w_old = 1;
+          if ((x(i - width, j) != NA_INTEGER) && (x(i - width, j) == 1)) {
             x_old = 1;
-            
           } else {
-            
-            w_old = arma_weights[0];
-            x_old = x(i - width, j);
-            
+            x_old = 0;
           }
           
-          if (n_new == 0) {
-            n_exp = 1;
-          } else if (n_new > n_old) {
-            n_exp = n_exp * lambda;
-          } else if (n_new < n_old) {
-            n_exp = n_exp / lambda;
-          }
-          
-          n_old = n_new;
-          prod_w *= w_new * n_exp / w_old;
-          prod_x *= x_new / x_old;
+          sum_x = sum_x + x_new - x_old;
           
         }
         
-        // don't compute if missing value and 'na_restore' argument is true
-        if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+        // compute any
+        if (sum_x > 0) {
+          rcpp_any(i, j) = 1;
+        } else if (n_na == 0) {
+          rcpp_any(i, j) = 0;
+        } else {
+          rcpp_any(i, j) = NA_INTEGER;
+        }
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling any using a standard algorithm
+struct RollAnyParallel : public Worker {
+  
+  const RMatrix<int> x;         // source
+  const int n_rows_x;
+  const int n_cols_x;
+  const int width;
+  RMatrix<int> rcpp_any;        // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollAnyParallel(const IntegerMatrix x, const int n_rows_x,
+                  const int n_cols_x, const int width,
+                  IntegerMatrix rcpp_any)
+    : x(x), n_rows_x(n_rows_x),
+      n_cols_x(n_cols_x), width(width),
+      rcpp_any(rcpp_any) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z / n_cols_x;
+      int j = z % n_cols_x;
+      
+      int count = 0;
+      int n_na = 0;
+      int sum_x = 0;
+      
+      // number of observations is either the window size or,
+      // for partial results, the number of the current row
+      while ((width > count) && (i >= count) && (sum_x == 0)) {
+        
+        // don't include if missing value
+        if (x(i - count, j) != NA_INTEGER) {
           
-          // compute the product
-          if (n_obs >= min_obs) {
-            arma_prod(i, j) = prod_w * prod_x;
-          } else {
-            arma_prod(i, j) = NA_REAL;
+          // compute the sum
+          if (x(i - count, j) == 1) {
+            sum_x = 1;
           }
           
         } else {
+          n_na = 1;
+        }
+        
+        count += 1;
+        
+      }
+      
+      // compute any
+      if (sum_x > 0) {
+        rcpp_any(i, j) = 1;
+      } else if (n_na == 0) {
+        rcpp_any(i, j) = 0;
+      } else {
+        rcpp_any(i, j) = NA_INTEGER;
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling all using an online algorithm
+struct RollAllOnline : public Worker {
+  
+  const RMatrix<int> x;         // source
+  const int n_rows_x;
+  const int n_cols_x;
+  const int width;
+  RMatrix<int> rcpp_all;        // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollAllOnline(const IntegerMatrix x, const int n_rows_x,
+                const int n_cols_x, const int width,
+                IntegerMatrix rcpp_all)
+    : x(x), n_rows_x(n_rows_x),
+      n_cols_x(n_cols_x), width(width),
+      rcpp_all(rcpp_all) { }
+  
+  // function call operator that iterates by column
+  void operator()(std::size_t begin_col, std::size_t end_col) {
+    for (std::size_t j = begin_col; j < end_col; j++) {
+      
+      int n_na = 0;
+      int x_new = 0;
+      int x_old = 0;
+      int sum_x = 0;
+      
+      for (int i = 0; i < n_rows_x; i++) {
+        
+        if ((x(i, j) != NA_INTEGER) && (x(i, j) == 0)) {
+          x_new = 1;
+        } else {
+          x_new = 0;
+        }
+        
+        // expanding window
+        if (i < width) {
           
-          // can be either NA or NaN
-          arma_prod(i, j) = x(i, j);
+          if (x(i, j) == NA_INTEGER) {
+            n_na += 1;
+          }
+          
+          sum_x = sum_x + x_new;
           
         }
         
+        // rolling window
+        if (i >= width) {
+          
+          if ((x(i, j) == NA_INTEGER) && (x(i - width, j) != NA_INTEGER)) {
+            n_na += 1;
+          } else if ((x(i, j) != NA_INTEGER) && (x(i - width, j) == NA_INTEGER)) {
+            n_na -= 1;
+          }
+          
+          if ((x(i - width, j) != NA_INTEGER) && (x(i - width, j) == 0)) {
+            x_old = 1;
+          } else {
+            x_old = 0;
+          }
+          
+          sum_x = sum_x + x_new - x_old;
+          
+        }
+        
+        // compute any
+        if (sum_x > 0) {
+          rcpp_all(i, j) = 0;
+        } else if (n_na == 0) {
+          rcpp_all(i, j) = 1;
+        } else {
+          rcpp_all(i, j) = NA_INTEGER;
+        }
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling all using a standard algorithm
+struct RollAllParallel : public Worker {
+  
+  const RMatrix<int> x;         // source
+  const int n_rows_x;
+  const int n_cols_x;
+  const int width;
+  RMatrix<int> rcpp_all;        // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollAllParallel(const IntegerMatrix x, const int n_rows_x,
+                  const int n_cols_x, const int width,
+                  IntegerMatrix rcpp_all)
+    : x(x), n_rows_x(n_rows_x),
+      n_cols_x(n_cols_x), width(width),
+      rcpp_all(rcpp_all) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z / n_cols_x;
+      int j = z % n_cols_x;
+      
+      int count = 0;
+      int n_na = 0;
+      int sum_x = 0;
+      
+      // number of observations is either the window size or,
+      // for partial results, the number of the current row
+      while ((width > count) && (i >= count) && (sum_x == 0)) {
+        
+        // don't include if missing value
+        if (x(i - count, j) != NA_INTEGER) {
+          
+          // compute the sum
+          if (x(i - count, j) == 0) {
+            sum_x = 1;
+          }
+          
+        } else {
+          n_na = 1;
+        }
+        
+        count += 1;
+        
+      }
+      
+      // compute all
+      if (sum_x > 0) {
+        rcpp_all(i, j) = 0;
+      } else if (n_na == 0) {
+        rcpp_all(i, j) = 1;
+      } else {
+        rcpp_all(i, j) = NA_INTEGER;
       }
       
     }
@@ -374,6 +492,174 @@ struct RollSumParallel : public Worker {
         
         // can be either NA or NaN
         arma_sum(i, j) = x(i, j);
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling products using an online algorithm
+struct RollProdOnline : public Worker {
+  
+  const RMatrix<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int n_cols_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const arma::uvec arma_any_na;
+  const bool na_restore;
+  arma::mat& arma_prod;         // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollProdOnline(const NumericMatrix x, const int n,
+                 const int n_rows_x, const int n_cols_x,
+                 const int width, const arma::vec arma_weights,
+                 const int min_obs, const arma::uvec arma_any_na,
+                 const bool na_restore, arma::mat& arma_prod)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), n_cols_x(n_cols_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs), arma_any_na(arma_any_na),
+      na_restore(na_restore), arma_prod(arma_prod) { }
+  
+  // function call operator that iterates by column
+  void operator()(std::size_t begin_col, std::size_t end_col) {
+    for (std::size_t j = begin_col; j < end_col; j++) {
+      
+      int n_obs = 0;
+      long double lambda = 0;
+      long double n_new = 0;
+      long double n_old = 0;
+      long double n_exp = 0;
+      long double w_new = 0;
+      long double w_old = 0;
+      long double x_new = 0;
+      long double x_old = 0;
+      long double prod_w = 1;
+      long double prod_x = 1;
+      
+      if (width > 1) {
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed!
+      } else {
+        lambda = arma_weights[n - 1];
+      }
+      
+      for (int i = 0; i < n_rows_x; i++) {
+        
+        // expanding window
+        if (i < width) {
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
+            n_obs += 1;
+          }
+          
+          if ((arma_any_na[i] != 0) || std::isnan(x(i, j))) {
+            
+            n_new = n_obs;
+            w_new = 1;
+            x_new = 1;
+            
+          } else {
+            
+            n_new = n_obs - 1;
+            w_new = arma_weights[n - 1];
+            x_new = x(i, j);
+            
+          }
+          
+          if (n_new == 0) {
+            n_exp = 1;
+          } else if (n_new > n_old) {
+            n_exp = n_exp * lambda;
+          } else if (n_new < n_old) {
+            n_exp = n_exp / lambda;
+          }
+          
+          n_old = n_new;
+          prod_w *= w_new * n_exp;
+          prod_x *= x_new;
+          
+        }
+        
+        // rolling window
+        if (i >= width) {
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) &&
+              ((arma_any_na[i - width] != 0) || std::isnan(x(i - width, j)))) {
+            
+            n_obs += 1;
+            
+          } else if (((arma_any_na[i] != 0) || std::isnan(x(i, j))) &&
+            (arma_any_na[i - width] == 0) && !std::isnan(x(i - width, j))) {
+            
+            n_obs -= 1;
+            
+          }
+          
+          if ((arma_any_na[i] != 0) || std::isnan(x(i, j))) {
+            
+            n_new = n_obs;
+            w_new = 1;
+            x_new = 1;
+            
+          } else {
+            
+            n_new = n_obs - 1;
+            w_new = arma_weights[n - 1];
+            x_new = x(i, j);
+            
+          }
+          
+          if ((arma_any_na[i - width] != 0) || std::isnan(x(i - width, j))) {
+            
+            w_old = 1;
+            x_old = 1;
+            
+          } else {
+            
+            w_old = arma_weights[0];
+            x_old = x(i - width, j);
+            
+          }
+          
+          if (n_new == 0) {
+            n_exp = 1;
+          } else if (n_new > n_old) {
+            n_exp = n_exp * lambda;
+          } else if (n_new < n_old) {
+            n_exp = n_exp / lambda;
+          }
+          
+          n_old = n_new;
+          prod_w *= w_new * n_exp / w_old;
+          prod_x *= x_new / x_old;
+          
+        }
+        
+        // don't compute if missing value and 'na_restore' argument is true
+        if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+          
+          // compute the product
+          if (n_obs >= min_obs) {
+            arma_prod(i, j) = prod_w * prod_x;
+          } else {
+            arma_prod(i, j) = NA_REAL;
+          }
+          
+        } else {
+          
+          // can be either NA or NaN
+          arma_prod(i, j) = x(i, j);
+          
+        }
         
       }
       

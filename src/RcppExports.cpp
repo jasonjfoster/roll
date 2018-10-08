@@ -6,6 +6,32 @@
 
 using namespace Rcpp;
 
+// roll_any
+LogicalMatrix roll_any(const LogicalMatrix& x, const int& width, const bool& online);
+RcppExport SEXP _roll_roll_any(SEXP xSEXP, SEXP widthSEXP, SEXP onlineSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const LogicalMatrix& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const int& >::type width(widthSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type online(onlineSEXP);
+    rcpp_result_gen = Rcpp::wrap(roll_any(x, width, online));
+    return rcpp_result_gen;
+END_RCPP
+}
+// roll_all
+LogicalMatrix roll_all(const LogicalMatrix& x, const int& width, const bool& online);
+RcppExport SEXP _roll_roll_all(SEXP xSEXP, SEXP widthSEXP, SEXP onlineSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const LogicalMatrix& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const int& >::type width(widthSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type online(onlineSEXP);
+    rcpp_result_gen = Rcpp::wrap(roll_all(x, width, online));
+    return rcpp_result_gen;
+END_RCPP
+}
 // roll_sum
 NumericMatrix roll_sum(const NumericMatrix& x, const int& width, const arma::vec& weights, const int& min_obs, const bool& complete_obs, const bool& na_restore, const bool& online);
 RcppExport SEXP _roll_roll_sum(SEXP xSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP onlineSEXP) {

@@ -223,6 +223,90 @@ arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
   
 }
 
+// [[Rcpp::export(.roll_any)]]
+LogicalMatrix roll_any(const LogicalMatrix& x, const int& width,
+                       const bool& online) {
+  
+  int n_rows_x = x.nrow();
+  int n_cols_x = x.ncol();
+  IntegerMatrix rcpp_x(x);
+  IntegerMatrix rcpp_any(n_rows_x, n_cols_x);
+  
+  // check 'width' argument for errors
+  check_width(width);
+  
+  // compute rolling any
+  if (online) {
+
+    RollAnyOnline roll_any_online(rcpp_x, n_rows_x, n_cols_x, width,
+                                  rcpp_any);
+    parallelFor(0, n_cols_x, roll_any_online);
+
+  } else {
+    
+    RollAnyParallel roll_any_parallel(rcpp_x, n_rows_x, n_cols_x, width,
+                                      rcpp_any);
+    parallelFor(0, n_rows_x * n_cols_x, roll_any_parallel);
+    
+  }
+  
+  // create and return a matrix or xts object
+  LogicalMatrix result(rcpp_any);
+  List dimnames = x.attr("dimnames");
+  result.attr("dimnames") = dimnames;
+  result.attr("index") = x.attr("index");
+  result.attr(".indexCLASS") = x.attr(".indexCLASS");
+  result.attr(".indexTZ") = x.attr(".indexTZ");
+  result.attr("tclass") = x.attr("tclass");
+  result.attr("tzone") = x.attr("tzone");
+  result.attr("class") = x.attr("class");
+  
+  return result;
+  
+}
+
+// [[Rcpp::export(.roll_all)]]
+LogicalMatrix roll_all(const LogicalMatrix& x, const int& width,
+                       const bool& online) {
+  
+  int n_rows_x = x.nrow();
+  int n_cols_x = x.ncol();
+  IntegerMatrix rcpp_x(x);
+  IntegerMatrix rcpp_all(n_rows_x, n_cols_x);
+  
+  // check 'width' argument for errors
+  check_width(width);
+  
+  // compute rolling all
+  if (online) {
+    
+    RollAllOnline roll_all_online(rcpp_x, n_rows_x, n_cols_x, width,
+                                  rcpp_all);
+    parallelFor(0, n_cols_x, roll_all_online);
+    
+  } else {
+    
+    RollAllParallel roll_all_parallel(rcpp_x, n_rows_x, n_cols_x, width,
+                                      rcpp_all);
+    parallelFor(0, n_rows_x * n_cols_x, roll_all_parallel);
+    
+  }
+  
+  // create and return a matrix or xts object
+  LogicalMatrix result(rcpp_all);
+  List dimnames = x.attr("dimnames");
+  result.attr("dimnames") = dimnames;
+  result.attr("index") = x.attr("index");
+  result.attr(".indexCLASS") = x.attr(".indexCLASS");
+  result.attr(".indexTZ") = x.attr(".indexTZ");
+  result.attr("tclass") = x.attr("tclass");
+  result.attr("tzone") = x.attr("tzone");
+  result.attr("class") = x.attr("class");
+  
+  return result;
+  
+}
+
 // [[Rcpp::export(.roll_sum)]]
 NumericMatrix roll_sum(const NumericMatrix& x, const int& width,
                        const arma::vec& weights, const int& min_obs,

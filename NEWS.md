@@ -1,5 +1,9 @@
 ## News for package 'roll'
 
+### Changes in roll version 1.1.2 (YYYY-MM-DD)
+
+* New `roll_any` and `roll_all` functions for computing rolling any and all, respectively, of time-series data ([#14](https://github.com/jjf234/roll/issues/14))
+
 ### Changes in roll version 1.1.1 (2018-08-11)
 
 * Added `online` argument to process observations using an online algorithm by default
