@@ -5,8 +5,8 @@
     .Call(`_roll_roll_any`, x, width, min_obs, complete_obs, na_restore, online)
 }
 
-.roll_all <- function(x, width, online) {
-    .Call(`_roll_roll_all`, x, width, online)
+.roll_all <- function(x, width, min_obs, complete_obs, na_restore, online) {
+    .Call(`_roll_roll_all`, x, width, min_obs, complete_obs, na_restore, online)
 }
 
 .roll_sum <- function(x, width, weights, min_obs, complete_obs, na_restore, online) {

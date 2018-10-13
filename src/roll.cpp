@@ -307,26 +307,40 @@ LogicalMatrix roll_any(const LogicalMatrix& x, const int& width,
 
 // [[Rcpp::export(.roll_all)]]
 LogicalMatrix roll_all(const LogicalMatrix& x, const int& width,
-                       const bool& online) {
+                       const int& min_obs, const bool& complete_obs,
+                       const bool& na_restore, const bool& online) {
   
   int n_rows_x = x.nrow();
   int n_cols_x = x.ncol();
+  IntegerVector rcpp_any_na(n_rows_x);
   IntegerMatrix rcpp_x(x);
   IntegerMatrix rcpp_all(n_rows_x, n_cols_x);
   
   // check 'width' argument for errors
   check_width(width);
   
+  // default 'min_obs' argument is 'width',
+  // otherwise check argument for errors
+  check_min_obs(min_obs);
+  
+  // default 'complete_obs' argument is 'false',
+  // otherwise check argument for errors
+  if (complete_obs) {
+    rcpp_any_na = any_na_i(rcpp_x);
+  }
+  
   // compute rolling all
   if (online) {
     
     RollAllOnline roll_all_online(rcpp_x, n_rows_x, n_cols_x, width,
+                                  min_obs, rcpp_any_na, na_restore,
                                   rcpp_all);
     parallelFor(0, n_cols_x, roll_all_online);
     
   } else {
     
     RollAllParallel roll_all_parallel(rcpp_x, n_rows_x, n_cols_x, width,
+                                      min_obs, rcpp_any_na, na_restore,
                                       rcpp_all);
     parallelFor(0, n_rows_x * n_cols_x, roll_all_parallel);
     

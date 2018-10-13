@@ -4,12 +4,21 @@
 \alias{roll_all}
 \title{Rolling All}
 \usage{
-roll_all(x, width, online = TRUE)
+roll_all(x, width, min_obs = 1, complete_obs = FALSE,
+  na_restore = FALSE, online = TRUE)
 }
 \arguments{
 \item{x}{logical matrix or xts object. Rows are observations and columns are variables.}
 
 \item{width}{integer. Window size.}
+
+\item{min_obs}{integer. Minimum number of observations required to have a value within a window,
+otherwise result is \code{NA}.}
+
+\item{complete_obs}{logical. If \code{TRUE} then rows containing any missing values are removed,
+if \code{FALSE} then each value is used.}
+
+\item{na_restore}{logical. Should missing values be restored?}
 
 \item{online}{logical. Process observations using an online algorithm.}
 }
