@@ -4,7 +4,7 @@
 \alias{roll_any}
 \title{Rolling Any}
 \usage{
-roll_any(x, width, min_obs = 1, complete_obs = FALSE,
+roll_any(x, width, min_obs = width, complete_obs = FALSE,
   na_restore = FALSE, online = TRUE)
 }
 \arguments{
@@ -23,7 +23,7 @@ if \code{FALSE} then each value is used.}
 \item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
-An object of the same class and dimension as \code{x} with the rolling any
+An object of the same class and dimension as \code{x} with the rolling any.
 }
 \description{
 A function for computing rolling any of time-series data.

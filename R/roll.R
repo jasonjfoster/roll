@@ -10,7 +10,7 @@
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling any
+##' @return An object of the same class and dimension as \code{x} with the rolling any.
 ##' @examples
 ##' n_vars <- 3
 ##' n_obs <- 15
@@ -20,7 +20,7 @@
 ##' result <- roll_any(x < 0, 5)
 ##' 
 ##' @export
-roll_any <- function(x, width, min_obs = 1,
+roll_any <- function(x, width, min_obs = width,
                      complete_obs = FALSE, na_restore = FALSE,
                      online = TRUE) {
   return(.Call(`_roll_roll_any`,
@@ -45,7 +45,7 @@ roll_any <- function(x, width, min_obs = 1,
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling all
+##' @return An object of the same class and dimension as \code{x} with the rolling all.
 ##' @examples
 ##' n_vars <- 3
 ##' n_obs <- 15
@@ -55,7 +55,7 @@ roll_any <- function(x, width, min_obs = 1,
 ##' result <- roll_all(x < 0, 5)
 ##' 
 ##' @export
-roll_all <- function(x, width, min_obs = 1,
+roll_all <- function(x, width, min_obs = width,
                      complete_obs = FALSE, na_restore = FALSE,
                      online = TRUE) {
   return(.Call(`_roll_roll_all`,
