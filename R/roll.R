@@ -4,6 +4,11 @@
 ##'
 ##' @param x logical matrix or xts object. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is \code{NA}.
+##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
+##' if \code{FALSE} then each value is used.
+##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
 ##' @return An object of the same class and dimension as \code{x} with the rolling any
 ##' @examples
@@ -15,10 +20,15 @@
 ##' result <- roll_any(x < 0, 5)
 ##' 
 ##' @export
-roll_any <- function(x, width, online = TRUE) {
+roll_any <- function(x, width, min_obs = 1,
+                     complete_obs = FALSE, na_restore = FALSE,
+                     online = TRUE) {
   return(.Call(`_roll_roll_any`,
                x,
                as.integer(width),
+               as.integer(min_obs),
+               as.logical(complete_obs),
+               as.logical(na_restore),
                as.logical(online)
   ))
 }

@@ -162,6 +162,32 @@ CharacterVector dimnames_lm_y(const List& input, const int& n_cols_y) {
   
 }
 
+IntegerVector any_na_i(const IntegerMatrix& x) {
+  
+  int n_rows_x = x.nrow();
+  int n_cols_x = x.ncol();
+  IntegerVector result(n_rows_x);
+  
+  for (int i = 0; i < n_rows_x; i++) {
+    
+    int any_na = 0;
+    int j = 0;
+    
+    while ((any_na == 0) && (j < n_cols_x)) {
+      if (x(i, j) == NA_INTEGER) {
+        any_na = 1;
+      }
+      j += 1;
+    }
+    
+    result[i] = any_na;
+    
+  }
+  
+  return result;
+  
+}
+
 arma::uvec any_na_x(const NumericMatrix& x) {
   
   int n_rows_x = x.nrow();
@@ -225,26 +251,40 @@ arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
 
 // [[Rcpp::export(.roll_any)]]
 LogicalMatrix roll_any(const LogicalMatrix& x, const int& width,
-                       const bool& online) {
+                       const int& min_obs, const bool& complete_obs,
+                       const bool& na_restore, const bool& online) {
   
   int n_rows_x = x.nrow();
   int n_cols_x = x.ncol();
+  IntegerVector rcpp_any_na(n_rows_x);
   IntegerMatrix rcpp_x(x);
   IntegerMatrix rcpp_any(n_rows_x, n_cols_x);
   
   // check 'width' argument for errors
   check_width(width);
   
+  // default 'min_obs' argument is 'width',
+  // otherwise check argument for errors
+  check_min_obs(min_obs);
+  
+  // default 'complete_obs' argument is 'false',
+  // otherwise check argument for errors
+  if (complete_obs) {
+    rcpp_any_na = any_na_i(rcpp_x);
+  }
+  
   // compute rolling any
   if (online) {
 
     RollAnyOnline roll_any_online(rcpp_x, n_rows_x, n_cols_x, width,
+                                  min_obs, rcpp_any_na, na_restore,
                                   rcpp_any);
     parallelFor(0, n_cols_x, roll_any_online);
 
   } else {
     
     RollAnyParallel roll_any_parallel(rcpp_x, n_rows_x, n_cols_x, width,
+                                      min_obs, rcpp_any_na, na_restore,
                                       rcpp_any);
     parallelFor(0, n_rows_x * n_cols_x, roll_any_parallel);
     

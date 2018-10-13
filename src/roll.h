@@ -15,70 +15,113 @@ struct RollAnyOnline : public Worker {
   const int n_rows_x;
   const int n_cols_x;
   const int width;
+  const int min_obs;
+  const RVector<int> rcpp_any_na;
+  const bool na_restore;
   RMatrix<int> rcpp_any;        // destination (pass by reference)
   
   // initialize with source and destination
   RollAnyOnline(const IntegerMatrix x, const int n_rows_x,
                 const int n_cols_x, const int width,
-                IntegerMatrix rcpp_any)
+                const int min_obs, const IntegerVector rcpp_any_na,
+                const bool na_restore, IntegerMatrix rcpp_any)
     : x(x), n_rows_x(n_rows_x),
       n_cols_x(n_cols_x), width(width),
-      rcpp_any(rcpp_any) { }
+      min_obs(min_obs), rcpp_any_na(rcpp_any_na),
+      na_restore(na_restore), rcpp_any(rcpp_any) { }
   
   // function call operator that iterates by column
   void operator()(std::size_t begin_col, std::size_t end_col) {
     for (std::size_t j = begin_col; j < end_col; j++) {
       
-      int n_na = 0;
+      int count = 0;
+      int n_obs = 0;
       int x_new = 0;
       int x_old = 0;
       int sum_x = 0;
       
       for (int i = 0; i < n_rows_x; i++) {
         
-        if ((x(i, j) != NA_INTEGER) && (x(i, j) == 1)) {
-          x_new = 1;
-        } else {
+        if ((rcpp_any_na[i] != 0) || (x(i, j) == NA_INTEGER) || (x(i, j) == 0)) {
+          
           x_new = 0;
+          
+        } else {
+          
+          x_new = 1;
+          
         }
         
         // expanding window
         if (i < width) {
           
-          if (x(i, j) == NA_INTEGER) {
-            n_na += 1;
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((rcpp_any_na[i] == 0) && (x(i, j) != NA_INTEGER)) {
+            n_obs += 1;
           }
           
           sum_x = sum_x + x_new;
+          
+          count += 1;
           
         }
         
         // rolling window
         if (i >= width) {
           
-          if ((x(i, j) == NA_INTEGER) && (x(i - width, j) != NA_INTEGER)) {
-            n_na += 1;
-          } else if ((x(i, j) != NA_INTEGER) && (x(i - width, j) == NA_INTEGER)) {
-            n_na -= 1;
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((rcpp_any_na[i] == 0) && (x(i, j) != NA_INTEGER) &&
+              ((rcpp_any_na[i - width] != 0) || (x(i - width, j) == NA_INTEGER))) {
+            
+            n_obs += 1;
+            
+          } else if (((rcpp_any_na[i] != 0) || (x(i, j) == NA_INTEGER)) &&
+            (rcpp_any_na[i - width] == 0) && (x(i - width, j) != NA_INTEGER)) {
+            
+            n_obs -= 1;
+            
           }
           
-          if ((x(i - width, j) != NA_INTEGER) && (x(i - width, j) == 1)) {
-            x_old = 1;
-          } else {
+          if ((rcpp_any_na[i - width] != 0) || (x(i - width, j) == NA_INTEGER) ||
+              (x(i - width, j) == 0)) {
+            
             x_old = 0;
+            
+          } else {
+            
+            x_old = 1;
+            
           }
           
           sum_x = sum_x + x_new - x_old;
           
         }
         
-        // compute any
-        if (sum_x > 0) {
-          rcpp_any(i, j) = 1;
-        } else if (n_na == 0) {
-          rcpp_any(i, j) = 0;
+        // don't compute if missing value and 'na_restore' argument is true
+        if ((!na_restore) || (na_restore && (x(i, j) != NA_INTEGER))) {
+          
+          // compute any
+          if (n_obs >= min_obs) {
+            
+            if (sum_x > 0) {
+              rcpp_any(i, j) = 1;
+            } else if (n_obs == count) {
+              rcpp_any(i, j) = 0;
+            } else {
+              rcpp_any(i, j) = NA_INTEGER;
+            }
+            
+          } else {
+            rcpp_any(i, j) = NA_INTEGER;
+          }
+          
         } else {
-          rcpp_any(i, j) = NA_INTEGER;
+          
+          // can be either NA or NaN
+          rcpp_any(i, j) = x(i, j);
+          
         }
         
       }
@@ -95,15 +138,20 @@ struct RollAnyParallel : public Worker {
   const int n_rows_x;
   const int n_cols_x;
   const int width;
+  const int min_obs;
+  const RVector<int> rcpp_any_na;
+  const bool na_restore;
   RMatrix<int> rcpp_any;        // destination (pass by reference)
   
   // initialize with source and destination
   RollAnyParallel(const IntegerMatrix x, const int n_rows_x,
                   const int n_cols_x, const int width,
-                  IntegerMatrix rcpp_any)
+                  const int min_obs, const IntegerVector rcpp_any_na,
+                  const bool na_restore, IntegerMatrix rcpp_any)
     : x(x), n_rows_x(n_rows_x),
       n_cols_x(n_cols_x), width(width),
-      rcpp_any(rcpp_any) { }
+      min_obs(min_obs), rcpp_any_na(rcpp_any_na),
+      na_restore(na_restore), rcpp_any(rcpp_any) { }
   
   // function call operator that iterates by index
   void operator()(std::size_t begin_index, std::size_t end_index) {
@@ -114,36 +162,53 @@ struct RollAnyParallel : public Worker {
       int j = z % n_cols_x;
       
       int count = 0;
-      int n_na = 0;
+      int n_obs = 0;
       int sum_x = 0;
       
-      // number of observations is either the window size or,
-      // for partial results, the number of the current row
-      while ((width > count) && (i >= count) && (sum_x == 0)) {
+      // don't compute if missing value and 'na_restore' argument is true
+      if ((!na_restore) || (na_restore && (x(i, j) != NA_INTEGER))) {
         
-        // don't include if missing value
-        if (x(i - count, j) != NA_INTEGER) {
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (i >= count)) {
           
-          // compute the sum
-          if (x(i - count, j) == 1) {
-            sum_x = 1;
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((rcpp_any_na[i - count] == 0) && (x(i - count, j) != NA_INTEGER)) {
+            
+            // compute the sum
+            if (x(i - count, j) == 1) {
+              sum_x = 1;
+            }
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute any
+        if (n_obs >= min_obs) {
+          
+          if (sum_x > 0) {
+            rcpp_any(i, j) = 1;
+          } else if (n_obs == count) {
+            rcpp_any(i, j) = 0;
+          } else {
+            rcpp_any(i, j) = NA_INTEGER;
           }
           
         } else {
-          n_na = 1;
+          rcpp_any(i, j) = NA_INTEGER;
         }
         
-        count += 1;
-        
-      }
-      
-      // compute any
-      if (sum_x > 0) {
-        rcpp_any(i, j) = 1;
-      } else if (n_na == 0) {
-        rcpp_any(i, j) = 0;
       } else {
-        rcpp_any(i, j) = NA_INTEGER;
+        
+        // can be either NA or NaN
+        rcpp_any(i, j) = x(i, j);
+        
       }
       
     }

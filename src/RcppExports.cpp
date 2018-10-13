@@ -7,15 +7,18 @@
 using namespace Rcpp;
 
 // roll_any
-LogicalMatrix roll_any(const LogicalMatrix& x, const int& width, const bool& online);
-RcppExport SEXP _roll_roll_any(SEXP xSEXP, SEXP widthSEXP, SEXP onlineSEXP) {
+LogicalMatrix roll_any(const LogicalMatrix& x, const int& width, const int& min_obs, const bool& complete_obs, const bool& na_restore, const bool& online);
+RcppExport SEXP _roll_roll_any(SEXP xSEXP, SEXP widthSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP onlineSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const LogicalMatrix& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const int& >::type width(widthSEXP);
+    Rcpp::traits::input_parameter< const int& >::type min_obs(min_obsSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type complete_obs(complete_obsSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type na_restore(na_restoreSEXP);
     Rcpp::traits::input_parameter< const bool& >::type online(onlineSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_any(x, width, online));
+    rcpp_result_gen = Rcpp::wrap(roll_any(x, width, min_obs, complete_obs, na_restore, online));
     return rcpp_result_gen;
 END_RCPP
 }
