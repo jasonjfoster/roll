@@ -8,6 +8,24 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
+arma::ivec stl_sort_index(arma::vec& x) {
+  
+  int n_rows_x = x.size();
+  arma::ivec y(n_rows_x);
+  std::iota(y.begin(), y.end(), 0);
+  
+  auto comparator = [&x](int a, int b) {
+    if (std::isnan(x[a])) return false;
+    if (std::isnan(x[b])) return true;
+    return x[a] < x[b];
+  };
+  
+  std::sort(y.begin(), y.end(), comparator);
+  
+  return y;
+  
+}
+
 // 'Worker' function for computing rolling any using an online algorithm
 struct RollAnyOnline : public Worker {
   
@@ -1079,6 +1097,142 @@ struct RollMeanParallel : public Worker {
         
         // can be either NA or NaN
         arma_mean(i, j) = x(i, j);
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling medians using a standard algorithm
+struct RollMedianParallel : public Worker {
+  
+  const RMatrix<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int n_cols_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const arma::uvec arma_any_na;
+  const bool na_restore;
+  arma::mat& arma_median;       // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollMedianParallel(const NumericMatrix x, const int n,
+                     const int n_rows_x, const int n_cols_x,
+                     const int width, const arma::vec arma_weights,
+                     const int min_obs, const arma::uvec arma_any_na,
+                     const bool na_restore, arma::mat& arma_median)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), n_cols_x(n_cols_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs), arma_any_na(arma_any_na),
+      na_restore(na_restore), arma_median(arma_median) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z / n_cols_x;
+      int j = z % n_cols_x;
+      
+      // don't compute if missing value and 'na_restore' argument is true
+      if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+        
+        int k = 0;
+        int count = 0;
+        long double sum_w = 0;
+        
+        int offset = std::max(0, i - width + 1);
+        int n_size_x = i - offset + 1;
+        arma::vec x_subset(n_size_x);
+        arma::vec arma_weights_subset(n_size_x);
+        arma::uvec arma_any_na_subset(n_size_x);
+        
+        std::copy(x.begin() + n_rows_x * j + offset, x.begin() + n_rows_x * j + i + 1,
+                  x_subset.begin());
+        std::copy(arma_weights.begin() + n - n_size_x, arma_weights.begin() + n,
+                  arma_weights_subset.begin());
+        std::copy(arma_any_na.begin() + offset, arma_any_na.begin() + i + 1,
+                  arma_any_na_subset.begin());
+        
+        arma::ivec sort_ix = stl_sort_index(x_subset);
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (n_size_x - 1 >= count)) {
+          
+          k = sort_ix[n_size_x - count - 1];
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
+            
+            // compute the rolling sum
+            sum_w += arma_weights_subset[k];
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        count = 0;
+        int n_obs = 0;
+        int temp_ix = 0;
+        long double sum_upper_w = 0;
+        long double sum_upper_x = 0;
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (n_size_x - 1 >= count)) {
+          
+          k = sort_ix[n_size_x - count - 1];
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
+            
+            if (sum_upper_w / sum_w < 0.5) {
+              
+              // compute the rolling sum
+              sum_upper_w += arma_weights_subset[k];
+              sum_upper_x = x_subset[k];
+              temp_ix = n_size_x - count - 1;
+              
+            }
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute the median
+        if ((n_obs >= min_obs)) {
+          
+          if (std::abs(sum_upper_w / sum_w - 0.5) <= sqrt(arma::datum::eps)) {
+            
+            k = sort_ix[temp_ix - 1];
+            arma_median(i, j) = (x_subset[k] + sum_upper_x) / 2;
+            
+          } else {
+            arma_median(i, j) = sum_upper_x;
+          }
+          
+        } else {
+          arma_median(i, j) = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        arma_median(i, j) = x(i, j);
         
       }
       

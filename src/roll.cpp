@@ -8,6 +8,28 @@ void check_width(const int& width) {
   
 }
 
+void check_weights_p(const arma::vec& weights) {
+  
+  int n = weights.size();
+  int any_leq = 0;
+  int i = 0;
+  
+  while ((any_leq == 0) && (i < n)) {
+    
+    if (weights[i] <= 0) {
+      any_leq = 1;
+    }
+    
+    i += 1;
+    
+  }
+  
+  if (any_leq > 0) {
+    warning("'weights' must be greater than zero");
+  }
+  
+}
+
 void check_weights_x(const int& n_rows_x, const int& width,
                      const arma::vec& weights) {
   
@@ -546,6 +568,72 @@ NumericMatrix roll_mean(const NumericMatrix& x, const int& width,
   
   // create and return a matrix or xts object
   NumericMatrix result(wrap(arma_mean));
+  List dimnames = x.attr("dimnames");
+  result.attr("dimnames") = dimnames;
+  result.attr("index") = x.attr("index");
+  result.attr(".indexCLASS") = x.attr(".indexCLASS");
+  result.attr(".indexTZ") = x.attr(".indexTZ");
+  result.attr("tclass") = x.attr("tclass");
+  result.attr("tzone") = x.attr("tzone");
+  result.attr("class") = x.attr("class");
+  
+  return result;
+  
+}
+
+// [[Rcpp::export(.roll_median)]]
+NumericMatrix roll_median(const NumericMatrix& x, const int& width,
+                          const arma::vec& weights, const int& min_obs,
+                          const bool& complete_obs, const bool& na_restore,
+                          const bool& online) {
+  
+  int n = weights.size();
+  int n_rows_x = x.nrow();
+  int n_cols_x = x.ncol();
+  arma::uvec arma_any_na(n_rows_x);
+  arma::mat arma_median(n_rows_x, n_cols_x);
+  
+  // check 'width' argument for errors
+  check_width(width);
+  
+  // default 'weights' argument is equal-weighted,
+  // otherwise check argument for errors
+  check_weights_p(weights);
+  
+  // default 'min_obs' argument is 'width',
+  // otherwise check argument for errors
+  check_min_obs(min_obs);
+  
+  // default 'complete_obs' argument is 'false',
+  // otherwise check argument for errors
+  if (complete_obs) {
+    arma_any_na = any_na_x(x);
+  } else {
+    arma_any_na.fill(0);
+  }
+  
+  // compute rolling median
+  if (online) {
+    
+    warning("'online = TRUE' is not supported");
+    RollMedianParallel roll_median_parallel(x, n, n_rows_x, n_cols_x, width,
+                                            weights, min_obs,
+                                            arma_any_na, na_restore,
+                                            arma_median);
+    parallelFor(0, n_rows_x * n_cols_x, roll_median_parallel);
+    
+  } else {
+    
+    RollMedianParallel roll_median_parallel(x, n, n_rows_x, n_cols_x, width,
+                                            weights, min_obs,
+                                            arma_any_na, na_restore,
+                                            arma_median);
+    parallelFor(0, n_rows_x * n_cols_x, roll_median_parallel);
+    
+  }
+  
+  // create and return a matrix or xts object
+  NumericMatrix result(wrap(arma_median));
   List dimnames = x.attr("dimnames");
   result.attr("dimnames") = dimnames;
   result.attr("index") = x.attr("index");
