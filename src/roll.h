@@ -8,23 +8,7 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
-arma::ivec stl_sort_index(arma::vec& x) {
-  
-  int n_rows_x = x.size();
-  arma::ivec y(n_rows_x);
-  std::iota(y.begin(), y.end(), 0);
-  
-  auto comparator = [&x](int a, int b) {
-    if (std::isnan(x[a])) return false;
-    if (std::isnan(x[b])) return true;
-    return x[a] < x[b];
-  };
-  
-  std::sort(y.begin(), y.end(), comparator);
-  
-  return y;
-  
-}
+arma::ivec stl_sort_index(arma::vec& x);
 
 // 'Worker' function for computing rolling any using an online algorithm
 struct RollAnyOnline : public Worker {

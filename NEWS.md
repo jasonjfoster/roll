@@ -2,7 +2,7 @@
 
 ### Changes in roll version 1.1.2 (YYYY-MM-DD)
 
-* New `roll_median`, `roll_any`, `roll_all` functions for computing rolling medians, any, and all, respectively, of time-series data ([#4](https://github.com/jjf234/roll/issues/4), [#14](https://github.com/jjf234/roll/issues/14))
+* New `roll_median`, `roll_any`, and `roll_all` functions for computing rolling medians, any, and all, respectively, of time-series data ([#4](https://github.com/jjf234/roll/issues/4), [#14](https://github.com/jjf234/roll/issues/14))
 
 ### Changes in roll version 1.1.1 (2018-08-11)
 
