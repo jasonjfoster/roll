@@ -493,7 +493,12 @@ struct RollSumOnline : public Worker {
             n_obs += 1;
           }
           
-          sum_x = lambda * sum_x + w_new * x_new;
+          // THINK ABOUT IT
+          if (width > 1) {
+            sum_x = lambda * sum_x + w_new * x_new;
+          } else {
+            sum_x = w_new * x_new;
+          }
           
         }
         
@@ -521,12 +526,17 @@ struct RollSumOnline : public Worker {
             
           } else {
             
-            w_old = arma_weights[0];
+            w_old = arma_weights[n - width];
             x_old = x(i - width, j);
             
           }
           
-          sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+          // THINK ABOUT IT
+          if (width > 1) {
+            sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+          } else {
+            sum_x = w_new * x_new;
+          }
           
         }
         
@@ -757,7 +767,7 @@ struct RollProdOnline : public Worker {
             
           } else {
             
-            w_old = arma_weights[0];
+            w_old = arma_weights[n - width];
             x_old = x(i - width, j);
             
           }
@@ -975,7 +985,7 @@ struct RollMeanOnline : public Worker {
             
           } else {
             
-            w_old = arma_weights[0];
+            w_old = arma_weights[n - width];
             x_old = x(i - width, j);
             
           }
@@ -1355,7 +1365,7 @@ struct RollVarOnline : public Worker {
             
           } else {
             
-            w_old = arma_weights[0];
+            w_old = arma_weights[n - width];
             x_old = x(i - width, j);
             
           }
@@ -1679,7 +1689,7 @@ struct RollSdOnline : public Worker {
             
           } else {
             
-            w_old = arma_weights[0];
+            w_old = arma_weights[n - width];
             x_old = x(i - width, j);
             
           }
@@ -2013,7 +2023,7 @@ struct RollScaleOnline : public Worker {
             
           } else {
             
-            w_old = arma_weights[0];
+            w_old = arma_weights[n - width];
             x_old = x(i - width, j);
             
           }
@@ -2447,7 +2457,7 @@ struct RollCovOnlineXX : public Worker {
               
             } else {
               
-              w_old = arma_weights[0];
+              w_old = arma_weights[n - width];
               x_old = x(i - width, j);
               y_old = x(i - width, k);
               
@@ -2760,7 +2770,7 @@ struct RollCovOnlineXY : public Worker {
               
             } else {
               
-              w_old = arma_weights[0];
+              w_old = arma_weights[n - width];
               x_old = x(i - width, j);
               y_old = y(i - width, k);
               
@@ -3445,7 +3455,7 @@ struct RollCovOnlineLm : public Worker {
               
             } else {
               
-              w_old = arma_weights[0];
+              w_old = arma_weights[n - width];
               x_old = x(i - width, j);
               y_old = x(i - width, k);
               
