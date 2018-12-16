@@ -493,7 +493,6 @@ struct RollSumOnline : public Worker {
             n_obs += 1;
           }
           
-          // THINK ABOUT IT
           if (width > 1) {
             sum_x = lambda * sum_x + w_new * x_new;
           } else {
@@ -531,7 +530,6 @@ struct RollSumOnline : public Worker {
             
           }
           
-          // THINK ABOUT IT
           if (width > 1) {
             sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
           } else {
@@ -956,8 +954,17 @@ struct RollMeanOnline : public Worker {
             n_obs += 1;
           }
           
-          sum_w = lambda * sum_w + w_new;
-          sum_x = lambda * sum_x + w_new * x_new;
+          if (width > 1) {
+            
+            sum_w = lambda * sum_w + w_new;
+            sum_x = lambda * sum_x + w_new * x_new;
+            
+          } else {
+            
+            sum_w = w_new;
+            sum_x = w_new * x_new;
+            
+          }
           
         }
         
@@ -990,8 +997,17 @@ struct RollMeanOnline : public Worker {
             
           }
           
-          sum_w = lambda * sum_w + w_new - lambda * w_old;
-          sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+          if (width > 1) {
+            
+            sum_w = lambda * sum_w + w_new - lambda * w_old;
+            sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+            
+          } else {
+            
+            sum_w = w_new;
+            sum_x = w_new * x_new;
+            
+          }
           
         }
         
@@ -1962,9 +1978,19 @@ struct RollScaleOnline : public Worker {
             n_obs += 1;
           }
           
-          sum_w = lambda * sum_w + w_new;
-          sum_x = lambda * sum_x + w_new * x_new;
-          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+          if (width > 1) {
+            
+            sum_w = lambda * sum_w + w_new;
+            sum_x = lambda * sum_x + w_new * x_new;
+            sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+            
+          } else {
+            
+            sum_w = w_new;
+            sum_x = w_new * x_new;
+            sumsq_w = pow(w_new, (long double)2.0);
+            
+          }
           
           if (center && (n_obs > 0)) {
             
@@ -2028,10 +2054,20 @@ struct RollScaleOnline : public Worker {
             
           }
           
-          sum_w = lambda * sum_w + w_new - lambda * w_old;
-          sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
-            pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+          if (width > 1) {
+            
+            sum_w = lambda * sum_w + w_new - lambda * w_old;
+            sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+            sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+              pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+            
+          } else {
+            
+            sum_w = w_new;
+            sum_x = w_new * x_new;
+            sumsq_w = pow(w_new, (long double)2.0);
+            
+          }
           
           if (center && (n_obs > 0)) {
             
