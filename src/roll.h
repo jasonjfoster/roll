@@ -3560,7 +3560,8 @@ struct RollCovOnlineLm : public Worker {
               !std::isnan(x(i, k)))) {
               
               // compute the unbiased estimate of variance
-              if ((n_obs > 1) && (n_obs >= min_obs)) {
+              // if ((n_obs > 1) && (n_obs >= min_obs)) {
+              if (n_obs >= min_obs) {
                 arma_cov(j, k, i) = sumsq_xy;
               } else {
                 arma_cov(j, k, i) = NA_REAL;
@@ -3723,7 +3724,8 @@ struct RollCovParallelLm : public Worker {
           }
           
           // compute the unbiased estimate of covariance
-          if ((n_obs > 1) && (n_obs >= min_obs)) {
+          // if ((n_obs > 1) && (n_obs >= min_obs)) {
+          if (n_obs >= min_obs) {
             arma_cov(j, k, i) = sumsq_xy;
           } else {
             arma_cov(j, k, i) = NA_REAL;
