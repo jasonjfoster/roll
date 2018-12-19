@@ -3868,7 +3868,11 @@ struct RollLmInterceptTRUE : public Worker {
           if (status_inv && (df_resid > 0)) {
             
             // residual variance
-            long double var_resid = (1 - arma_rsq[i]) * var_y / df_resid;
+            long double var_resid = 0;
+            
+            if (1 - arma_rsq[i] >= 0) {
+              var_resid = (1 - arma_rsq[i]) * var_y / df_resid;
+            }
             
             // standard errors
             arma_se(i, 0) = sqrt(var_resid * (1 / arma_sum_w[i] +
@@ -3981,7 +3985,11 @@ struct RollLmInterceptFALSE : public Worker {
           if (status_inv && (df_resid > 0)) {
             
             // residual variance
-            long double var_resid = (1 - arma_rsq[i]) * var_y / df_resid;
+            long double var_resid = 0;
+            
+            if (1 - arma_rsq[i] >= 0) {
+              var_resid = (1 - arma_rsq[i]) * var_y / df_resid;
+            }
             
             // standard errors
             arma_se.row(i) = sqrt(var_resid * trans(diagvec(A_inv)));
