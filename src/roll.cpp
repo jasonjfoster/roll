@@ -25,7 +25,7 @@ void check_weights_p(const arma::vec& weights) {
   }
   
   if (any_leq > 0) {
-    warning("'weights' must be greater than zero");
+    stop("values of 'weights' must be greater than zero");
   }
   
 }

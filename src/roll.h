@@ -1195,6 +1195,7 @@ struct RollMedianParallel : public Worker {
         int temp_ix = 0;
         long double sum_upper_w = 0;
         long double sum_upper_x = 0;
+        long double sum_upper_w_temp = 0;
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
@@ -1206,12 +1207,14 @@ struct RollMedianParallel : public Worker {
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
           if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
             
-            if (sum_upper_w / sum_w < 0.5) {
+            if (sum_upper_w / sum_w <= 0.5) {
+              
+              temp_ix = n_size_x - count - 1;
+              sum_upper_w_temp = sum_upper_w;
               
               // compute the rolling sum
               sum_upper_w += arma_weights_subset[k];
               sum_upper_x = x_subset[k];
-              temp_ix = n_size_x - count - 1;
               
             }
             
@@ -1226,9 +1229,9 @@ struct RollMedianParallel : public Worker {
         // compute the median
         if ((n_obs >= min_obs)) {
           
-          if (std::abs(sum_upper_w / sum_w - 0.5) <= sqrt(arma::datum::eps)) {
+          if (std::abs(sum_upper_w_temp / sum_w - 0.5) <= sqrt(arma::datum::eps)) {
             
-            k = sort_ix[temp_ix - 1];
+            k = sort_ix[temp_ix + 1];
             arma_median(i, j) = (x_subset[k] + sum_upper_x) / 2;
             
           } else {
