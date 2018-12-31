@@ -7,7 +7,7 @@
 
 ### Changes in roll version 1.1.1 (2018-08-11)
 
-* Added `online` argument to process observations using an online algorithm by default
+* Added `online` argument to process observations using online algorithms by default
 
 * `roll_lm` function now returns standard errors ([#7](https://github.com/jjf234/roll/issues/7))
 
