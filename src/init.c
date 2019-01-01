@@ -15,6 +15,7 @@ extern SEXP _roll_roll_lm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_max(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_mean(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_median(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _roll_roll_min(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_prod(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_scale(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_sd(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -29,6 +30,7 @@ static const R_CallMethodDef CallEntries[] = {
   {"_roll_roll_max",    (DL_FUNC) &_roll_roll_max,     7},
   {"_roll_roll_mean",   (DL_FUNC) &_roll_roll_mean,    7},
   {"_roll_roll_median", (DL_FUNC) &_roll_roll_median,  7},
+  {"_roll_roll_min",    (DL_FUNC) &_roll_roll_min,     7},
   {"_roll_roll_prod",   (DL_FUNC) &_roll_roll_prod,    7},
   {"_roll_roll_scale",  (DL_FUNC) &_roll_roll_scale,   9},
   {"_roll_roll_sd",     (DL_FUNC) &_roll_roll_sd,      8},

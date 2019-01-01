@@ -241,7 +241,7 @@ roll_median <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling maximums
+##' @return An object of the same class and dimension as \code{x} with the rolling maximums.
 ##' @examples
 ##' n_vars <- 3
 ##' n_obs <- 15
@@ -258,6 +258,46 @@ roll_max <- function(x, width, weights = rep(1, width),
                      min_obs = width, complete_obs = FALSE, na_restore = FALSE,
                      online = FALSE) {
   return(.Call(`_roll_roll_max`,
+               x,
+               as.integer(width),
+               as.numeric(weights),
+               as.integer(min_obs),
+               as.logical(complete_obs),
+               as.logical(na_restore),
+               as.logical(online)
+  ))
+}
+
+##' Rolling Minimums
+##'
+##' A function for computing rolling minimums of time-series data.
+##'
+##' @param x matrix or xts object. Rows are observations and columns are variables.
+##' @param width integer. Window size.
+##' @param weights vector. Weights for each observation within a window.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is \code{NA}.
+##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
+##' if \code{FALSE} then each value is used.
+##' @param na_restore logical. Should missing values be restored?
+##' @param online logical. Process observations using an online algorithm.
+##' @return An object of the same class and dimension as \code{x} with the rolling minimums.
+##' @examples
+##' n_vars <- 3
+##' n_obs <- 15
+##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' 
+##' # rolling minimums
+##' result <- roll_min(x, 5)
+##' 
+##' # rolling minimums with exponential decay
+##' weights <- 0.9 ^ (5:1)
+##' result <- roll_min(x, 5, weights)
+##' @export
+roll_min <- function(x, width, weights = rep(1, width),
+                     min_obs = width, complete_obs = FALSE, na_restore = FALSE,
+                     online = FALSE) {
+  return(.Call(`_roll_roll_min`,
                x,
                as.integer(width),
                as.numeric(weights),
