@@ -1115,6 +1115,194 @@ struct RollMeanParallel : public Worker {
   
 };
 
+// 'Worker' function for computing rolling minimums using a standard algorithm
+struct RollMinParallel : public Worker {
+  
+  const RMatrix<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int n_cols_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const arma::uvec arma_any_na;
+  const bool na_restore;
+  arma::mat& arma_min;          // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollMinParallel(const NumericMatrix x, const int n,
+                  const int n_rows_x, const int n_cols_x,
+                  const int width, const arma::vec arma_weights,
+                  const int min_obs, const arma::uvec arma_any_na,
+                  const bool na_restore, arma::mat& arma_min)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), n_cols_x(n_cols_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs), arma_any_na(arma_any_na),
+      na_restore(na_restore), arma_min(arma_min) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z / n_cols_x;
+      int j = z % n_cols_x;
+      
+      // don't compute if missing value and 'na_restore' argument is true
+      if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+        
+        int offset = std::max(0, i - width + 1);
+        int n_size_x = i - offset + 1;
+        arma::vec x_subset(n_size_x);
+        arma::uvec arma_any_na_subset(n_size_x);
+        
+        std::copy(x.begin() + n_rows_x * j + offset, x.begin() + n_rows_x * j + i + 1,
+                  x_subset.begin());
+        std::copy(arma_any_na.begin() + offset, arma_any_na.begin() + i + 1,
+                  arma_any_na_subset.begin());
+        
+        arma::ivec sort_ix = stl_sort_index(x_subset);
+        
+        int k = 0;
+        int count = 0;
+        int n_obs = 0;
+        long double min_x = 0;
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (n_size_x - 1 >= count)) {
+          
+          k = sort_ix[n_size_x - count - 1];
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
+            
+            min_x = x_subset[k];
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute the minimum
+        if ((n_obs >= min_obs)) {
+          arma_min(i, j) = min_x;
+        } else {
+          arma_min(i, j) = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        arma_min(i, j) = x(i, j);
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling maximums using a standard algorithm
+struct RollMaxParallel : public Worker {
+  
+  const RMatrix<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int n_cols_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const arma::uvec arma_any_na;
+  const bool na_restore;
+  arma::mat& arma_max;          // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollMaxParallel(const NumericMatrix x, const int n,
+                  const int n_rows_x, const int n_cols_x,
+                  const int width, const arma::vec arma_weights,
+                  const int min_obs, const arma::uvec arma_any_na,
+                  const bool na_restore, arma::mat& arma_max)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), n_cols_x(n_cols_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs), arma_any_na(arma_any_na),
+      na_restore(na_restore), arma_max(arma_max) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z / n_cols_x;
+      int j = z % n_cols_x;
+      
+      // don't compute if missing value and 'na_restore' argument is true
+      if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+        
+        int offset = std::max(0, i - width + 1);
+        int n_size_x = i - offset + 1;
+        arma::vec x_subset(n_size_x);
+        arma::uvec arma_any_na_subset(n_size_x);
+        
+        std::copy(x.begin() + n_rows_x * j + offset, x.begin() + n_rows_x * j + i + 1,
+                  x_subset.begin());
+        std::copy(arma_any_na.begin() + offset, arma_any_na.begin() + i + 1,
+                  arma_any_na_subset.begin());
+        
+        arma::ivec sort_ix = stl_sort_index(x_subset);
+        
+        int k = 0;
+        int count = 0;
+        int n_obs = 0;
+        long double max_x = 0;
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (n_size_x - 1 >= count)) {
+          
+          k = sort_ix[n_size_x - count - 1];
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
+            
+            if (n_obs == 0) {
+              max_x = x_subset[k];
+            }
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute the maximum
+        if ((n_obs >= min_obs)) {
+          arma_max(i, j) = max_x;
+        } else {
+          arma_max(i, j) = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        arma_max(i, j) = x(i, j);
+        
+      }
+      
+    }
+  }
+  
+};
+
 // 'Worker' function for computing rolling medians using a standard algorithm
 struct RollMedianParallel : public Worker {
   
@@ -1246,194 +1434,6 @@ struct RollMedianParallel : public Worker {
         
         // can be either NA or NaN
         arma_median(i, j) = x(i, j);
-        
-      }
-      
-    }
-  }
-  
-};
-
-// 'Worker' function for computing rolling maximums using a standard algorithm
-struct RollMaxParallel : public Worker {
-  
-  const RMatrix<double> x;      // source
-  const int n;
-  const int n_rows_x;
-  const int n_cols_x;
-  const int width;
-  const arma::vec arma_weights;
-  const int min_obs;
-  const arma::uvec arma_any_na;
-  const bool na_restore;
-  arma::mat& arma_max;          // destination (pass by reference)
-  
-  // initialize with source and destination
-  RollMaxParallel(const NumericMatrix x, const int n,
-                  const int n_rows_x, const int n_cols_x,
-                  const int width, const arma::vec arma_weights,
-                  const int min_obs, const arma::uvec arma_any_na,
-                  const bool na_restore, arma::mat& arma_max)
-    : x(x), n(n),
-      n_rows_x(n_rows_x), n_cols_x(n_cols_x),
-      width(width), arma_weights(arma_weights),
-      min_obs(min_obs), arma_any_na(arma_any_na),
-      na_restore(na_restore), arma_max(arma_max) { }
-  
-  // function call operator that iterates by index
-  void operator()(std::size_t begin_index, std::size_t end_index) {
-    for (std::size_t z = begin_index; z < end_index; z++) {
-      
-      // from 1D to 2D array
-      int i = z / n_cols_x;
-      int j = z % n_cols_x;
-      
-      // don't compute if missing value and 'na_restore' argument is true
-      if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
-        
-        int offset = std::max(0, i - width + 1);
-        int n_size_x = i - offset + 1;
-        arma::vec x_subset(n_size_x);
-        arma::uvec arma_any_na_subset(n_size_x);
-        
-        std::copy(x.begin() + n_rows_x * j + offset, x.begin() + n_rows_x * j + i + 1,
-                  x_subset.begin());
-        std::copy(arma_any_na.begin() + offset, arma_any_na.begin() + i + 1,
-                  arma_any_na_subset.begin());
-        
-        arma::ivec sort_ix = stl_sort_index(x_subset);
-        
-        int k = 0;
-        int count = 0;
-        int n_obs = 0;
-        long double max_x = 0;
-        
-        // number of observations is either the window size or,
-        // for partial results, the number of the current row
-        while ((width > count) && (n_size_x - 1 >= count)) {
-          
-          k = sort_ix[n_size_x - count - 1];
-          
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
-            
-            if (n_obs == 0) {
-              max_x = x_subset[k];
-            }
-            
-            n_obs += 1;
-            
-          }
-          
-          count += 1;
-          
-        }
-        
-        // compute the maximum
-        if ((n_obs >= min_obs)) {
-          arma_max(i, j) = max_x;
-        } else {
-          arma_max(i, j) = NA_REAL;
-        }
-        
-      } else {
-        
-        // can be either NA or NaN
-        arma_max(i, j) = x(i, j);
-        
-      }
-      
-    }
-  }
-  
-};
-
-// 'Worker' function for computing rolling minimums using a standard algorithm
-struct RollMinParallel : public Worker {
-  
-  const RMatrix<double> x;      // source
-  const int n;
-  const int n_rows_x;
-  const int n_cols_x;
-  const int width;
-  const arma::vec arma_weights;
-  const int min_obs;
-  const arma::uvec arma_any_na;
-  const bool na_restore;
-  arma::mat& arma_min;          // destination (pass by reference)
-  
-  // initialize with source and destination
-  RollMinParallel(const NumericMatrix x, const int n,
-                  const int n_rows_x, const int n_cols_x,
-                  const int width, const arma::vec arma_weights,
-                  const int min_obs, const arma::uvec arma_any_na,
-                  const bool na_restore, arma::mat& arma_min)
-    : x(x), n(n),
-      n_rows_x(n_rows_x), n_cols_x(n_cols_x),
-      width(width), arma_weights(arma_weights),
-      min_obs(min_obs), arma_any_na(arma_any_na),
-      na_restore(na_restore), arma_min(arma_min) { }
-  
-  // function call operator that iterates by index
-  void operator()(std::size_t begin_index, std::size_t end_index) {
-    for (std::size_t z = begin_index; z < end_index; z++) {
-      
-      // from 1D to 2D array
-      int i = z / n_cols_x;
-      int j = z % n_cols_x;
-      
-      // don't compute if missing value and 'na_restore' argument is true
-      if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
-        
-        int offset = std::max(0, i - width + 1);
-        int n_size_x = i - offset + 1;
-        arma::vec x_subset(n_size_x);
-        arma::uvec arma_any_na_subset(n_size_x);
-        
-        std::copy(x.begin() + n_rows_x * j + offset, x.begin() + n_rows_x * j + i + 1,
-                  x_subset.begin());
-        std::copy(arma_any_na.begin() + offset, arma_any_na.begin() + i + 1,
-                  arma_any_na_subset.begin());
-        
-        arma::ivec sort_ix = stl_sort_index(x_subset);
-        
-        int k = 0;
-        int count = 0;
-        int n_obs = 0;
-        long double min_x = 0;
-        
-        // number of observations is either the window size or,
-        // for partial results, the number of the current row
-        while ((width > count) && (n_size_x - 1 >= count)) {
-          
-          k = sort_ix[n_size_x - count - 1];
-          
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
-            
-            min_x = x_subset[k];
-            
-            n_obs += 1;
-            
-          }
-          
-          count += 1;
-          
-        }
-        
-        // compute the minimum
-        if ((n_obs >= min_obs)) {
-          arma_min(i, j) = min_x;
-        } else {
-          arma_min(i, j) = NA_REAL;
-        }
-        
-      } else {
-        
-        // can be either NA or NaN
-        arma_min(i, j) = x(i, j);
         
       }
       
@@ -2309,8 +2309,7 @@ struct RollScaleOnline : public Worker {
           // compute the unbiased estimate of centering and scaling
           if (n_obs >= min_obs) {
             
-            if (scale && ((n_obs <= 1) ||
-                sqrt(var_x) <= sqrt(arma::datum::eps))) {
+            if (scale && ((n_obs <= 1) || (var_x <= sqrt(arma::datum::eps)))) {
               arma_scale(i, j) = NA_REAL;
             } else if (center && scale) {
               arma_scale(i, j) = (x_ij - mean_x) / sqrt(var_x);
@@ -2483,8 +2482,7 @@ struct RollScaleParallel : public Worker {
         // compute the unbiased estimate of centering and scaling
         if (n_obs >= min_obs) {
           
-          if (scale && ((n_obs <= 1) ||
-              sqrt(var_x) <= sqrt(arma::datum::eps))) {
+          if (scale && ((n_obs <= 1) || (var_x <= sqrt(arma::datum::eps)))) {
             arma_scale(i, j) = NA_REAL;
           } else if (center && scale) {
             arma_scale(i, j) = (x_ij - mean_x) / sqrt(var_x);
@@ -2784,8 +2782,8 @@ struct RollCovOnlineXX : public Worker {
                 if (scale) {
                   
                   // don't compute if the standard deviation is zero
-                  if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) ||
-                      (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
+                  if ((sumsq_x <= sqrt(arma::datum::eps)) ||
+                      (sumsq_y <= sqrt(arma::datum::eps))) {
                     arma_cov(j, k, i) = NA_REAL;
                   } else {
                     arma_cov(j, k, i) = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
@@ -3097,8 +3095,8 @@ struct RollCovOnlineXY : public Worker {
                 if (scale) {
                   
                   // don't compute if the standard deviation is zero
-                  if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) ||
-                      (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
+                  if ((sumsq_x <= sqrt(arma::datum::eps)) ||
+                      (sumsq_y <= sqrt(arma::datum::eps))) {
                     arma_cov(j, k, i) = NA_REAL;
                   } else {
                     arma_cov(j, k, i) = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
@@ -3300,8 +3298,8 @@ struct RollCovParallelXX : public Worker {
             if (scale) {
               
               // don't compute if the standard deviation is zero
-              if ((sqrt(var_x) <= sqrt(arma::datum::eps)) ||
-                  (sqrt(var_y) <= sqrt(arma::datum::eps))) {
+              if ((var_x <= sqrt(arma::datum::eps)) ||
+                  (var_y <= sqrt(arma::datum::eps))) {
                 arma_cov(j, k, i) = NA_REAL;
               } else {
                 arma_cov(j, k, i) = sumsq_xy / (sqrt(var_x) * sqrt(var_y));
@@ -3504,8 +3502,8 @@ struct RollCovParallelXY : public Worker {
             if (scale) {
               
               // don't compute if the standard deviation is zero
-              if ((sqrt(var_x) <= sqrt(arma::datum::eps)) ||
-                  (sqrt(var_y) <= sqrt(arma::datum::eps))) {
+              if ((var_x <= sqrt(arma::datum::eps)) ||
+                  (var_y <= sqrt(arma::datum::eps))) {
                 arma_cov(j, k, i) = NA_REAL;
               } else {
                 arma_cov(j, k, i) = sumsq_xy / (sqrt(var_x) * sqrt(var_y));
@@ -4057,7 +4055,7 @@ struct RollLmInterceptTRUE : public Worker {
           
           // r-squared
           long double var_y = sigma(n_cols_x - 1, n_cols_x - 1);
-          if ((sqrt(var_y) <= sqrt(arma::datum::eps)) || (var_y < 0)) {
+          if (var_y <= sqrt(arma::datum::eps)) {
             arma_rsq[i] = NA_REAL;
           } else {
             arma_rsq[i] = as_scalar(trans_coef * A * coef) / var_y;
@@ -4170,7 +4168,7 @@ struct RollLmInterceptFALSE : public Worker {
           
           // r-squared
           long double var_y = sigma(n_cols_x - 1, n_cols_x - 1);
-          if ((sqrt(var_y) <= sqrt(arma::datum::eps)) || (var_y < 0)) {
+          if (var_y <= sqrt(arma::datum::eps)) {
             arma_rsq[i] = NA_REAL;
           } else {
             arma_rsq[i] = as_scalar(trans_coef * A * coef) / var_y;

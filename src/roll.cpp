@@ -599,17 +599,17 @@ NumericMatrix roll_mean(const NumericMatrix& x, const int& width,
   
 }
 
-// [[Rcpp::export(.roll_median)]]
-NumericMatrix roll_median(const NumericMatrix& x, const int& width,
-                          const arma::vec& weights, const int& min_obs,
-                          const bool& complete_obs, const bool& na_restore,
-                          const bool& online) {
+// [[Rcpp::export(.roll_min)]]
+NumericMatrix roll_min(const NumericMatrix& x, const int& width,
+                       const arma::vec& weights, const int& min_obs,
+                       const bool& complete_obs, const bool& na_restore,
+                       const bool& online) {
   
   int n = weights.size();
   int n_rows_x = x.nrow();
   int n_cols_x = x.ncol();
   arma::uvec arma_any_na(n_rows_x);
-  arma::mat arma_median(n_rows_x, n_cols_x);
+  arma::mat arma_min(n_rows_x, n_cols_x);
   
   // check 'width' argument for errors
   check_width(width);
@@ -630,28 +630,28 @@ NumericMatrix roll_median(const NumericMatrix& x, const int& width,
     arma_any_na.fill(0);
   }
   
-  // compute rolling median
+  // compute rolling minimums
   if (online) {
     
     warning("'online = TRUE' is not supported");
-    RollMedianParallel roll_median_parallel(x, n, n_rows_x, n_cols_x, width,
-                                            weights, min_obs,
-                                            arma_any_na, na_restore,
-                                            arma_median);
-    parallelFor(0, n_rows_x * n_cols_x, roll_median_parallel);
+    RollMinParallel roll_min_parallel(x, n, n_rows_x, n_cols_x, width,
+                                      weights, min_obs,
+                                      arma_any_na, na_restore,
+                                      arma_min);
+    parallelFor(0, n_rows_x * n_cols_x, roll_min_parallel);
     
   } else {
     
-    RollMedianParallel roll_median_parallel(x, n, n_rows_x, n_cols_x, width,
-                                            weights, min_obs,
-                                            arma_any_na, na_restore,
-                                            arma_median);
-    parallelFor(0, n_rows_x * n_cols_x, roll_median_parallel);
+    RollMinParallel roll_min_parallel(x, n, n_rows_x, n_cols_x, width,
+                                      weights, min_obs,
+                                      arma_any_na, na_restore,
+                                      arma_min);
+    parallelFor(0, n_rows_x * n_cols_x, roll_min_parallel);
     
   }
   
   // create and return a matrix or xts object
-  NumericMatrix result(wrap(arma_median));
+  NumericMatrix result(wrap(arma_min));
   List dimnames = x.attr("dimnames");
   result.attr("dimnames") = dimnames;
   result.attr("index") = x.attr("index");
@@ -731,18 +731,17 @@ NumericMatrix roll_max(const NumericMatrix& x, const int& width,
   
 }
 
-
-// [[Rcpp::export(.roll_min)]]
-NumericMatrix roll_min(const NumericMatrix& x, const int& width,
-                       const arma::vec& weights, const int& min_obs,
-                       const bool& complete_obs, const bool& na_restore,
-                       const bool& online) {
+// [[Rcpp::export(.roll_median)]]
+NumericMatrix roll_median(const NumericMatrix& x, const int& width,
+                          const arma::vec& weights, const int& min_obs,
+                          const bool& complete_obs, const bool& na_restore,
+                          const bool& online) {
   
   int n = weights.size();
   int n_rows_x = x.nrow();
   int n_cols_x = x.ncol();
   arma::uvec arma_any_na(n_rows_x);
-  arma::mat arma_min(n_rows_x, n_cols_x);
+  arma::mat arma_median(n_rows_x, n_cols_x);
   
   // check 'width' argument for errors
   check_width(width);
@@ -763,28 +762,28 @@ NumericMatrix roll_min(const NumericMatrix& x, const int& width,
     arma_any_na.fill(0);
   }
   
-  // compute rolling minimums
+  // compute rolling median
   if (online) {
     
     warning("'online = TRUE' is not supported");
-    RollMinParallel roll_min_parallel(x, n, n_rows_x, n_cols_x, width,
-                                      weights, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_min);
-    parallelFor(0, n_rows_x * n_cols_x, roll_min_parallel);
+    RollMedianParallel roll_median_parallel(x, n, n_rows_x, n_cols_x, width,
+                                            weights, min_obs,
+                                            arma_any_na, na_restore,
+                                            arma_median);
+    parallelFor(0, n_rows_x * n_cols_x, roll_median_parallel);
     
   } else {
     
-    RollMinParallel roll_min_parallel(x, n, n_rows_x, n_cols_x, width,
-                                      weights, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_min);
-    parallelFor(0, n_rows_x * n_cols_x, roll_min_parallel);
+    RollMedianParallel roll_median_parallel(x, n, n_rows_x, n_cols_x, width,
+                                            weights, min_obs,
+                                            arma_any_na, na_restore,
+                                            arma_median);
+    parallelFor(0, n_rows_x * n_cols_x, roll_median_parallel);
     
   }
   
   // create and return a matrix or xts object
-  NumericMatrix result(wrap(arma_min));
+  NumericMatrix result(wrap(arma_median));
   List dimnames = x.attr("dimnames");
   result.attr("dimnames") = dimnames;
   result.attr("index") = x.attr("index");

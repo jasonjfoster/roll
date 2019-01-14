@@ -21,16 +21,16 @@
     .Call(`_roll_roll_mean`, x, width, weights, min_obs, complete_obs, na_restore, online)
 }
 
-.roll_median <- function(x, width, weights, min_obs, complete_obs, na_restore, online) {
-    .Call(`_roll_roll_median`, x, width, weights, min_obs, complete_obs, na_restore, online)
+.roll_min <- function(x, width, weights, min_obs, complete_obs, na_restore, online) {
+    .Call(`_roll_roll_min`, x, width, weights, min_obs, complete_obs, na_restore, online)
 }
 
 .roll_max <- function(x, width, weights, min_obs, complete_obs, na_restore, online) {
     .Call(`_roll_roll_max`, x, width, weights, min_obs, complete_obs, na_restore, online)
 }
 
-.roll_min <- function(x, width, weights, min_obs, complete_obs, na_restore, online) {
-    .Call(`_roll_roll_min`, x, width, weights, min_obs, complete_obs, na_restore, online)
+.roll_median <- function(x, width, weights, min_obs, complete_obs, na_restore, online) {
+    .Call(`_roll_roll_median`, x, width, weights, min_obs, complete_obs, na_restore, online)
 }
 
 .roll_var <- function(x, width, weights, center, min_obs, complete_obs, na_restore, online) {
