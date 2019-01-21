@@ -2309,7 +2309,8 @@ struct RollScaleOnline : public Worker {
           // compute the unbiased estimate of centering and scaling
           if (n_obs >= min_obs) {
             
-            if (scale && ((n_obs <= 1) || (var_x <= sqrt(arma::datum::eps)))) {
+            if (scale && ((n_obs <= 1) || (var_x < 0) ||
+                (sqrt(var_x) <= sqrt(arma::datum::eps)))) {
               arma_scale(i, j) = NA_REAL;
             } else if (center && scale) {
               arma_scale(i, j) = (x_ij - mean_x) / sqrt(var_x);
@@ -2482,7 +2483,8 @@ struct RollScaleParallel : public Worker {
         // compute the unbiased estimate of centering and scaling
         if (n_obs >= min_obs) {
           
-          if (scale && ((n_obs <= 1) || (var_x <= sqrt(arma::datum::eps)))) {
+          if (scale && ((n_obs <= 1) || (var_x < 0) ||
+              (sqrt(var_x) <= sqrt(arma::datum::eps)))) {
             arma_scale(i, j) = NA_REAL;
           } else if (center && scale) {
             arma_scale(i, j) = (x_ij - mean_x) / sqrt(var_x);
@@ -2782,8 +2784,8 @@ struct RollCovOnlineXX : public Worker {
                 if (scale) {
                   
                   // don't compute if the standard deviation is zero
-                  if ((sumsq_x <= sqrt(arma::datum::eps)) ||
-                      (sumsq_y <= sqrt(arma::datum::eps))) {
+                  if ((sumsq_x < 0) || (sumsq_y < 0) ||
+                      (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
                     arma_cov(j, k, i) = NA_REAL;
                   } else {
                     arma_cov(j, k, i) = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
@@ -3095,8 +3097,8 @@ struct RollCovOnlineXY : public Worker {
                 if (scale) {
                   
                   // don't compute if the standard deviation is zero
-                  if ((sumsq_x <= sqrt(arma::datum::eps)) ||
-                      (sumsq_y <= sqrt(arma::datum::eps))) {
+                  if ((sumsq_x < 0) || (sumsq_y < 0) ||
+                      (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
                     arma_cov(j, k, i) = NA_REAL;
                   } else {
                     arma_cov(j, k, i) = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
@@ -3298,8 +3300,8 @@ struct RollCovParallelXX : public Worker {
             if (scale) {
               
               // don't compute if the standard deviation is zero
-              if ((var_x <= sqrt(arma::datum::eps)) ||
-                  (var_y <= sqrt(arma::datum::eps))) {
+              if ((var_x < 0) || (var_y < 0) ||
+                  (sqrt(var_x) <= sqrt(arma::datum::eps)) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {
                 arma_cov(j, k, i) = NA_REAL;
               } else {
                 arma_cov(j, k, i) = sumsq_xy / (sqrt(var_x) * sqrt(var_y));
@@ -3502,8 +3504,8 @@ struct RollCovParallelXY : public Worker {
             if (scale) {
               
               // don't compute if the standard deviation is zero
-              if ((var_x <= sqrt(arma::datum::eps)) ||
-                  (var_y <= sqrt(arma::datum::eps))) {
+              if ((var_x < 0) || (var_y < 0) ||
+                  (sqrt(var_x) <= sqrt(arma::datum::eps)) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {
                 arma_cov(j, k, i) = NA_REAL;
               } else {
                 arma_cov(j, k, i) = sumsq_xy / (sqrt(var_x) * sqrt(var_y));
