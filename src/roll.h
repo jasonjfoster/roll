@@ -4057,7 +4057,7 @@ struct RollLmInterceptTRUE : public Worker {
           
           // r-squared
           long double var_y = sigma(n_cols_x - 1, n_cols_x - 1);
-          if (var_y <= sqrt(arma::datum::eps)) {
+          if ((var_y < 0) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {
             arma_rsq[i] = NA_REAL;
           } else {
             arma_rsq[i] = as_scalar(trans_coef * A * coef) / var_y;
@@ -4170,7 +4170,7 @@ struct RollLmInterceptFALSE : public Worker {
           
           // r-squared
           long double var_y = sigma(n_cols_x - 1, n_cols_x - 1);
-          if (var_y <= sqrt(arma::datum::eps)) {
+          if ((var_y < 0) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {
             arma_rsq[i] = NA_REAL;
           } else {
             arma_rsq[i] = as_scalar(trans_coef * A * coef) / var_y;
