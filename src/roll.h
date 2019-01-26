@@ -3794,7 +3794,8 @@ struct RollCovOnlineLm : public Worker {
               // if ((n_obs > 1) && (n_obs >= min_obs)) {
               if (n_obs >= min_obs) {
 
-                if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+                if (((int)j != n_cols_x - 1) && ((int)k != n_cols_x - 1) &&
+                    (std::abs(sumsq_xy) <= sqrt(arma::datum::eps))) {
                   arma_cov(j, k, i) = 0;
                 } else {
                   arma_cov(j, k, i) = sumsq_xy;
@@ -3964,7 +3965,8 @@ struct RollCovParallelLm : public Worker {
           // if ((n_obs > 1) && (n_obs >= min_obs)) {
           if (n_obs >= min_obs) {
             
-            if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+            if (((int)j != n_cols_x - 1) && ((int)k != n_cols_x - 1) &&
+                (std::abs(sumsq_xy) <= sqrt(arma::datum::eps))) {
               arma_cov(j, k, i) = 0;
             } else {
               arma_cov(j, k, i) = sumsq_xy;
@@ -4074,6 +4076,10 @@ struct RollLmInterceptTRUE : public Worker {
             long double var_resid = (1 - arma_rsq[i]) * var_y / df_resid;
             
             // standard errors
+            if ((var_resid < 0) || (sqrt(var_resid) <= sqrt(arma::datum::eps))) {
+              var_resid = 0;
+            }
+            
             arma_se(i, 0) = sqrt(var_resid * (1 / arma_sum_w[i] +
               as_scalar(mean_x * A_inv * trans(mean_x))));
             arma_se.submat(i, 1, i, n_cols_x - 1) = sqrt(var_resid * trans(diagvec(A_inv)));
@@ -4184,14 +4190,13 @@ struct RollLmInterceptFALSE : public Worker {
           if (status_inv && (df_resid > 0)) {
             
             // residual variance
-            long double var_resid = 0;
-            
-            // inconsistent with RollLmInterceptTRUE!
-            if (std::abs(1 - arma_rsq[i]) > sqrt(arma::datum::eps)) {
-              var_resid = (1 - arma_rsq[i]) * var_y / df_resid;
-            }
+            long double var_resid = (1 - arma_rsq[i]) * var_y / df_resid;
             
             // standard errors
+            if ((var_resid < 0) || (sqrt(var_resid) <= sqrt(arma::datum::eps))) {
+              var_resid = 0;
+            }
+            
             arma_se.row(i) = sqrt(var_resid * trans(diagvec(A_inv)));
             
           } else {
