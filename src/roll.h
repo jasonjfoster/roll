@@ -1162,6 +1162,7 @@ struct RollMinParallel : public Worker {
         std::copy(arma_any_na.begin() + offset, arma_any_na.begin() + i + 1,
                   arma_any_na_subset.begin());
         
+        // similar to R's sort with 'index.return = TRUE'
         arma::ivec sort_ix = stl_sort_index(x_subset);
         
         int k = 0;
@@ -1179,6 +1180,8 @@ struct RollMinParallel : public Worker {
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
           if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
             
+            // minimum is last element of sorted array
+            // note: 'weights' must be greater than 0
             min_x = x_subset[k];
             
             n_obs += 1;
@@ -1255,6 +1258,7 @@ struct RollMaxParallel : public Worker {
         std::copy(arma_any_na.begin() + offset, arma_any_na.begin() + i + 1,
                   arma_any_na_subset.begin());
         
+        // similar to R's sort with 'index.return = TRUE'
         arma::ivec sort_ix = stl_sort_index(x_subset);
         
         int k = 0;
@@ -1272,6 +1276,8 @@ struct RollMaxParallel : public Worker {
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
           if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
             
+            // maximum is first element of sorted array
+            // note: 'weights' must be greater than 0
             if (n_obs == 0) {
               max_x = x_subset[k];
             }
@@ -1357,6 +1363,7 @@ struct RollMedianParallel : public Worker {
         std::copy(arma_any_na.begin() + offset, arma_any_na.begin() + i + 1,
                   arma_any_na_subset.begin());
         
+        // similar to R's sort with 'index.return = TRUE'
         arma::ivec sort_ix = stl_sort_index(x_subset);
         
         // number of observations is either the window size or,
@@ -1395,6 +1402,8 @@ struct RollMedianParallel : public Worker {
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
           if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
             
+            // median is last element of sorted array that satisfies condition
+            // note: 'weights' must be greater than 0
             if (sum_upper_w / sum_w <= 0.5) {
               
               temp_ix = n_size_x - count - 1;
@@ -1417,6 +1426,7 @@ struct RollMedianParallel : public Worker {
         // compute the median
         if ((n_obs >= min_obs)) {
           
+          // average if upper and lower weight is equal
           if (std::abs(sum_upper_w_temp / sum_w - 0.5) <= sqrt(arma::datum::eps)) {
             
             k = sort_ix[temp_ix + 1];
