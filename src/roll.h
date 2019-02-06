@@ -101,7 +101,7 @@ struct RollAnyOnline : public Worker {
           
         }
         
-        // don't compute if missing value and 'na_restore' argument is true
+        // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && (x(i, j) != NA_INTEGER))) {
           
           // compute any
@@ -167,7 +167,7 @@ struct RollAnyParallel : public Worker {
       int n_obs = 0;
       int sum_x = 0;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && (x(i, j) != NA_INTEGER))) {
         
         // number of observations is either the window size or,
@@ -309,7 +309,7 @@ struct RollAllOnline : public Worker {
           
         }
         
-        // don't compute if missing value and 'na_restore' argument is true
+        // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && (x(i, j) != NA_INTEGER))) {
           
           // compute all
@@ -375,7 +375,7 @@ struct RollAllParallel : public Worker {
       int n_obs = 0;
       int sum_x = 0;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && (x(i, j) != NA_INTEGER))) {
         
         // number of observations is either the window size or,
@@ -538,7 +538,7 @@ struct RollSumOnline : public Worker {
           
         }
         
-        // don't compute if missing value and 'na_restore' argument is true
+        // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
           // compute the sum
@@ -600,7 +600,7 @@ struct RollSumParallel : public Worker {
       int n_obs = 0;
       long double sum_x = 0;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
         
         // number of observations is either the window size or,
@@ -784,7 +784,7 @@ struct RollProdOnline : public Worker {
           
         }
         
-        // don't compute if missing value and 'na_restore' argument is true
+        // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
           // compute the product
@@ -846,7 +846,7 @@ struct RollProdParallel : public Worker {
       int n_obs = 0;
       long double prod_x = 1;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
         
         // number of observations is either the window size or,
@@ -1011,7 +1011,7 @@ struct RollMeanOnline : public Worker {
           
         }
         
-        // don't compute if missing value and 'na_restore' argument is true
+        // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
           // compute the mean
@@ -1074,7 +1074,7 @@ struct RollMeanParallel : public Worker {
       long double sum_w = 0;
       long double sum_x = 0;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
         
         // number of observations is either the window size or,
@@ -1149,7 +1149,7 @@ struct RollMinParallel : public Worker {
       int i = z / n_cols_x;
       int j = z % n_cols_x;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
         
         int offset = std::max(0, i - width + 1);
@@ -1180,7 +1180,7 @@ struct RollMinParallel : public Worker {
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
           if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
             
-            // minimum is last element of sorted array
+            // last element of sorted array
             // note: 'weights' must be greater than 0
             min_x = x_subset[k];
             
@@ -1245,7 +1245,7 @@ struct RollMaxParallel : public Worker {
       int i = z / n_cols_x;
       int j = z % n_cols_x;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
         
         int offset = std::max(0, i - width + 1);
@@ -1276,7 +1276,7 @@ struct RollMaxParallel : public Worker {
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
           if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
             
-            // maximum is first element of sorted array
+            // first element of sorted array
             // note: 'weights' must be greater than 0
             if (n_obs == 0) {
               max_x = x_subset[k];
@@ -1343,7 +1343,7 @@ struct RollMedianParallel : public Worker {
       int i = z / n_cols_x;
       int j = z % n_cols_x;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
         
         int k = 0;
@@ -1402,7 +1402,7 @@ struct RollMedianParallel : public Worker {
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
           if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
             
-            // median is last element of sorted array that satisfies condition
+            // last element of sorted array that is half of 'weights'
             // note: 'weights' must be greater than 0
             if (sum_upper_w / sum_w <= 0.5) {
               
@@ -1629,7 +1629,7 @@ struct RollVarOnline : public Worker {
           
         }
         
-        // don't compute if missing value and 'na_restore' argument is true
+        // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
           // compute the unbiased estimate of variance
@@ -1691,7 +1691,7 @@ struct RollVarParallel : public Worker {
       
       long double mean_x = 0;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
         
         if (center) {
@@ -1953,7 +1953,7 @@ struct RollSdOnline : public Worker {
           
         }
         
-        // don't compute if missing value and 'na_restore' argument is true
+        // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
           // compute the unbiased estimate of standard deviation
@@ -2015,7 +2015,7 @@ struct RollSdParallel : public Worker {
       
       long double mean_x = 0;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
         
         if (center) {
@@ -2313,7 +2313,7 @@ struct RollScaleOnline : public Worker {
           
         }
         
-        // don't compute if missing value and 'na_restore' argument is true
+        // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
           // compute the unbiased estimate of centering and scaling
@@ -2390,7 +2390,7 @@ struct RollScaleParallel : public Worker {
       long double mean_x = 0;
       long double var_x = 0;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
         
         if (center) {
@@ -2784,7 +2784,7 @@ struct RollCovOnlineXX : public Worker {
             
           }
           
-          // don't compute if missing value and 'na_restore' argument is true
+          // don't compute if missing value and 'na_restore' argument is TRUE
           if ((!na_restore) || (na_restore && !std::isnan(x(i, j)) &&
               !std::isnan(x(i, k)))) {
               
@@ -3097,7 +3097,7 @@ struct RollCovOnlineXY : public Worker {
             
           }
           
-          // don't compute if missing value and 'na_restore' argument is true
+          // don't compute if missing value and 'na_restore' argument is TRUE
           if ((!na_restore) || (na_restore && !std::isnan(x(i, j)) &&
               !std::isnan(y(i, k)))) {
               
@@ -3188,7 +3188,7 @@ struct RollCovParallelXX : public Worker {
       long double var_x = 0;
       long double var_y = 0;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)) &&
           !std::isnan(x(i, k)))) {
           
@@ -3392,7 +3392,7 @@ struct RollCovParallelXY : public Worker {
       long double var_x = 0;
       long double var_y = 0;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)) &&
           !std::isnan(y(i, k)))) {
           
@@ -3796,7 +3796,7 @@ struct RollCovOnlineLm : public Worker {
             arma_mean(i, j) = mean_x;
           }
           
-          // don't compute if missing value and 'na_restore' argument is true
+          // don't compute if missing value and 'na_restore' argument is TRUE
           if ((!na_restore) || (na_restore && !std::isnan(x(i, j)) &&
               !std::isnan(x(i, k)))) {
               
@@ -3886,7 +3886,7 @@ struct RollCovParallelLm : public Worker {
       long double mean_x = 0;
       long double mean_y = 0;
       
-      // don't compute if missing value and 'na_restore' argument is true
+      // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)) &&
           !std::isnan(x(i, k)))) {
           
