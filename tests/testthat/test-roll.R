@@ -9,9 +9,9 @@ set.seed(5640)
 
 # test data
 dates <- seq(Sys.Date(), length.out = n_obs, by = "-1 day")
-test_data <- list(zoo(matrix(rnorm(n_obs * n_vars_x), nrow = n_obs, ncol = n_vars_x), dates),
-                  zoo(matrix(rev(rep(1:n_vars_x, times = n_vars_x, each = n_obs / n_vars_x)) / 1000,
-                             nrow = n_obs, ncol = n_vars_x), dates))
+test_data <- list(zoo::zoo(matrix(rnorm(n_obs * n_vars_x), nrow = n_obs, ncol = n_vars_x), dates),
+                  zoo::zoo(matrix(rev(rep(1:n_vars_x, times = n_vars_x, each = n_obs / n_vars_x)) / 1000,
+                                  nrow = n_obs, ncol = n_vars_x), dates))
 test_data <- lapply(test_data, setNames, paste0("x", rep(1:n_vars_x)))
 test_data[[3]] <- matrix(rnorm(n_obs * n_vars_x), nrow = n_obs, ncol = n_vars_x)
 
@@ -78,7 +78,7 @@ rollapplyr_lm <- function(x, y, width) {
                  "r.squared" = matrix(NA, n_rows_xy, 1),
                  "std.error" = matrix(NA, n_rows_xy, n_cols_x + 1))
   
-  if (is.zoo(x)) {
+  if (zoo::is.zoo(x)) {
     
     x_attr <- attributes(x)
     x_attr[["dim"]] <- NULL
