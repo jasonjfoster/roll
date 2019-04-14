@@ -19,11 +19,12 @@ idx <- sample(1:(n_obs * n_vars_x), n_obs / 4)
 test_data[[3]][idx] <- NA
 
 # test arguments
-test_data_x <- c(lapply(test_data, function(x){x[ , c(1, 2)]}),
-                 lapply(test_data, function(x){x[ , 1, drop = FALSE]}))
+# test_data_x <- c(lapply(test_data, function(x){x[ , c(1, 2)]}),
+#                  lapply(test_data, function(x){x[ , 1, drop = FALSE]}))
+test_data_x <- test_data
 test_data_y <- lapply(test_data, function(x){x[ , 3, drop = FALSE]})
 test_data_null <- c(test_data, list(NULL))
-test_width <- c(1, 2, 10, 100)
+test_width <- c(1, 2, 10, 20)
 test_intercept <- c(TRUE, FALSE)
 test_center <- c(TRUE, FALSE)
 test_scale <- c(TRUE, FALSE)
