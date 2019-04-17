@@ -1635,10 +1635,10 @@ struct RollVarOnline : public Worker {
           // compute the unbiased estimate of variance
           if ((n_obs > 1) && (n_obs >= min_obs)) {
             
-            if (sqrt(sumsq_x) > sqrt(arma::datum::eps)) {
-              arma_var(i, j) = sumsq_x / (sum_w - sumsq_w / sum_w);
-            } else {
+            if (sumsq_x <= sqrt(arma::datum::eps)) {
               arma_var(i, j) = 0;
+            } else {
+              arma_var(i, j) = sumsq_x / (sum_w - sumsq_w / sum_w);
             }
             
           } else {
@@ -1766,10 +1766,10 @@ struct RollVarParallel : public Worker {
         // compute the unbiased estimate of variance
         if ((n_obs > 1) && (n_obs >= min_obs)) {
           
-          if (sqrt(sumsq_x) > sqrt(arma::datum::eps)) {
-            arma_var(i, j) = sumsq_x / (sum_w - sumsq_w / sum_w);
-          } else {
+          if (sumsq_x <= sqrt(arma::datum::eps)) {
             arma_var(i, j) = 0;
+          } else {
+            arma_var(i, j) = sumsq_x / (sum_w - sumsq_w / sum_w);
           }
           
         } else {
@@ -1971,12 +1971,12 @@ struct RollSdOnline : public Worker {
           // compute the unbiased estimate of standard deviation
           if ((n_obs > 1) && (n_obs >= min_obs)) {
             
-            if (sqrt(sumsq_x) > sqrt(arma::datum::eps)) {
-              arma_sd(i, j) = sqrt(sumsq_x / (sum_w - sumsq_w / sum_w));
-            } else {
+            if (sumsq_x <= sqrt(arma::datum::eps)) {
               arma_sd(i, j) = 0;
+            } else {
+              arma_sd(i, j) = sqrt(sumsq_x / (sum_w - sumsq_w / sum_w));
             }
-            
+
           } else {
             arma_sd(i, j) = NA_REAL;
           }
@@ -2101,11 +2101,11 @@ struct RollSdParallel : public Worker {
         
         // compute the unbiased estimate of standard deviation
         if ((n_obs > 1) && (n_obs >= min_obs)) {
-          
-          if (sqrt(sumsq_x) > sqrt(arma::datum::eps)) {
-            arma_sd(i, j) = sqrt(sumsq_x / (sum_w - sumsq_w / sum_w));
-          } else {
+
+          if (sumsq_x <= sqrt(arma::datum::eps)) {
             arma_sd(i, j) = 0;
+          } else {
+            arma_sd(i, j) = sqrt(sumsq_x / (sum_w - sumsq_w / sum_w));
           }
           
         } else {

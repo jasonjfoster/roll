@@ -1,6 +1,6 @@
-context("rolling means")
+context("rolling statistics")
 
-n_vars_x <- 3
+n_vars_x <- 4
 n_vars_y <- 1
 n_obs <- 15
 lambda <- 0.9
@@ -19,16 +19,14 @@ idx <- sample(1:(n_obs * n_vars_x), n_obs / 4)
 test_data[[3]][idx] <- NA
 
 # test arguments
-# test_data_x <- c(lapply(test_data, function(x){x[ , c(1, 2)]}),
-#                  lapply(test_data, function(x){x[ , 1, drop = FALSE]}))
-test_data_x <- lapply(test_data, function(x){x[ , c(1, 2)]})
-test_data_y <- lapply(test_data, function(x){x[ , 3, drop = FALSE]})
-test_data_null <- c(test_data, list(NULL))
+test_data_x <- lapply(test_data, function(x){x[ , 1:2]})
+test_data_y <- lapply(test_data, function(x){x[ , 3:4, drop = FALSE]})
+test_data_null <- c(test_data_x, list(NULL))
 test_width <- c(1, 2, 10, 20)
 test_intercept <- c(TRUE, FALSE)
 test_center <- c(TRUE, FALSE)
 test_scale <- c(TRUE, FALSE)
-test_min_obs <- c(1, 2, 5, 100)
+test_min_obs <- c(1, 2, 10, 20)
 test_complete_obs <- c(TRUE, FALSE)
 test_na_restore <- c(TRUE, FALSE)
 test_online <- c(TRUE, FALSE)
@@ -50,15 +48,16 @@ scale_z <- function(x, center = TRUE, scale = TRUE) {
   
 }
 
-rollapplyr_cube <- function(f, x, width) {
+rollapplyr_cube <- function(f, x, y, width) {
   
-  n_rows_x <- nrow(x)
+  n_rows_xy <- nrow(x)
   n_cols_x <- ncol(x)
-  r_cube <- array(NA, c(n_cols_x, n_cols_x, n_rows_x))
+  r_cube <- array(NA, c(n_cols_x, n_cols_x, n_rows_xy))
   
-  for (i in 1:n_rows_x) {
+  for (i in 1:n_rows_xy) {
     
-    result <- f(x[max(1, i - width + 1):i, , drop = FALSE])
+    result <- f(x[max(1, i - width + 1):i, , drop = FALSE],
+                y[max(1, i - width + 1):i, , drop = FALSE])
     
     if (!anyNA(result)) {
       r_cube[ , , i] <- result
@@ -70,14 +69,18 @@ rollapplyr_cube <- function(f, x, width) {
   
 }
 
-rollapplyr_lm <- function(x, y, width) {
+rollapplyr_lm <- function(x, y, width, intercept) {
   
   n_rows_xy <- nrow(x)
   n_cols_x <- ncol(x)
   
-  result <- list("coefficients" = matrix(NA, n_rows_xy, n_cols_x + 1),
+  if (intercept) {
+    n_cols_x <- n_cols_x + 1
+  }
+  
+  result <- list("coefficients" = matrix(NA, n_rows_xy, n_cols_x),
                  "r.squared" = matrix(NA, n_rows_xy, 1),
-                 "std.error" = matrix(NA, n_rows_xy, n_cols_x + 1))
+                 "std.error" = matrix(NA, n_rows_xy, n_cols_x))
   
   if (zoo::is.zoo(x)) {
     
@@ -93,10 +96,15 @@ rollapplyr_lm <- function(x, y, width) {
     y_subset <- y[max(1, i - width + 1):i, , drop = FALSE]
     data <- as.data.frame(cbind(y_subset, x_subset))
     
-    fit <- lm(reformulate(termlabels = ".", response = names(data)[1]), data = data)
+    if (intercept) {
+      fit <- lm(reformulate(termlabels = ".", response = names(data)[1]), data = data)
+    } else {
+      fit <- lm(reformulate(termlabels = ".-1", response = names(data)[1]), data = data)
+    }
+    
     summary_fit <- summary(fit)
     
-    if ((nrow(coef(summary_fit)) == n_cols_x + 1)) {
+    if ((nrow(coef(summary_fit)) == n_cols_x)) {
       
       result[["coefficients"]][i, ] <- coef(summary_fit)[ , "Estimate"]
       result[["r.squared"]][i, ] <- summary_fit$r.squared
@@ -115,9 +123,9 @@ rollapplyr_lm <- function(x, y, width) {
     attributes(result[["r.squared"]]) <- x_attr
     attributes(result[["std.error"]]) <- x_attr
     
-    attr(result[["coefficients"]], "dim") <- c(n_rows_xy, n_cols_x + 1)
+    attr(result[["coefficients"]], "dim") <- c(n_rows_xy, n_cols_x)
     attr(result[["r.squared"]], "dim") <- c(n_rows_xy, 1)
-    attr(result[["std.error"]], "dim") <- c(n_rows_xy, n_cols_x + 1)
+    attr(result[["std.error"]], "dim") <- c(n_rows_xy, n_cols_x)
     
   }
   
@@ -127,12 +135,15 @@ rollapplyr_lm <- function(x, y, width) {
 
 test_that("equal to online algorithm", {
   
+  # skip_on_cran()
+  
   for (ax in 1:length(test_data_x)) {
     for (b in 1:length(test_width)) {
       
       width <- test_width[b]
-      test_weights <- list(rep(1, width), lambda ^ (width:1), 1:width,
-                           rep(1, 2 * width), lambda ^ ((2 * width):1), 1:(width * 2))
+      test_weights <- list(lambda ^ ((2 * width):1))
+      # test_weights <- list(rep(1, width), lambda ^ (width:1), 1:width,
+      #                      rep(1, 2 * width), lambda ^ ((2 * width):1), 1:(width * 2))
       
       for (c in 1:length(test_min_obs)) {
         for (d in 1:length(test_complete_obs)) {
@@ -304,7 +315,7 @@ test_that("equal to online algorithm", {
 
 test_that("equivalent to zoo::rollapply", {
   
-  for (a in 1:(length(test_data) - 1)) {
+  for (ax in 1:(length(test_data_x) - 1)) {
     for (b in 1:length(test_width)) {
       
       width <- test_width[b]
@@ -313,111 +324,118 @@ test_that("equivalent to zoo::rollapply", {
       
       for (i in 1:length(test_online)) {
         
-        expect_equivalent(roll_any(test_data[[a]] < 0, width,
+        expect_equivalent(roll_any(test_data_x[[ax]] < 0, width,
                                    test_min_obs[1], test_complete_obs[2],
                                    test_na_restore[2], test_online[i]),
-                          zoo::rollapplyr(test_data[[a]] < 0, width = width,
+                          zoo::rollapplyr(test_data_x[[ax]] < 0, width = width,
                                           any, partial = TRUE))
         
-        expect_equivalent(roll_all(test_data[[a]] < 0, width,
+        expect_equivalent(roll_all(test_data_x[[ax]] < 0, width,
                                    test_min_obs[1], test_complete_obs[2],
                                    test_na_restore[2], test_online[i]),
-                          zoo::rollapplyr(test_data[[a]] < 0, width = width,
+                          zoo::rollapplyr(test_data_x[[ax]] < 0, width = width,
                                           all, partial = TRUE))
         
-        expect_equivalent(roll_min(test_data[[a]], width,
+        expect_equivalent(roll_min(test_data_x[[ax]], width,
                                    test_weights[[1]], test_min_obs[1],
                                    test_complete_obs[2], test_na_restore[2],
                                    test_online[i]),
-                          zoo::rollapplyr(test_data[[a]], width = width,
+                          zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           min, partial = TRUE))
         
-        expect_equivalent(roll_max(test_data[[a]], width,
+        expect_equivalent(roll_max(test_data_x[[ax]], width,
                                    test_weights[[1]], test_min_obs[1],
                                    test_complete_obs[2], test_na_restore[2],
                                    test_online[i]),
-                          zoo::rollapplyr(test_data[[a]], width = width,
+                          zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           max, partial = TRUE))
         
-        expect_equivalent(roll_median(test_data[[a]], width,
+        expect_equivalent(roll_median(test_data_x[[ax]], width,
                                       test_weights[[1]], test_min_obs[1],
                                       test_complete_obs[2], test_na_restore[2],
                                       test_online[i]),
-                          zoo::rollapplyr(test_data[[a]], width = width,
+                          zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           median, partial = TRUE))
         
-        expect_equivalent(roll_sum(test_data[[a]], width,
+        expect_equivalent(roll_sum(test_data_x[[ax]], width,
                                    test_weights[[1]], test_min_obs[1],
                                    test_complete_obs[2], test_na_restore[2],
                                    test_online[i]),
-                          zoo::rollapplyr(test_data[[a]], width = width,
+                          zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           sum, partial = TRUE))
         
-        expect_equivalent(roll_prod(test_data[[a]], width,
+        expect_equivalent(roll_prod(test_data_x[[ax]], width,
                                     test_weights[[1]], test_min_obs[1],
                                     test_complete_obs[2], test_na_restore[2],
                                     test_online[i]),
-                          zoo::rollapplyr(test_data[[a]], width = width,
+                          zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           prod, partial = TRUE))
         
-        expect_equivalent(roll_mean(test_data[[a]], width,
+        expect_equivalent(roll_mean(test_data_x[[ax]], width,
                                     test_weights[[1]], test_min_obs[1],
                                     test_complete_obs[2], test_na_restore[2],
                                     test_online[i]),
-                          zoo::rollapplyr(test_data[[a]], width = width,
+                          zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           mean, partial = TRUE))
         
-        expect_equivalent(roll_var(test_data[[a]], width,
+        expect_equivalent(roll_var(test_data_x[[ax]], width,
                                    test_weights[[1]], test_center[1],
                                    test_min_obs[1], test_complete_obs[2],
                                    test_na_restore[2], test_online[i]),
-                          zoo::rollapplyr(test_data[[a]], width = width,
+                          zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           var, partial = TRUE))
         
-        expect_equivalent(roll_sd(test_data[[a]], width,
+        expect_equivalent(roll_sd(test_data_x[[ax]], width,
                                   test_weights[[1]], test_center[1],
                                   test_min_obs[1], test_complete_obs[2],
                                   test_na_restore[2], test_online[i]),
-                          zoo::rollapplyr(test_data[[a]], width = width,
+                          zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           sd, partial = TRUE))
         
         for (g in 1:length(test_center)) {
           for (h in 1:length(test_scale)) {
             
-            expect_equivalent(roll_scale(test_data[[a]], width,
+            expect_equivalent(roll_scale(test_data_x[[ax]], width,
                                          test_weights[[1]], test_center[g],
                                          test_scale[h], test_min_obs[1],
                                          test_complete_obs[2], test_na_restore[2],
                                          test_online[i]),
-                              zoo::rollapplyr(test_data[[a]], width = width,
+                              zoo::rollapplyr(test_data_x[[ax]], width = width,
                                               scale_z, center = test_center[g],
                                               scale = test_scale[h], partial = TRUE))
             
           }
         }
         
-        expect_equivalent(roll_cov(test_data[[a]], test_data[[a]],
-                                   width, test_weights[[1]],
-                                   test_center[1], test_scale[2],
-                                   test_min_obs[1], test_complete_obs[2],
-                                   test_na_restore[2], test_online[i]),
-                          rollapplyr_cube(cov, test_data[[a]], width))
-        
-        expect_equivalent(roll_cor(test_data[[a]], test_data[[a]],
-                                   width, test_weights[[1]],
-                                   test_center[1], test_scale[1],
-                                   test_min_obs[1], test_complete_obs[2],
-                                   test_na_restore[2], test_online[i]),
-                          rollapplyr_cube(cor, test_data[[a]], width))
-        
         for (ay in 1:(length(test_data_y) - 1)) {
           
-          expect_equivalent(roll_lm(test_data[[a]], test_data_y[[ay]],
-                                    width, test_weights[[1]],
-                                    test_intercept[1], test_min_obs[1],
-                                    test_complete_obs[2], test_na_restore[2],
-                                    test_online[i]),
-                            rollapplyr_lm(test_data[[a]], test_data_y[[ay]], width))
+          expect_equivalent(roll_cov(test_data_x[[ax]], test_data_y[[ay]],
+                                     width, test_weights[[1]],
+                                     test_center[1], test_scale[2],
+                                     test_min_obs[1], test_complete_obs[2],
+                                     test_na_restore[2], test_online[i]),
+                            rollapplyr_cube(cov, test_data_x[[ax]], test_data_y[[ay]],
+                                            width))
+          
+          expect_equivalent(roll_cor(test_data_x[[ax]], test_data_y[[ay]],
+                                     width, test_weights[[1]],
+                                     test_center[1], test_scale[1],
+                                     test_min_obs[1], test_complete_obs[2],
+                                     test_na_restore[2], test_online[i]),
+                            rollapplyr_cube(cor, test_data_x[[ax]], test_data_y[[ay]],
+                                            width))
+          
+          for (i in 1:length(test_intercept)) {
+            
+            expect_equivalent(roll_lm(test_data_x[[ax]], test_data_y[[ay]][ , 1, drop = FALSE],
+                                      width, test_weights[[1]],
+                                      test_intercept[i], test_min_obs[1],
+                                      test_complete_obs[2], test_na_restore[2],
+                                      test_online[i]),
+                              rollapplyr_lm(test_data_x[[ax]], test_data_y[[ay]][ , 1, drop = FALSE],
+                                            width, test_intercept[i]))
+            
+          }
           
         }
         
