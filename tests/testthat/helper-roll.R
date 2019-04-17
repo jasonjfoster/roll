@@ -1,10 +1,9 @@
 n_vars <- 4
-n_obs <- 15
+n_obs <- 20
 lambda <- 0.9
 
-set.seed(5640)
-
 # test data
+set.seed(5640)
 dates <- seq(Sys.Date(), length.out = n_obs, by = "-1 day")
 test_data <- list(zoo::zoo(matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars), dates),
                   zoo::zoo(matrix(rev(rep(1:n_vars, times = n_vars, each = n_obs / n_vars)) / 1000,
@@ -12,6 +11,7 @@ test_data <- list(zoo::zoo(matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_
 test_data <- lapply(test_data, setNames, paste0("x", rep(1:n_vars)))
 test_data[[3]] <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 
+set.seed(5640)
 idx <- sample(1:(n_obs * n_vars), n_obs / 4)
 test_data[[3]][idx] <- NA
 

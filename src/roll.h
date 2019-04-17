@@ -3828,8 +3828,9 @@ struct RollCovOnlineLm : public Worker {
               // if ((n_obs > 1) && (n_obs >= min_obs)) {
               if (n_obs >= min_obs) {
 
-                if (((int)j != n_cols_x - 1) && ((int)k != n_cols_x - 1) &&
-                    (std::abs(sumsq_xy) <= sqrt(arma::datum::eps))) {
+                if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+                // if (((int)j != n_cols_x - 1) && ((int)k != n_cols_x - 1) &&
+                //     (std::abs(sumsq_xy) <= sqrt(arma::datum::eps))) {
                   arma_cov(j, k, i) = 0;
                 } else {
                   arma_cov(j, k, i) = sumsq_xy;
@@ -3999,8 +4000,9 @@ struct RollCovParallelLm : public Worker {
           // if ((n_obs > 1) && (n_obs >= min_obs)) {
           if (n_obs >= min_obs) {
             
-            if (((int)j != n_cols_x - 1) && ((int)k != n_cols_x - 1) &&
-                (std::abs(sumsq_xy) <= sqrt(arma::datum::eps))) {
+            if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+            // if (((int)j != n_cols_x - 1) && ((int)k != n_cols_x - 1) &&
+            //     (std::abs(sumsq_xy) <= sqrt(arma::datum::eps))) {
               arma_cov(j, k, i) = 0;
             } else {
               arma_cov(j, k, i) = sumsq_xy;
