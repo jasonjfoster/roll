@@ -189,73 +189,73 @@ test_that("equivalent to zoo::rollapply", {
       test_weights <- list(rep(1, width), lambda ^ (width:1), 1:width,
                            rep(1, 2 * width), lambda ^ ((2 * width):1), 1:(width * 2))
       
-      for (i in 1:length(test_online)) {
+      for (j in 1:length(test_online)) {
         
         expect_equivalent(roll_any(test_data_x[[ax]] < 0, width,
                                    test_min_obs[1], test_complete_obs[2],
-                                   test_na_restore[2], test_online[i]),
+                                   test_na_restore[2], test_online[j]),
                           zoo::rollapplyr(test_data_x[[ax]] < 0, width = width,
                                           any, partial = TRUE))
         
         expect_equivalent(roll_all(test_data_x[[ax]] < 0, width,
                                    test_min_obs[1], test_complete_obs[2],
-                                   test_na_restore[2], test_online[i]),
+                                   test_na_restore[2], test_online[j]),
                           zoo::rollapplyr(test_data_x[[ax]] < 0, width = width,
                                           all, partial = TRUE))
         
         expect_equivalent(roll_min(test_data_x[[ax]], width,
                                    test_weights[[1]], test_min_obs[1],
                                    test_complete_obs[2], test_na_restore[2],
-                                   test_online[i]),
+                                   test_online[j]),
                           zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           min, partial = TRUE))
         
         expect_equivalent(roll_max(test_data_x[[ax]], width,
                                    test_weights[[1]], test_min_obs[1],
                                    test_complete_obs[2], test_na_restore[2],
-                                   test_online[i]),
+                                   test_online[j]),
                           zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           max, partial = TRUE))
         
         expect_equivalent(roll_median(test_data_x[[ax]], width,
                                       test_weights[[1]], test_min_obs[1],
                                       test_complete_obs[2], test_na_restore[2],
-                                      test_online[i]),
+                                      test_online[j]),
                           zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           median, partial = TRUE))
         
         expect_equivalent(roll_sum(test_data_x[[ax]], width,
                                    test_weights[[1]], test_min_obs[1],
                                    test_complete_obs[2], test_na_restore[2],
-                                   test_online[i]),
+                                   test_online[j]),
                           zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           sum, partial = TRUE))
         
         expect_equivalent(roll_prod(test_data_x[[ax]], width,
                                     test_weights[[1]], test_min_obs[1],
                                     test_complete_obs[2], test_na_restore[2],
-                                    test_online[i]),
+                                    test_online[j]),
                           zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           prod, partial = TRUE))
         
         expect_equivalent(roll_mean(test_data_x[[ax]], width,
                                     test_weights[[1]], test_min_obs[1],
                                     test_complete_obs[2], test_na_restore[2],
-                                    test_online[i]),
+                                    test_online[j]),
                           zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           mean, partial = TRUE))
         
         expect_equivalent(roll_var(test_data_x[[ax]], width,
                                    test_weights[[1]], test_center[1],
                                    test_min_obs[1], test_complete_obs[2],
-                                   test_na_restore[2], test_online[i]),
+                                   test_na_restore[2], test_online[j]),
                           zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           var, partial = TRUE))
         
         expect_equivalent(roll_sd(test_data_x[[ax]], width,
                                   test_weights[[1]], test_center[1],
                                   test_min_obs[1], test_complete_obs[2],
-                                  test_na_restore[2], test_online[i]),
+                                  test_na_restore[2], test_online[j]),
                           zoo::rollapplyr(test_data_x[[ax]], width = width,
                                           sd, partial = TRUE))
         
@@ -266,7 +266,7 @@ test_that("equivalent to zoo::rollapply", {
                                          test_weights[[1]], test_center[g],
                                          test_scale[h], test_min_obs[1],
                                          test_complete_obs[2], test_na_restore[2],
-                                         test_online[i]),
+                                         test_online[j]),
                               zoo::rollapplyr(test_data_x[[ax]], width = width,
                                               scale_z, center = test_center[g],
                                               scale = test_scale[h], partial = TRUE))
@@ -280,7 +280,7 @@ test_that("equivalent to zoo::rollapply", {
                                      width, test_weights[[1]],
                                      test_center[1], test_scale[2],
                                      test_min_obs[1], test_complete_obs[2],
-                                     test_na_restore[2], test_online[i]),
+                                     test_na_restore[2], test_online[j]),
                             rollapplyr_cube(cov, test_data_x[[ax]], test_data_y[[ay]],
                                             width))
           
@@ -298,7 +298,7 @@ test_that("equivalent to zoo::rollapply", {
                                       width, test_weights[[1]],
                                       test_intercept[i], test_min_obs[1],
                                       test_complete_obs[2], test_na_restore[2],
-                                      test_online[i]),
+                                      test_online[j]),
                               rollapplyr_lm(test_data_x[[ax]], test_data_y[[ay]][ , 1, drop = FALSE],
                                             width, test_intercept[i]))
             
