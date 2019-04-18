@@ -2822,11 +2822,23 @@ struct RollCovOnlineXX : public Worker {
                       (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
                     arma_cov(j, k, i) = NA_REAL;
                   } else {
-                    arma_cov(j, k, i) = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
+                    
+                    if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+                      arma_cov(j, k, i) = 0;
+                    } else {
+                      arma_cov(j, k, i) = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
+                    }
+                    
                   }
                   
                 } else if (!scale) {
-                  arma_cov(j, k, i) = sumsq_xy / (sum_w - sumsq_w / sum_w);
+
+                  if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+                    arma_cov(j, k, i) = 0;
+                  } else {
+                    arma_cov(j, k, i) = sumsq_xy / (sum_w - sumsq_w / sum_w);
+                  }
+                  
                 }
                 
               } else {
@@ -3135,11 +3147,23 @@ struct RollCovOnlineXY : public Worker {
                       (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
                     arma_cov(j, k, i) = NA_REAL;
                   } else {
-                    arma_cov(j, k, i) = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
+
+                    if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+                      arma_cov(j, k, i) = 0;
+                    } else {
+                      arma_cov(j, k, i) = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
+                    }
+                    
                   }
                   
                 } else if (!scale) {
-                  arma_cov(j, k, i) = sumsq_xy / (sum_w - sumsq_w / sum_w);
+
+                  if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+                    arma_cov(j, k, i) = 0;
+                  } else {
+                    arma_cov(j, k, i) = sumsq_xy / (sum_w - sumsq_w / sum_w);
+                  }
+                  
                 }
                 
               } else {
@@ -3338,11 +3362,23 @@ struct RollCovParallelXX : public Worker {
                   (sqrt(var_x) <= sqrt(arma::datum::eps)) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {
                 arma_cov(j, k, i) = NA_REAL;
               } else {
-                arma_cov(j, k, i) = sumsq_xy / (sqrt(var_x) * sqrt(var_y));
+
+                if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+                  arma_cov(j, k, i) = 0;
+                } else {
+                  arma_cov(j, k, i) = sumsq_xy / (sqrt(var_x) * sqrt(var_y));
+                }
+                
               }
               
             } else if (!scale) {
-              arma_cov(j, k, i) = sumsq_xy / (sum_w - sumsq_w / sum_w);
+              
+              if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+                arma_cov(j, k, i) = 0;
+              } else {
+                arma_cov(j, k, i) = sumsq_xy / (sum_w - sumsq_w / sum_w);
+              }
+              
             }
             
           } else {
@@ -3542,11 +3578,23 @@ struct RollCovParallelXY : public Worker {
                   (sqrt(var_x) <= sqrt(arma::datum::eps)) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {
                 arma_cov(j, k, i) = NA_REAL;
               } else {
-                arma_cov(j, k, i) = sumsq_xy / (sqrt(var_x) * sqrt(var_y));
+                
+                if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+                  arma_cov(j, k, i) = 0;
+                } else {
+                  arma_cov(j, k, i) = sumsq_xy / (sqrt(var_x) * sqrt(var_y));
+                }
+                
               }
               
             } else if (!scale) {
-              arma_cov(j, k, i) = sumsq_xy / (sum_w - sumsq_w / sum_w);
+              
+              if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+                arma_cov(j, k, i) = 0;
+              } else {
+                arma_cov(j, k, i) = sumsq_xy / (sum_w - sumsq_w / sum_w);
+              }
+              
             }
             
           } else {

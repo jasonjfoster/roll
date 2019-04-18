@@ -28,7 +28,6 @@ test_that("equal to online algorithm", {
                                   test_min_obs[c], test_complete_obs[d],
                                   test_na_restore[e], test_online[2]))
             
-            
             for (f in 1:length(test_weights)) {
               
               # 'online = TRUE' is not supported
@@ -179,6 +178,9 @@ test_that("equal to online algorithm", {
 })
 
 test_that("equivalent to zoo::rollapply", {
+  
+  if (!requireNamespace("zoo", quietly = TRUE))
+    skip("zoo package required for this test")
   
   for (ax in 1:(length(test_data_x) - 1)) {
     for (b in 1:length(test_width)) {

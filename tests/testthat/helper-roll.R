@@ -5,9 +5,21 @@ lambda <- 0.9
 # test data
 set.seed(5640)
 dates <- seq(Sys.Date(), length.out = n_obs, by = "-1 day")
-test_data <- list(zoo::zoo(matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars), dates),
-                  zoo::zoo(matrix(rev(rep(1:n_vars, times = n_vars, each = n_obs / n_vars)) / 1000,
-                                  nrow = n_obs, ncol = n_vars), dates))
+
+if (requireNamespace("zoo", quietly = TRUE)) {
+  
+  test_data <- list(zoo::zoo(matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars), dates),
+                    zoo::zoo(matrix(rev(rep(1:n_vars, times = n_vars, each = n_obs / n_vars)) / 1000,
+                                    nrow = n_obs, ncol = n_vars), dates))
+  
+} else {
+  
+  test_data <- list(matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars),
+                    matrix(rev(rep(1:n_vars, times = n_vars, each = n_obs / n_vars)) / 1000,
+                           nrow = n_obs, ncol = n_vars))
+  
+}
+
 test_data <- lapply(test_data, setNames, paste0("x", rep(1:n_vars)))
 test_data[[3]] <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 
