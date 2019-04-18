@@ -288,7 +288,7 @@ test_that("equivalent to zoo::rollapply", {
                                      width, test_weights[[1]],
                                      test_center[1], test_scale[1],
                                      test_min_obs[1], test_complete_obs[2],
-                                     test_na_restore[2], test_online[i]),
+                                     test_na_restore[2], test_online[j]),
                             rollapplyr_cube(cor, test_data_x[[ax]], test_data_y[[ay]],
                                             width))
           
