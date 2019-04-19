@@ -112,14 +112,24 @@ rollapplyr_lm <- function(x, y, width, intercept) {
     }
     
     summary_fit <- summary(fit)
+    summary_fit_coef <- coef(summary_fit)[ , "Estimate"]
     
     if ((nrow(coef(summary_fit)) == n_cols_x)) {
       
-      result[["coefficients"]][i, ] <- coef(summary_fit)[ , "Estimate"]
-      result[["r.squared"]][i, ] <- summary_fit$r.squared
+      result[["coefficients"]][i, ] <- summary_fit_coef
       
-      if (!is.na(summary_fit$r.squared)) {
+      # In summary.lm(fit) : essentially perfect fit: summary may be unreliable
+      if (isFALSE(isTRUE(all.equal(as.numeric(rep(summary_fit_coef[1], length(y_subset))), as.numeric(y_subset))) &&
+                  isTRUE(all.equal(as.numeric(summary_fit_coef[-1]), rep(0, length(summary_fit_coef[-1])))))) {
+        
+        result[["r.squared"]][i, ] <- summary_fit$r.squared
         result[["std.error"]][i, ] <- coef(summary_fit)[ , "Std. Error"]
+        
+      } else {
+        
+        result[["r.squared"]][i, ] <- NA
+        result[["std.error"]][i, ] <- NA
+        
       }
       
     }
