@@ -3,6 +3,7 @@ n_obs <- 20
 lambda <- 0.9
 
 # test data
+set.seed(5640)
 dates <- seq(Sys.Date(), length.out = n_obs, by = "-1 day")
 
 if (requireNamespace("zoo", quietly = TRUE)) {
@@ -22,6 +23,7 @@ if (requireNamespace("zoo", quietly = TRUE)) {
 test_data <- lapply(test_data, setNames, paste0("x", rep(1:n_vars)))
 test_data[[3]] <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 
+set.seed(5640)
 idx <- sample(1:(n_obs * n_vars), n_obs / 4)
 test_data[[3]][idx] <- NA
 
