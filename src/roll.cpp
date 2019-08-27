@@ -633,7 +633,7 @@ NumericMatrix roll_min(const NumericMatrix& x, const int& width,
   // compute rolling minimums
   if (online) {
     
-    warning("'online = TRUE' is not supported");
+    warning("'online' is not supported");
     RollMinParallel roll_min_parallel(x, n, n_rows_x, n_cols_x, width,
                                       weights, min_obs,
                                       arma_any_na, na_restore,
@@ -699,7 +699,7 @@ NumericMatrix roll_max(const NumericMatrix& x, const int& width,
   // compute rolling maximums
   if (online) {
     
-    warning("'online = TRUE' is not supported");
+    warning("'online' is not supported");
     RollMaxParallel roll_max_parallel(x, n, n_rows_x, n_cols_x, width,
                                       weights, min_obs,
                                       arma_any_na, na_restore,
@@ -765,7 +765,7 @@ NumericMatrix roll_median(const NumericMatrix& x, const int& width,
   // compute rolling median
   if (online) {
     
-    warning("'online = TRUE' is not supported");
+    warning("'online' is not supported");
     RollMedianParallel roll_median_parallel(x, n, n_rows_x, n_cols_x, width,
                                             weights, min_obs,
                                             arma_any_na, na_restore,
@@ -1162,7 +1162,7 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
     arma_any_na = any_na_x(data);
   } else {
     
-    warning("'complete_obs = FALSE' is not supported");
+    warning("'complete_obs' is not supported");
     arma_any_na = any_na_x(data);
     
   }
