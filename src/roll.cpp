@@ -1,4 +1,4 @@
-#include "roll.h"
+#include "roll_mat.h"
 
 void check_width(const int& width) {
   
@@ -315,18 +315,18 @@ LogicalMatrix roll_any(const LogicalMatrix& x, const int& width,
   
   // compute rolling any
   if (online) {
-
+    
     RollAnyOnline roll_any_online(rcpp_x, n_rows_x, n_cols_x, width,
                                   min_obs, rcpp_any_na, na_restore,
                                   rcpp_any);
     parallelFor(0, n_cols_x, roll_any_online);
-
+    
   } else {
     
-    RollAnyParallel roll_any_parallel(rcpp_x, n_rows_x, n_cols_x, width,
-                                      min_obs, rcpp_any_na, na_restore,
-                                      rcpp_any);
-    parallelFor(0, n_rows_x * n_cols_x, roll_any_parallel);
+    RollAnyBatch roll_any_batch(rcpp_x, n_rows_x, n_cols_x, width,
+                                min_obs, rcpp_any_na, na_restore,
+                                rcpp_any);
+    parallelFor(0, n_rows_x * n_cols_x, roll_any_batch);
     
   }
   
@@ -379,10 +379,10 @@ LogicalMatrix roll_all(const LogicalMatrix& x, const int& width,
     
   } else {
     
-    RollAllParallel roll_all_parallel(rcpp_x, n_rows_x, n_cols_x, width,
-                                      min_obs, rcpp_any_na, na_restore,
-                                      rcpp_all);
-    parallelFor(0, n_rows_x * n_cols_x, roll_all_parallel);
+    RollAllBatch roll_all_batch(rcpp_x, n_rows_x, n_cols_x, width,
+                                min_obs, rcpp_any_na, na_restore,
+                                rcpp_all);
+    parallelFor(0, n_rows_x * n_cols_x, roll_all_batch);
     
   }
   
@@ -444,11 +444,11 @@ NumericMatrix roll_sum(const NumericMatrix& x, const int& width,
     
   } else {
     
-    RollSumParallel roll_sum_parallel(x, n, n_rows_x, n_cols_x, width,
-                                      weights, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_sum);
-    parallelFor(0, n_rows_x * n_cols_x, roll_sum_parallel);
+    RollSumBatch roll_sum_batch(x, n, n_rows_x, n_cols_x, width,
+                                weights, min_obs,
+                                arma_any_na, na_restore,
+                                arma_sum);
+    parallelFor(0, n_rows_x * n_cols_x, roll_sum_batch);
     
   }
   
@@ -510,11 +510,11 @@ NumericMatrix roll_prod(const NumericMatrix& x, const int& width,
     
   } else {
     
-    RollProdParallel roll_prod_parallel(x, n, n_rows_x, n_cols_x, width,
-                                        weights, min_obs,
-                                        arma_any_na, na_restore,
-                                        arma_prod);
-    parallelFor(0, n_rows_x * n_cols_x, roll_prod_parallel);
+    RollProdBatch roll_prod_batch(x, n, n_rows_x, n_cols_x, width,
+                                  weights, min_obs,
+                                  arma_any_na, na_restore,
+                                  arma_prod);
+    parallelFor(0, n_rows_x * n_cols_x, roll_prod_batch);
     
   }
   
@@ -576,11 +576,11 @@ NumericMatrix roll_mean(const NumericMatrix& x, const int& width,
     
   } else {
     
-    RollMeanParallel roll_mean_parallel(x, n, n_rows_x, n_cols_x, width,
-                                        weights, min_obs,
-                                        arma_any_na, na_restore,
-                                        arma_mean);
-    parallelFor(0, n_rows_x * n_cols_x, roll_mean_parallel);
+    RollMeanBatch roll_mean_batch(x, n, n_rows_x, n_cols_x, width,
+                                  weights, min_obs,
+                                  arma_any_na, na_restore,
+                                  arma_mean);
+    parallelFor(0, n_rows_x * n_cols_x, roll_mean_batch);
     
   }
   
@@ -634,19 +634,19 @@ NumericMatrix roll_min(const NumericMatrix& x, const int& width,
   if (online) {
     
     warning("'online' is not supported");
-    RollMinParallel roll_min_parallel(x, n, n_rows_x, n_cols_x, width,
-                                      weights, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_min);
-    parallelFor(0, n_rows_x * n_cols_x, roll_min_parallel);
+    RollMinBatch roll_min_batch(x, n, n_rows_x, n_cols_x, width,
+                                weights, min_obs,
+                                arma_any_na, na_restore,
+                                arma_min);
+    parallelFor(0, n_rows_x * n_cols_x, roll_min_batch);
     
   } else {
     
-    RollMinParallel roll_min_parallel(x, n, n_rows_x, n_cols_x, width,
-                                      weights, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_min);
-    parallelFor(0, n_rows_x * n_cols_x, roll_min_parallel);
+    RollMinBatch roll_min_batch(x, n, n_rows_x, n_cols_x, width,
+                                weights, min_obs,
+                                arma_any_na, na_restore,
+                                arma_min);
+    parallelFor(0, n_rows_x * n_cols_x, roll_min_batch);
     
   }
   
@@ -700,19 +700,19 @@ NumericMatrix roll_max(const NumericMatrix& x, const int& width,
   if (online) {
     
     warning("'online' is not supported");
-    RollMaxParallel roll_max_parallel(x, n, n_rows_x, n_cols_x, width,
-                                      weights, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_max);
-    parallelFor(0, n_rows_x * n_cols_x, roll_max_parallel);
+    RollMaxBatch roll_max_batch(x, n, n_rows_x, n_cols_x, width,
+                                weights, min_obs,
+                                arma_any_na, na_restore,
+                                arma_max);
+    parallelFor(0, n_rows_x * n_cols_x, roll_max_batch);
     
   } else {
     
-    RollMaxParallel roll_max_parallel(x, n, n_rows_x, n_cols_x, width,
-                                      weights, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_max);
-    parallelFor(0, n_rows_x * n_cols_x, roll_max_parallel);
+    RollMaxBatch roll_max_batch(x, n, n_rows_x, n_cols_x, width,
+                                weights, min_obs,
+                                arma_any_na, na_restore,
+                                arma_max);
+    parallelFor(0, n_rows_x * n_cols_x, roll_max_batch);
     
   }
   
@@ -766,19 +766,19 @@ NumericMatrix roll_median(const NumericMatrix& x, const int& width,
   if (online) {
     
     warning("'online' is not supported");
-    RollMedianParallel roll_median_parallel(x, n, n_rows_x, n_cols_x, width,
-                                            weights, min_obs,
-                                            arma_any_na, na_restore,
-                                            arma_median);
-    parallelFor(0, n_rows_x * n_cols_x, roll_median_parallel);
+    RollMedianBatch roll_median_batch(x, n, n_rows_x, n_cols_x, width,
+                                      weights, min_obs,
+                                      arma_any_na, na_restore,
+                                      arma_median);
+    parallelFor(0, n_rows_x * n_cols_x, roll_median_batch);
     
   } else {
     
-    RollMedianParallel roll_median_parallel(x, n, n_rows_x, n_cols_x, width,
-                                            weights, min_obs,
-                                            arma_any_na, na_restore,
-                                            arma_median);
-    parallelFor(0, n_rows_x * n_cols_x, roll_median_parallel);
+    RollMedianBatch roll_median_batch(x, n, n_rows_x, n_cols_x, width,
+                                      weights, min_obs,
+                                      arma_any_na, na_restore,
+                                      arma_median);
+    parallelFor(0, n_rows_x * n_cols_x, roll_median_batch);
     
   }
   
@@ -840,11 +840,11 @@ NumericMatrix roll_var(const NumericMatrix& x, const int& width,
     
   } else {
     
-    RollVarParallel roll_var_parallel(x, n, n_rows_x, n_cols_x, width,
-                                      weights, center, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_var);
-    parallelFor(0, n_rows_x * n_cols_x, roll_var_parallel);
+    RollVarBatch roll_var_batch(x, n, n_rows_x, n_cols_x, width,
+                                weights, center, min_obs,
+                                arma_any_na, na_restore,
+                                arma_var);
+    parallelFor(0, n_rows_x * n_cols_x, roll_var_batch);
     
   }
   
@@ -906,11 +906,11 @@ NumericMatrix roll_sd(const NumericMatrix& x, const int& width,
     
   } else {
     
-    RollSdParallel roll_sd_parallel(x, n, n_rows_x, n_cols_x, width,
-                                    weights, center, min_obs,
-                                    arma_any_na, na_restore,
-                                    arma_sd);
-    parallelFor(0, n_rows_x * n_cols_x, roll_sd_parallel);
+    RollSdBatch roll_sd_batch(x, n, n_rows_x, n_cols_x, width,
+                              weights, center, min_obs,
+                              arma_any_na, na_restore,
+                              arma_sd);
+    parallelFor(0, n_rows_x * n_cols_x, roll_sd_batch);
     
   }
   
@@ -973,11 +973,11 @@ NumericMatrix roll_scale(const NumericMatrix& x, const int& width,
     
   } else {
     
-    RollScaleParallel roll_scale_parallel(x, n, n_rows_x, n_cols_x, width,
-                                          weights, center, scale, min_obs,
-                                          arma_any_na, na_restore,
-                                          arma_scale);
-    parallelFor(0, n_rows_x * n_cols_x, roll_scale_parallel);
+    RollScaleBatch roll_scale_batch(x, n, n_rows_x, n_cols_x, width,
+                                    weights, center, scale, min_obs,
+                                    arma_any_na, na_restore,
+                                    arma_scale);
+    parallelFor(0, n_rows_x * n_cols_x, roll_scale_batch);
     
   }
   
@@ -1063,20 +1063,20 @@ NumericVector roll_cov_z(const NumericMatrix& x, const NumericMatrix& y,
     if (symmetric) {
       
       // y is null
-      RollCovParallelXX roll_cov_parallel(x, n, n_rows_xy, n_cols_x, width,
-                                          weights, center, scale, min_obs,
-                                          arma_any_na, na_restore,
-                                          arma_cov);
-      parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_parallel);
+      RollCovBatchXX roll_cov_batch(x, n, n_rows_xy, n_cols_x, width,
+                                    weights, center, scale, min_obs,
+                                    arma_any_na, na_restore,
+                                    arma_cov);
+      parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_batch);
       
     } else if (!symmetric) {
       
       // y is not null
-      RollCovParallelXY roll_cov_parallel(x, y, n, n_rows_xy, n_cols_x, n_cols_y, width,
-                                          weights, center, scale, min_obs,
-                                          arma_any_na, na_restore,
-                                          arma_cov);
-      parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_cov_parallel);
+      RollCovBatchXY roll_cov_batch(x, y, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                    weights, center, scale, min_obs,
+                                    arma_any_na, na_restore,
+                                    arma_cov);
+      parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_cov_batch);
       
     }
     
@@ -1179,12 +1179,12 @@ List roll_lm_z(const NumericMatrix& x, const NumericVector& y,
     
   } else {
     
-    RollCovParallelLm roll_cov_parallel(data, n, n_rows_xy, n_cols_x, width,
-                                        weights, intercept, min_obs,
-                                        arma_any_na, na_restore,
-                                        arma_n_obs, arma_sum_w, arma_mean,
-                                        arma_cov);
-    parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_parallel);
+    RollCovBatchLm roll_cov_batch(data, n, n_rows_xy, n_cols_x, width,
+                                  weights, intercept, min_obs,
+                                  arma_any_na, na_restore,
+                                  arma_n_obs, arma_sum_w, arma_mean,
+                                  arma_cov);
+    parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_batch);
     
   }
   
