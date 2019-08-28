@@ -652,6 +652,8 @@ SEXP roll_mean(const SEXP& x, const int& width,
     if (names.size() > 1) {
       result.attr("names") = names;
     }
+    result.attr("index") = xx.attr("index");
+    result.attr("class") = xx.attr("class");
     
     return result;
     
