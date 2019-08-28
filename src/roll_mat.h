@@ -887,7 +887,7 @@ struct RollProdBatch : public Worker {
 };
 
 // 'Worker' function for computing rolling means using an online algorithm
-struct RollMeanOnline : public Worker {
+struct RollMeanOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -901,11 +901,11 @@ struct RollMeanOnline : public Worker {
   arma::mat& arma_mean;         // destination (pass by reference)
   
   // initialize with source and destination
-  RollMeanOnline(const NumericMatrix x, const int n,
-                 const int n_rows_x, const int n_cols_x,
-                 const int width, const arma::vec arma_weights,
-                 const int min_obs, const arma::uvec arma_any_na,
-                 const bool na_restore, arma::mat& arma_mean)
+  RollMeanOnlineMat(const NumericMatrix x, const int n,
+                    const int n_rows_x, const int n_cols_x,
+                    const int width, const arma::vec arma_weights,
+                    const int min_obs, const arma::uvec arma_any_na,
+                    const bool na_restore, arma::mat& arma_mean)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
@@ -1036,7 +1036,7 @@ struct RollMeanOnline : public Worker {
 };
 
 // 'Worker' function for computing rolling means using a standard algorithm
-struct RollMeanBatch : public Worker {
+struct RollMeanBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -1050,11 +1050,11 @@ struct RollMeanBatch : public Worker {
   arma::mat& arma_mean;         // destination (pass by reference)
   
   // initialize with source and destination
-  RollMeanBatch(const NumericMatrix x, const int n,
-                const int n_rows_x, const int n_cols_x,
-                const int width, const arma::vec arma_weights,
-                const int min_obs, const arma::uvec arma_any_na,
-                const bool na_restore, arma::mat& arma_mean)
+  RollMeanBatchMat(const NumericMatrix x, const int n,
+                   const int n_rows_x, const int n_cols_x,
+                   const int width, const arma::vec arma_weights,
+                   const int min_obs, const arma::uvec arma_any_na,
+                   const bool na_restore, arma::mat& arma_mean)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),

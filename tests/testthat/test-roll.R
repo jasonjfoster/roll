@@ -30,7 +30,7 @@ test_that("equal to online algorithm", {
             
             for (f in 1:length(test_weights)) {
               
-              # 'online = TRUE' is not supported
+              # "'online' is not supported"
               expect_equal(roll_min(test_data_x[[ax]], width,
                                     test_weights[[f]], test_min_obs[c],
                                     test_complete_obs[d], test_na_restore[e],
@@ -151,7 +151,7 @@ test_that("equal to online algorithm", {
               for (ay in 1:length(test_data_y)) {
                 for (i in 1:length(test_intercept)) {
                   
-                  # 'complete_obs = FALSE' is not supported
+                  # "'complete_obs' is not supported"
                   expect_equal(roll_lm(test_data_x[[ax]], test_data_y[[ay]],
                                        test_width[b], test_weights[[f]],
                                        test_intercept[i], test_min_obs[c],

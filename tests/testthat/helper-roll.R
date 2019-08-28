@@ -118,7 +118,7 @@ rollapplyr_lm <- function(x, y, width, intercept) {
       
       result[["coefficients"]][i, ] <- summary_fit_coef
       
-      # In summary.lm(fit) : essentially perfect fit: summary may be unreliable
+      # "In summary.lm(fit) : essentially perfect fit: summary may be unreliable"
       if (!(isTRUE(all.equal(as.numeric(rep(summary_fit_coef[1], length(y_subset))), as.numeric(y_subset))) &&
             isTRUE(all.equal(as.numeric(summary_fit_coef[-1]), rep(0, length(summary_fit_coef[-1])))))) {
         

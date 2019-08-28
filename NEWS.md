@@ -1,5 +1,9 @@
 ## News for package 'roll'
 
+### Changes in roll version 1.1.3 (YYYY-MM-DD)
+
+* Added vector support to each function ([#20](https://github.com/jjf234/roll/issues/20))
+
 ### Changes in roll version 1.1.2 (2019-02-06)
 
 * New `roll_median`, `roll_min`, `roll_max`, `roll_any`, and `roll_all` functions for computing rolling medians, minimums, maximums, any, and all, respectively, of time-series data ([#4](https://github.com/jjf234/roll/issues/4), [#13](https://github.com/jjf234/roll/issues/13), [#14](https://github.com/jjf234/roll/issues/14))
