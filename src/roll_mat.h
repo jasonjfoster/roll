@@ -1453,7 +1453,7 @@ struct RollMedianBatch : public Worker {
 };
 
 // 'Worker' function for computing rolling variances using an online algorithm
-struct RollVarOnline : public Worker {
+struct RollVarOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -1468,12 +1468,12 @@ struct RollVarOnline : public Worker {
   arma::mat& arma_var;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollVarOnline(const NumericMatrix x, const int n,
-                const int n_rows_x, const int n_cols_x,
-                const int width, const arma::vec arma_weights,
-                const bool center, const int min_obs,
-                const arma::uvec arma_any_na, const bool na_restore,
-                arma::mat& arma_var)
+  RollVarOnlineMat(const NumericMatrix x, const int n,
+                   const int n_rows_x, const int n_cols_x,
+                   const int width, const arma::vec arma_weights,
+                   const bool center, const int min_obs,
+                   const arma::uvec arma_any_na, const bool na_restore,
+                   arma::mat& arma_var)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
@@ -1659,7 +1659,7 @@ struct RollVarOnline : public Worker {
 };
 
 // 'Worker' function for computing rolling variances using a standard algorithm
-struct RollVarBatch : public Worker {
+struct RollVarBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -1674,12 +1674,12 @@ struct RollVarBatch : public Worker {
   arma::mat& arma_var;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollVarBatch(const NumericMatrix x, const int n,
-               const int n_rows_x, const int n_cols_x,
-               const int width, const arma::vec arma_weights,
-               const bool center, const int min_obs,
-               const arma::uvec arma_any_na, const bool na_restore,
-               arma::mat& arma_var)
+  RollVarBatchMat(const NumericMatrix x, const int n,
+                  const int n_rows_x, const int n_cols_x,
+                  const int width, const arma::vec arma_weights,
+                  const bool center, const int min_obs,
+                  const arma::uvec arma_any_na, const bool na_restore,
+                  arma::mat& arma_var)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),

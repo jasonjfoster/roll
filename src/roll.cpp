@@ -860,68 +860,130 @@ NumericMatrix roll_median(const NumericMatrix& x, const int& width,
 }
 
 // [[Rcpp::export(.roll_var)]]
-NumericMatrix roll_var(const NumericMatrix& x, const int& width,
+SEXP roll_var(const SEXP& x, const int& width,
                        const arma::vec& weights, const bool& center,
                        const int& min_obs, const bool& complete_obs,
                        const bool& na_restore, const bool& online) {
   
-  int n = weights.size();
-  int n_rows_x = x.nrow();
-  int n_cols_x = x.ncol();
-  arma::uvec arma_any_na(n_rows_x);
-  arma::mat arma_var(n_rows_x, n_cols_x);
-  
-  // check 'width' argument for errors
-  check_width(width);
-  
-  // default 'weights' argument is equal-weighted,
-  // otherwise check argument for errors
-  check_weights_x(n_rows_x, width, weights);
-  bool status = check_lambda(weights, online);
-  
-  // default 'min_obs' argument is 'width',
-  // otherwise check argument for errors
-  check_min_obs(min_obs);
-  
-  // default 'complete_obs' argument is 'false',
-  // otherwise check argument for errors
-  if (complete_obs) {
-    arma_any_na = any_na_x(x);
+  if (Rf_isMatrix(x)) {
+    
+    NumericMatrix xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.nrow();
+    int n_cols_x = xx.ncol();
+    arma::uvec arma_any_na(n_rows_x);
+    arma::mat arma_var(n_rows_x, n_cols_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_x(n_rows_x, width, weights);
+    bool status = check_lambda(weights, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'false',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      arma_any_na = any_na_x(x);
+    } else {
+      arma_any_na.fill(0);
+    }
+    
+    // compute rolling variances
+    if (status && online) {
+      
+      RollVarOnlineMat roll_var_online(xx, n, n_rows_x, n_cols_x, width,
+                                       weights, center, min_obs,
+                                       arma_any_na, na_restore,
+                                       arma_var);
+      parallelFor(0, n_cols_x, roll_var_online);
+      
+    } else {
+      
+      RollVarBatchMat roll_var_batch(xx, n, n_rows_x, n_cols_x, width,
+                                     weights, center, min_obs,
+                                     arma_any_na, na_restore,
+                                     arma_var);
+      parallelFor(0, n_rows_x * n_cols_x, roll_var_batch);
+      
+    }
+    
+    // create and return a matrix or xts object
+    NumericMatrix result(wrap(arma_var));
+    List dimnames = xx.attr("dimnames");
+    result.attr("dimnames") = dimnames;
+    result.attr("index") = xx.attr("index");
+    result.attr(".indexCLASS") = xx.attr(".indexCLASS");
+    result.attr(".indexTZ") = xx.attr(".indexTZ");
+    result.attr("tclass") = xx.attr("tclass");
+    result.attr("tzone") = xx.attr("tzone");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
   } else {
-    arma_any_na.fill(0);
+    
+    NumericVector xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.size();
+    arma::uvec arma_any_na(n_rows_x);
+    arma::vec arma_var(n_rows_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_x(n_rows_x, width, weights);
+    bool status = check_lambda(weights, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'false',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      warning("'complete_obs' is only supported for matrices");
+    }
+    
+    // compute rolling variances
+    if (status && online) {
+      
+      RollVarOnlineVec roll_var_online(xx, n, n_rows_x, width,
+                                       weights, center, min_obs,
+                                       na_restore,
+                                       arma_var);
+      parallelFor(0, n_rows_x, roll_var_online);
+      
+    } else {
+      
+      RollVarBatchVec roll_var_batch(xx, n, n_rows_x, width,
+                                     weights, center, min_obs,
+                                     na_restore,
+                                     arma_var);
+      parallelFor(0, n_rows_x, roll_var_batch);
+      
+    }
+    
+    // create and return a vector object
+    NumericVector result(wrap(arma_var));
+    result.attr("dim") = R_NilValue;
+    List names = xx.attr("names");
+    if (names.size() > 1) {
+      result.attr("names") = names;
+    }
+    result.attr("index") = xx.attr("index");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
   }
-  
-  // compute rolling variances
-  if (status && online) {
-    
-    RollVarOnline roll_var_online(x, n, n_rows_x, n_cols_x, width,
-                                  weights, center, min_obs,
-                                  arma_any_na, na_restore,
-                                  arma_var);
-    parallelFor(0, n_cols_x, roll_var_online);
-    
-  } else {
-    
-    RollVarBatch roll_var_batch(x, n, n_rows_x, n_cols_x, width,
-                                weights, center, min_obs,
-                                arma_any_na, na_restore,
-                                arma_var);
-    parallelFor(0, n_rows_x * n_cols_x, roll_var_batch);
-    
-  }
-  
-  // create and return a matrix or xts object
-  NumericMatrix result(wrap(arma_var));
-  List dimnames = x.attr("dimnames");
-  result.attr("dimnames") = dimnames;
-  result.attr("index") = x.attr("index");
-  result.attr(".indexCLASS") = x.attr(".indexCLASS");
-  result.attr(".indexTZ") = x.attr(".indexTZ");
-  result.attr("tclass") = x.attr("tclass");
-  result.attr("tzone") = x.attr("tzone");
-  result.attr("class") = x.attr("class");
-  
-  return result;
   
 }
 
