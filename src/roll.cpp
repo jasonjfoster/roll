@@ -629,11 +629,115 @@ SEXP roll_mean(const SEXP& x, const int& width,
     // compute rolling means
     if (status && online) {
       
-      RollMeanOnlineVec roll_mean_online(xx, n, n_rows_x, width,
-                                         weights, min_obs,
-                                         na_restore,
-                                         arma_mean);
-      parallelFor(0, n_rows_x, roll_mean_online);
+      int n_obs = 0;
+      long double lambda = 0;
+      long double w_new = 0;
+      long double w_old = 0;
+      long double x_new = 0;
+      long double x_old = 0;
+      long double sum_w = 0;
+      long double sum_x = 0;
+      
+      if (width > 1) {
+        lambda = weights[n - 2] / weights[n - 1]; // check already passed!
+      } else {
+        lambda = weights[n - 1];
+      }
+      
+      for (int i = 0; i < n_rows_x; i++) {
+        
+        if (std::isnan(xx[i])) {
+          
+          w_new = 0;
+          x_new = 0;
+          
+        } else {
+          
+          w_new = weights[n - 1];
+          x_new = xx[i];
+          
+        }
+        
+        // expanding window
+        if (i < width) {
+          
+          // don't include if missing value
+          if (!std::isnan(xx[i])) {
+            n_obs += 1;
+          }
+          
+          if (width > 1) {
+            
+            sum_w = lambda * sum_w + w_new;
+            sum_x = lambda * sum_x + w_new * x_new;
+            
+          } else {
+            
+            sum_w = w_new;
+            sum_x = w_new * x_new;
+            
+          }
+          
+        }
+        
+        // rolling window
+        if (i >= width) {
+          
+          // don't include if missing value
+          if (!std::isnan(xx[i]) && std::isnan(xx[i - width])) {
+            
+            n_obs += 1;
+            
+          } else if (std::isnan(xx[i]) && !std::isnan(xx[i - width])) {
+            
+            n_obs -= 1;
+            
+          }
+          
+          if (std::isnan(xx[i - width])) {
+            
+            w_old = 0;
+            x_old = 0;
+            
+          } else {
+            
+            w_old = weights[n - width];
+            x_old = xx[i - width];
+            
+          }
+          
+          if (width > 1) {
+            
+            sum_w = lambda * sum_w + w_new - lambda * w_old;
+            sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+            
+          } else {
+            
+            sum_w = w_new;
+            sum_x = w_new * x_new;
+            
+          }
+          
+        }
+        
+        // don't compute if missing value and 'na_restore' argument is TRUE
+        if ((!na_restore) || (na_restore && !std::isnan(xx[i]))) {
+          
+          // compute the mean
+          if (n_obs >= min_obs) {
+            arma_mean[i] = sum_x / sum_w;
+          } else {
+            arma_mean[i] = NA_REAL;
+          }
+          
+        } else {
+          
+          // can be either NA or NaN
+          arma_mean[i] = xx[i];
+          
+        }
+        
+      }
       
     } else {
       
@@ -955,11 +1059,165 @@ SEXP roll_var(const SEXP& x, const int& width,
     // compute rolling variances
     if (status && online) {
       
-      RollVarOnlineVec roll_var_online(xx, n, n_rows_x, width,
-                                       weights, center, min_obs,
-                                       na_restore,
-                                       arma_var);
-      parallelFor(0, n_rows_x, roll_var_online);
+      int n_obs = 0;
+      long double lambda = 0;
+      long double w_new = 0;
+      long double w_old = 0; 
+      long double x_new = 0;
+      long double x_old = 0;
+      long double sum_w = 0;
+      long double sum_x = 0;
+      long double sumsq_w = 0;
+      long double sumsq_x = 0;
+      long double mean_prev_x = 0;
+      long double mean_x = 0;
+      
+      if (width > 1) {
+        lambda = weights[n - 2] / weights[n - 1]; // check already passed!
+      } else {
+        lambda = weights[n - 1];
+      }
+      
+      for (int i = 0; i < n_rows_x; i++) {
+        
+        if (std::isnan(xx[i])) {
+          
+          w_new = 0;
+          x_new = 0;
+          
+        } else {
+          
+          w_new = weights[n - 1];
+          x_new = xx[i];
+          
+        }
+        
+        // expanding window
+        if (i < width) {
+          
+          // don't include if missing value
+          if (!std::isnan(xx[i])) {
+            n_obs += 1;
+          }
+          
+          sum_w = lambda * sum_w + w_new;
+          sum_x = lambda * sum_x + w_new * x_new;
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+          
+          if (center && (n_obs > 0)) {
+            
+            // compute the mean
+            mean_prev_x = mean_x;
+            mean_x = sum_x / sum_w;
+            
+          }
+          
+          // compute the sum of squares
+          if (!std::isnan(xx[i]) && (n_obs > 1)) {
+            
+            sumsq_x = lambda * sumsq_x +
+              w_new * (x_new - mean_x) * (x_new - mean_prev_x);
+            
+          } else if (std::isnan(xx[i])) {
+            
+            sumsq_x = lambda * sumsq_x;
+            
+          } else if (!std::isnan(xx[i]) && (n_obs == 1) && !center) {
+            
+            sumsq_x = w_new * pow(x_new, (long double)2.0);
+            
+          }
+          
+        }
+        
+        // rolling window
+        if (i >= width) {
+          
+          // don't include if missing value
+          if (!std::isnan(xx[i]) && std::isnan(xx[i - width])) {
+            
+            n_obs += 1;
+            
+          } else if (std::isnan(xx[i]) && !std::isnan(xx[i - width])) {
+            
+            n_obs -= 1;
+            
+          }
+          
+          if (std::isnan(xx[i - width])) {
+            
+            w_old = 0;
+            x_old = 0;
+            
+          } else {
+            
+            w_old = weights[n - width];
+            x_old = xx[i - width];
+            
+          }
+          
+          sum_w = lambda * sum_w + w_new - lambda * w_old;
+          sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+            pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+          
+          if (center && (n_obs > 0)) {
+            
+            // compute the mean
+            mean_prev_x = mean_x;
+            mean_x = sum_x / sum_w;
+            
+          }
+          
+          // compute the sum of squares
+          if (!std::isnan(xx[i]) && !std::isnan(xx[i - width])) {
+            
+            sumsq_x = lambda * sumsq_x +
+              w_new * (x_new - mean_x) * (x_new - mean_prev_x) -
+              lambda * w_old * (x_old - mean_x) * (x_old - mean_prev_x);
+            
+          } else if (!std::isnan(xx[i]) && std::isnan(xx[i - width])) {
+            
+            sumsq_x = lambda * sumsq_x +
+              w_new * (x_new - mean_x) * (x_new - mean_prev_x);
+            
+          } else if (std::isnan(xx[i]) && !std::isnan(xx[i - width])) {
+            
+            sumsq_x = lambda * sumsq_x -
+              lambda * w_old * (x_old - mean_x) * (x_old - mean_prev_x);
+            
+          } else if (std::isnan(xx[i]) || std::isnan(xx[i - width])) {
+            
+            sumsq_x = lambda * sumsq_x;
+            
+          }
+          
+        }
+        
+        // don't compute if missing value
+        if ((!na_restore) || (na_restore && !std::isnan(xx[i]))) {
+          
+          // compute the unbiased estimate of variance
+          if ((n_obs > 1) && (n_obs >= min_obs)) {
+            
+            if (std::abs(sumsq_x) <= sqrt(arma::datum::eps)) {
+              arma_var[i] = 0;
+            } else {
+              arma_var[i] = sumsq_x / (sum_w - sumsq_w / sum_w);
+            }
+            
+          } else {
+            arma_var[i] = NA_REAL;
+          }
+          
+        } else {
+          
+          // can be either NA or NaN
+          arma_var[i] = xx[i];
+          
+        }
+        
+      }
       
     } else {
       
