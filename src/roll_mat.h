@@ -2125,7 +2125,7 @@ struct RollSdBatchMat : public Worker {
 };
 
 // 'Worker' function for computing rolling centering and scaling using an online algorithm
-struct RollScaleOnline : public Worker {
+struct RollScaleOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -2141,12 +2141,12 @@ struct RollScaleOnline : public Worker {
   arma::mat& arma_scale;        // destination (pass by reference)
   
   // initialize with source and destination
-  RollScaleOnline(const NumericMatrix x, const int n,
-                  const int n_rows_x, const int n_cols_x,
-                  const int width, const arma::vec arma_weights,
-                  const bool center, const bool scale,
-                  const int min_obs, const arma::uvec arma_any_na,
-                  const bool na_restore, arma::mat& arma_scale)
+  RollScaleOnlineMat(const NumericMatrix x, const int n,
+                     const int n_rows_x, const int n_cols_x,
+                     const int width, const arma::vec arma_weights,
+                     const bool center, const bool scale,
+                     const int min_obs, const arma::uvec arma_any_na,
+                     const bool na_restore, arma::mat& arma_scale)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
@@ -2374,7 +2374,7 @@ struct RollScaleOnline : public Worker {
 };
 
 // 'Worker' function for computing rolling centering and scaling using a standard algorithm
-struct RollScaleBatch : public Worker {
+struct RollScaleBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -2390,12 +2390,12 @@ struct RollScaleBatch : public Worker {
   arma::mat& arma_scale;        // destination (pass by reference)
   
   // initialize with source and destination
-  RollScaleBatch(const NumericMatrix x, const int n,
-                 const int n_rows_x, const int n_cols_x,
-                 const int width, const arma::vec arma_weights,
-                 const bool center, const bool scale,
-                 const int min_obs, const arma::uvec arma_any_na,
-                 const bool na_restore, arma::mat& arma_scale)
+  RollScaleBatchMat(const NumericMatrix x, const int n,
+                    const int n_rows_x, const int n_cols_x,
+                    const int width, const arma::vec arma_weights,
+                    const bool center, const bool scale,
+                    const int min_obs, const arma::uvec arma_any_na,
+                    const bool na_restore, arma::mat& arma_scale)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
