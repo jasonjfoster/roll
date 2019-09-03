@@ -1789,7 +1789,7 @@ struct RollVarBatchMat : public Worker {
 };
 
 // 'Worker' function for computing rolling standard deviations using an online algorithm
-struct RollSdOnline : public Worker {
+struct RollSdOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -1804,12 +1804,12 @@ struct RollSdOnline : public Worker {
   arma::mat& arma_sd;         // destination (pass by reference)
   
   // initialize with source and destination
-  RollSdOnline(const NumericMatrix x, const int n,
-               const int n_rows_x, const int n_cols_x,
-               const int width, const arma::vec arma_weights,
-               const bool center, const int min_obs,
-               const arma::uvec arma_any_na, const bool na_restore,
-               arma::mat& arma_sd)
+  RollSdOnlineMat(const NumericMatrix x, const int n,
+                  const int n_rows_x, const int n_cols_x,
+                  const int width, const arma::vec arma_weights,
+                  const bool center, const int min_obs,
+                  const arma::uvec arma_any_na, const bool na_restore,
+                  arma::mat& arma_sd)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
@@ -1995,7 +1995,7 @@ struct RollSdOnline : public Worker {
 };
 
 // 'Worker' function for computing rolling standard deviations using a standard algorithm
-struct RollSdBatch : public Worker {
+struct RollSdBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -2010,12 +2010,12 @@ struct RollSdBatch : public Worker {
   arma::mat& arma_sd;           // destination (pass by reference)
   
   // initialize with source and destination
-  RollSdBatch(const NumericMatrix x, const int n,
-              const int n_rows_x, const int n_cols_x,
-              const int width, const arma::vec arma_weights,
-              const bool center, const int min_obs,
-              const arma::uvec arma_any_na, const bool na_restore,
-              arma::mat& arma_sd)
+  RollSdBatchMat(const NumericMatrix x, const int n,
+                 const int n_rows_x, const int n_cols_x,
+                 const int width, const arma::vec arma_weights,
+                 const bool center, const int min_obs,
+                 const arma::uvec arma_any_na, const bool na_restore,
+                 arma::mat& arma_sd)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
