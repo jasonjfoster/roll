@@ -25,7 +25,7 @@ test_data[[3]] <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 
 set.seed(5640)
 idx <- sample(1:(n_obs * n_vars), n_obs / 4)
-test_data[[3]][idx] <- NA
+test_data[[3]][idx] <- as.numeric(NA)
 
 # test arguments
 test_data_x <- lapply(test_data, function(x){x[ , 1:2]})
@@ -44,13 +44,12 @@ test_online <- c(TRUE, FALSE)
 scale_z <- function(x, center = TRUE, scale = TRUE) {
   
   n_rows_x <- length(x)
+  result <- as.numeric(NA)
   
-  result <- scale(x, center = center, scale = scale)
+  temp <- scale(x, center = center, scale = scale)
   
   if ((scale && (n_rows_x > 1)) || !scale) {
-    result <- result[length(result)]
-  } else {
-    result <- as.numeric(NA)
+    result <- temp[length(temp)]
   }
   
   return(result)
@@ -67,15 +66,15 @@ rollapplyr_cube <- function(f, x, y, width) {
     n_rows_xy <- nrow(x)
     n_cols_x <- ncol(x)
     n_cols_y <- ncol(y)
-    r_cube <- array(NA, c(n_cols_x, n_cols_y, n_rows_xy))
+    result <- array(as.numeric(NA), c(n_cols_x, n_cols_y, n_rows_xy))
     
     for (i in 1:n_rows_xy) {
       
-      result <- f(x[max(1, i - width + 1):i, , drop = FALSE],
-                  y[max(1, i - width + 1):i, , drop = FALSE])
+      temp <- f(x[max(1, i - width + 1):i, , drop = FALSE],
+                y[max(1, i - width + 1):i, , drop = FALSE])
       
-      if (!anyNA(result)) {
-        r_cube[ , , i] <- result
+      if (!anyNA(temp)) {
+        result[ , , i] <- temp
       }
       
     }
@@ -83,22 +82,22 @@ rollapplyr_cube <- function(f, x, y, width) {
   } else {
     
     n_rows_xy <- length(x)
-    r_cube <- array(NA, n_rows_xy)
+    result <- array(NA, n_rows_xy)
     
     for (i in 1:n_rows_xy) {
       
-      result <- f(x[max(1, i - width + 1):i],
-                  y[max(1, i - width + 1):i])
+      temp <- f(x[max(1, i - width + 1):i],
+                y[max(1, i - width + 1):i])
       
-      if (!anyNA(result)) {
-        r_cube[i] <- result
+      if (!anyNA(temp)) {
+        result[i] <- temp
       }
       
     }
     
   }
   
-  return(r_cube)
+  return(result)
   
 }
 
@@ -111,9 +110,9 @@ rollapplyr_lm <- function(x, y, width, intercept) {
     n_cols_x <- n_cols_x + 1
   }
   
-  result <- list("coefficients" = matrix(NA, n_rows_xy, n_cols_x),
-                 "r.squared" = matrix(NA, n_rows_xy, 1),
-                 "std.error" = matrix(NA, n_rows_xy, n_cols_x))
+  result <- list("coefficients" = matrix(as.numeric(NA), n_rows_xy, n_cols_x),
+                 "r.squared" = matrix(as.numeric(NA), n_rows_xy, 1),
+                 "std.error" = matrix(as.numeric(NA), n_rows_xy, n_cols_x))
   
   if (zoo::is.zoo(x)) {
     
@@ -151,8 +150,8 @@ rollapplyr_lm <- function(x, y, width, intercept) {
         
       } else {
         
-        result[["r.squared"]][i, ] <- NA
-        result[["std.error"]][i, ] <- NA
+        result[["r.squared"]][i, ] <- as.numeric(NA)
+        result[["std.error"]][i, ] <- as.numeric(NA)
         
       }
       

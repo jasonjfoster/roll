@@ -1350,8 +1350,9 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     
     NumericMatrix xx(x);
     NumericVector yy(y);
-    yy.attr("dim") = IntegerVector::create(yy.size(), 1);
-    NumericMatrix yyy(wrap(yy));
+    // yy.attr("dim") = IntegerVector::create(yy.size(), 1);
+    // NumericMatrix yyy(wrap(yy));
+    NumericMatrix yyy(yy.size(), 1, yy.begin());
     
     int n = weights.size();
     int n_rows_xy = xx.nrow();
@@ -1451,8 +1452,9 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     
     NumericVector xx(x);
     NumericMatrix yy(y);
-    xx.attr("dim") = IntegerVector::create(xx.size(), 1);
-    NumericMatrix xxx(wrap(xx));
+    // xx.attr("dim") = IntegerVector::create(xx.size(), 1);
+    // NumericMatrix xxx(wrap(xx));
+    NumericMatrix xxx(xx.size(), 1, xx.begin());
     
     int n = weights.size();
     int n_rows_xy = xxx.nrow();
