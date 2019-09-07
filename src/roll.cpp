@@ -1241,126 +1241,417 @@ SEXP roll_scale(const SEXP& x, const int& width,
   
 }
 
-NumericVector roll_cov_z(const NumericMatrix& x, const NumericMatrix& y,
-                         const int& width, const arma::vec& weights,
-                         const bool& center, const bool& scale,
-                         const int& min_obs, const bool& complete_obs,
-                         const bool& na_restore, const bool& online,
-                         const bool& symmetric) {
+SEXP roll_cov_z(const SEXP& x, const SEXP& y,
+                const int& width, const arma::vec& weights,
+                const bool& center, const bool& scale,
+                const int& min_obs, const bool& complete_obs,
+                const bool& na_restore, const bool& online,
+                const bool& symmetric) {
   
-  int n = weights.size();
-  int n_rows_xy = x.nrow();
-  int n_cols_x = x.ncol();
-  int n_cols_y = y.ncol();
-  arma::uvec arma_any_na(n_rows_xy);
-  arma::cube arma_cov(n_cols_x, n_cols_y, n_rows_xy);
-  
-  // check 'x' and 'y' arguments for errors
-  check_lm(n_rows_xy, y.nrow());
-  
-  // check 'width' argument for errors
-  check_width(width);
-  
-  // default 'weights' argument is equal-weighted,
-  // otherwise check argument for errors
-  check_weights_xy(n_rows_xy, width, weights);
-  bool status = check_lambda(weights, online);
-  
-  // default 'min_obs' argument is 'width',
-  // otherwise check argument for errors
-  check_min_obs(min_obs);
-  
-  // default 'complete_obs' argument is 'true',
-  // otherwise check argument for errors
-  if (complete_obs && symmetric) {
-    arma_any_na = any_na_x(x);
-  } else if (complete_obs && !symmetric) {
-    arma_any_na = any_na_xy(x, y);
-  } else {
-    arma_any_na.fill(0);
-  }
-  
-  // compute rolling covariances
-  if (status && online) {
+  if (Rf_isMatrix(x) && Rf_isMatrix(y)) {
     
-    if (symmetric) {
+    NumericMatrix xx(x);
+    NumericMatrix yy(y);
+    int n = weights.size();
+    int n_rows_xy = xx.nrow();
+    int n_cols_x = xx.ncol();
+    int n_cols_y = yy.ncol();
+    arma::uvec arma_any_na(n_rows_xy);
+    arma::cube arma_cov(n_cols_x, n_cols_y, n_rows_xy);
+    
+    // check 'x' and 'y' arguments for errors
+    check_lm(n_rows_xy, yy.nrow());
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_xy(n_rows_xy, width, weights);
+    bool status = check_lambda(weights, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'true',
+    // otherwise check argument for errors
+    if (complete_obs && symmetric) {
+      arma_any_na = any_na_x(xx);
+    } else if (complete_obs && !symmetric) {
+      arma_any_na = any_na_xy(xx, yy);
+    } else {
+      arma_any_na.fill(0);
+    }
+    
+    // compute rolling covariances
+    if (status && online) {
       
-      // y is null
-      RollCovOnlineXX roll_cov_online(x, n, n_rows_xy, n_cols_x, width,
-                                      weights, center, scale, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_cov);
-      parallelFor(0, n_cols_x, roll_cov_online);
+      if (symmetric) {
+        
+        // y is null
+        RollCovOnlineMatXX roll_cov_online(xx, n, n_rows_xy, n_cols_x, width,
+                                           weights, center, scale, min_obs,
+                                           arma_any_na, na_restore,
+                                           arma_cov);
+        parallelFor(0, n_cols_x, roll_cov_online);
+        
+      } else if (!symmetric) {
+        
+        // y is not null
+        RollCovOnlineMatXY roll_cov_online(xx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                           weights, center, scale, min_obs,
+                                           arma_any_na, na_restore,
+                                           arma_cov);
+        parallelFor(0, n_cols_x, roll_cov_online);
+        
+      }
       
-    } else if (!symmetric) {
+    } else {
       
-      // y is not null
-      RollCovOnlineXY roll_cov_online(x, y, n, n_rows_xy, n_cols_x, n_cols_y, width,
-                                      weights, center, scale, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_cov);
-      parallelFor(0, n_cols_x, roll_cov_online);
+      if (symmetric) {
+        
+        // y is null
+        RollCovBatchMatXX roll_cov_batch(xx, n, n_rows_xy, n_cols_x, width,
+                                         weights, center, scale, min_obs,
+                                         arma_any_na, na_restore,
+                                         arma_cov);
+        parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_batch);
+        
+      } else if (!symmetric) {
+        
+        // y is not null
+        RollCovBatchMatXY roll_cov_batch(xx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                         weights, center, scale, min_obs,
+                                         arma_any_na, na_restore,
+                                         arma_cov);
+        parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_cov_batch);
+        
+      }
       
     }
     
-  } else {
+    // create and return a matrix
+    NumericVector result(wrap(arma_cov));
+    result.attr("dim") = IntegerVector::create(n_cols_x, n_cols_y, n_rows_xy);
+    List x_dimnames = xx.attr("dimnames");
+    List y_dimnames = yy.attr("dimnames");
+    if ((x_dimnames.size() > 1) && (y_dimnames.size() > 1)) {
+      result.attr("dimnames") = List::create(x_dimnames[1], y_dimnames[1]);
+    } else if (x_dimnames.size() > 1) {
+      result.attr("dimnames") = List::create(x_dimnames[1], R_NilValue);
+    } else if (y_dimnames.size() > 1) {
+      result.attr("dimnames") = List::create(R_NilValue, y_dimnames[1]);
+    }
     
-    if (symmetric) {
+    return result;
+    
+  } else if (Rf_isMatrix(x)) {
+    
+    NumericMatrix xx(x);
+    NumericVector yy(y);
+    yy.attr("dim") = IntegerVector::create(yy.size(), 1);
+    NumericMatrix yyy(wrap(yy));
+    
+    int n = weights.size();
+    int n_rows_xy = xx.nrow();
+    int n_cols_x = xx.ncol();
+    int n_cols_y = yyy.ncol();
+    arma::uvec arma_any_na(n_rows_xy);
+    arma::cube arma_cov(n_cols_x, n_cols_y, n_rows_xy);
+    
+    // check 'x' and 'y' arguments for errors
+    check_lm(n_rows_xy, yyy.nrow());
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_xy(n_rows_xy, width, weights);
+    bool status = check_lambda(weights, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'true',
+    // otherwise check argument for errors
+    if (complete_obs && symmetric) {
+      arma_any_na = any_na_x(xx);
+    } else if (complete_obs && !symmetric) {
+      arma_any_na = any_na_xy(xx, yyy);
+    } else {
+      arma_any_na.fill(0);
+    }
+    
+    // compute rolling covariances
+    if (status && online) {
       
-      // y is null
-      RollCovBatchXX roll_cov_batch(x, n, n_rows_xy, n_cols_x, width,
-                                    weights, center, scale, min_obs,
-                                    arma_any_na, na_restore,
-                                    arma_cov);
-      parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_batch);
+      if (symmetric) {
+        
+        // y is null
+        RollCovOnlineMatXX roll_cov_online(xx, n, n_rows_xy, n_cols_x, width,
+                                           weights, center, scale, min_obs,
+                                           arma_any_na, na_restore,
+                                           arma_cov);
+        parallelFor(0, n_cols_x, roll_cov_online);
+        
+      } else if (!symmetric) {
+        
+        // y is not null
+        RollCovOnlineMatXY roll_cov_online(xx, yyy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                           weights, center, scale, min_obs,
+                                           arma_any_na, na_restore,
+                                           arma_cov);
+        parallelFor(0, n_cols_x, roll_cov_online);
+        
+      }
       
-    } else if (!symmetric) {
+    } else {
       
-      // y is not null
-      RollCovBatchXY roll_cov_batch(x, y, n, n_rows_xy, n_cols_x, n_cols_y, width,
-                                    weights, center, scale, min_obs,
-                                    arma_any_na, na_restore,
-                                    arma_cov);
-      parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_cov_batch);
+      if (symmetric) {
+        
+        // y is null
+        RollCovBatchMatXX roll_cov_batch(xx, n, n_rows_xy, n_cols_x, width,
+                                         weights, center, scale, min_obs,
+                                         arma_any_na, na_restore,
+                                         arma_cov);
+        parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_batch);
+        
+      } else if (!symmetric) {
+        
+        // y is not null
+        RollCovBatchMatXY roll_cov_batch(xx, yyy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                         weights, center, scale, min_obs,
+                                         arma_any_na, na_restore,
+                                         arma_cov);
+        parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_cov_batch);
+        
+      }
       
     }
     
+    // create and return a matrix
+    NumericVector result(wrap(arma_cov));
+    result.attr("dim") = IntegerVector::create(n_cols_x, n_cols_y, n_rows_xy);
+    List x_dimnames = xx.attr("dimnames");
+    List y_dimnames = yyy.attr("dimnames");
+    if ((x_dimnames.size() > 1) && (y_dimnames.size() > 1)) {
+      result.attr("dimnames") = List::create(x_dimnames[1], y_dimnames[1]);
+    } else if (x_dimnames.size() > 1) {
+      result.attr("dimnames") = List::create(x_dimnames[1], R_NilValue);
+    } else if (y_dimnames.size() > 1) {
+      result.attr("dimnames") = List::create(R_NilValue, y_dimnames[1]);
+    }
+    
+    return result;
+    
+  } else if (Rf_isMatrix(y)) {
+    
+    NumericVector xx(x);
+    NumericMatrix yy(y);
+    xx.attr("dim") = IntegerVector::create(xx.size(), 1);
+    NumericMatrix xxx(wrap(xx));
+    
+    int n = weights.size();
+    int n_rows_xy = xxx.nrow();
+    int n_cols_x = xxx.ncol();
+    int n_cols_y = yy.ncol();
+    arma::uvec arma_any_na(n_rows_xy);
+    arma::cube arma_cov(n_cols_x, n_cols_y, n_rows_xy);
+    
+    // check 'x' and 'y' arguments for errors
+    check_lm(n_rows_xy, yy.nrow());
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_xy(n_rows_xy, width, weights);
+    bool status = check_lambda(weights, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'true',
+    // otherwise check argument for errors
+    if (complete_obs && symmetric) {
+      arma_any_na = any_na_x(xxx);
+    } else if (complete_obs && !symmetric) {
+      arma_any_na = any_na_xy(xxx, yy);
+    } else {
+      arma_any_na.fill(0);
+    }
+    
+    // compute rolling covariances
+    if (status && online) {
+      
+      if (symmetric) {
+        
+        // y is null
+        RollCovOnlineMatXX roll_cov_online(xxx, n, n_rows_xy, n_cols_x, width,
+                                           weights, center, scale, min_obs,
+                                           arma_any_na, na_restore,
+                                           arma_cov);
+        parallelFor(0, n_cols_x, roll_cov_online);
+        
+      } else if (!symmetric) {
+        
+        // y is not null
+        RollCovOnlineMatXY roll_cov_online(xxx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                           weights, center, scale, min_obs,
+                                           arma_any_na, na_restore,
+                                           arma_cov);
+        parallelFor(0, n_cols_x, roll_cov_online);
+        
+      }
+      
+    } else {
+      
+      if (symmetric) {
+        
+        // y is null
+        RollCovBatchMatXX roll_cov_batch(xxx, n, n_rows_xy, n_cols_x, width,
+                                         weights, center, scale, min_obs,
+                                         arma_any_na, na_restore,
+                                         arma_cov);
+        parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_batch);
+        
+      } else if (!symmetric) {
+        
+        // y is not null
+        RollCovBatchMatXY roll_cov_batch(xxx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                         weights, center, scale, min_obs,
+                                         arma_any_na, na_restore,
+                                         arma_cov);
+        parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_cov_batch);
+        
+      }
+      
+    }
+    
+    // create and return a matrix
+    NumericVector result(wrap(arma_cov));
+    result.attr("dim") = IntegerVector::create(n_cols_x, n_cols_y, n_rows_xy);
+    List x_dimnames = xxx.attr("dimnames");
+    List y_dimnames = yy.attr("dimnames");
+    if ((x_dimnames.size() > 1) && (y_dimnames.size() > 1)) {
+      result.attr("dimnames") = List::create(x_dimnames[1], y_dimnames[1]);
+    } else if (x_dimnames.size() > 1) {
+      result.attr("dimnames") = List::create(x_dimnames[1], R_NilValue);
+    } else if (y_dimnames.size() > 1) {
+      result.attr("dimnames") = List::create(R_NilValue, y_dimnames[1]);
+    }
+    
+    return result;
+    
+  } else {
+    
+    NumericVector xx(x);
+    NumericVector yy(y);
+    int n = weights.size();
+    int n_rows_xy = xx.size();
+    arma::vec arma_cov(n_rows_xy);
+    
+    // check 'x' and 'y' arguments for errors
+    check_lm(n_rows_xy, yy.size());
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_xy(n_rows_xy, width, weights);
+    bool status = check_lambda(weights, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'true',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      warning("'complete_obs' is only supported for matrices");
+    }
+    
+    // compute rolling covariances
+    if (status && online) {
+      
+      if (symmetric) {
+        
+        // y is null
+        RollCovOnlineVecXX roll_cov_online(xx, n, n_rows_xy, width,
+                                           weights, center, scale, min_obs,
+                                           na_restore,
+                                           arma_cov);
+        roll_cov_online();
+        
+      } else if (!symmetric) {
+        
+        // y is not null
+        RollCovOnlineVecXY roll_cov_online(xx, yy, n, n_rows_xy, width,
+                                           weights, center, scale, min_obs,
+                                           na_restore,
+                                           arma_cov);
+        roll_cov_online();
+        
+      }
+      
+    } else {
+      
+      if (symmetric) {
+
+        // y is null
+        RollCovBatchVecXX roll_cov_batch(xx, n, n_rows_xy, width,
+                                         weights, center, scale, min_obs,
+                                         na_restore,
+                                         arma_cov);
+        parallelFor(0, n_rows_xy, roll_cov_batch);
+
+      } else if (!symmetric) {
+
+        // y is not null
+        RollCovBatchVecXY roll_cov_batch(xx, yy, n, n_rows_xy, width,
+                                         weights, center, scale, min_obs,
+                                         na_restore,
+                                         arma_cov);
+        parallelFor(0, n_rows_xy, roll_cov_batch);
+
+      }
+      
+    }
+    
+    // create and return a vector object
+    NumericVector result(wrap(arma_cov));
+    result.attr("dim") = R_NilValue;
+    
+    return result;
+    
   }
-  
-  // create and return a matrix
-  NumericVector result(wrap(arma_cov));
-  result.attr("dim") = IntegerVector::create(n_cols_x, n_cols_y, n_rows_xy);
-  List x_dimnames = x.attr("dimnames");
-  List y_dimnames = y.attr("dimnames");
-  if ((x_dimnames.size() > 1) && (y_dimnames.size() > 1)) {
-    result.attr("dimnames") = List::create(x_dimnames[1], y_dimnames[1]);
-  } else if (x_dimnames.size() > 1) {
-    result.attr("dimnames") = List::create(x_dimnames[1], R_NilValue);
-  } else if (y_dimnames.size() > 1) {
-    result.attr("dimnames") = List::create(R_NilValue, y_dimnames[1]);
-  }
-  
-  return result;
   
 }
 
 // [[Rcpp::export(.roll_cov)]]
-NumericVector roll_cov(const NumericMatrix& x, const Nullable<NumericMatrix>& y,
-                       const int& width, const arma::vec& weights,
-                       const bool& center, const bool& scale,
-                       const int& min_obs, const bool& complete_obs,
-                       const bool& na_restore, const bool& online) {
+SEXP roll_cov(const SEXP& x, const SEXP& y,
+              const int& width, const arma::vec& weights,
+              const bool& center, const bool& scale,
+              const int& min_obs, const bool& complete_obs,
+              const bool& na_restore, const bool& online) {
   
-  if (y.isNotNull()) {
+  if (Rf_isNull(y)) {
     
-    NumericMatrix yy(y);
-    return roll_cov_z(x, yy, width, weights, center, scale, min_obs, complete_obs, 
+    return roll_cov_z(x, x, width, weights, center, scale, min_obs, complete_obs, 
+                      na_restore, online, true);
+    
+  } else {
+    
+    return roll_cov_z(x, y, width, weights, center, scale, min_obs, complete_obs, 
                       na_restore, online, false);
     
   }
-  
-  return roll_cov_z(x, x, width, weights, center, scale, min_obs, complete_obs,
-                    na_restore, online, true);
   
 }
 

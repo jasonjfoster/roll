@@ -2547,7 +2547,7 @@ struct RollScaleBatchMat : public Worker {
 };
 
 // 'Worker' function for computing rolling covariances using an online algorithm
-struct RollCovOnlineXX : public Worker {
+struct RollCovOnlineMatXX : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -2563,12 +2563,12 @@ struct RollCovOnlineXX : public Worker {
   arma::cube& arma_cov;         // destination (pass by reference)
   
   // initialize with source and destination
-  RollCovOnlineXX(const NumericMatrix x, const int n,
-                  const int n_rows_xy, const int n_cols_x,
-                  const int width, const arma::vec arma_weights,
-                  const bool center, const bool scale,
-                  const int min_obs, const arma::uvec arma_any_na,
-                  const bool na_restore, arma::cube& arma_cov)
+  RollCovOnlineMatXX(const NumericMatrix x, const int n,
+                     const int n_rows_xy, const int n_cols_x,
+                     const int width, const arma::vec arma_weights,
+                     const bool center, const bool scale,
+                     const int min_obs, const arma::uvec arma_any_na,
+                     const bool na_restore, arma::cube& arma_cov)
     : x(x), n(n),
       n_rows_xy(n_rows_xy), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
@@ -2868,7 +2868,7 @@ struct RollCovOnlineXX : public Worker {
 };
 
 // 'Worker' function for computing rolling covariances using an online algorithm
-struct RollCovOnlineXY : public Worker {
+struct RollCovOnlineMatXY : public Worker {
   
   const RMatrix<double> x;      // source
   const RMatrix<double> y;      // source
@@ -2886,13 +2886,13 @@ struct RollCovOnlineXY : public Worker {
   arma::cube& arma_cov;         // destination (pass by reference)
   
   // initialize with source and destination
-  RollCovOnlineXY(const NumericMatrix x, const NumericMatrix y,
-                  const int n, const int n_rows_xy,
-                  const int n_cols_x, const int n_cols_y,
-                  const int width, const arma::vec arma_weights,
-                  const bool center, const bool scale,
-                  const int min_obs, const arma::uvec arma_any_na,
-                  const bool na_restore, arma::cube& arma_cov)
+  RollCovOnlineMatXY(const NumericMatrix x, const NumericMatrix y,
+                     const int n, const int n_rows_xy,
+                     const int n_cols_x, const int n_cols_y,
+                     const int width, const arma::vec arma_weights,
+                     const bool center, const bool scale,
+                     const int min_obs, const arma::uvec arma_any_na,
+                     const bool na_restore, arma::cube& arma_cov)
     : x(x), y(y),
       n(n), n_rows_xy(n_rows_xy),
       n_cols_x(n_cols_x), n_cols_y(n_cols_y),
@@ -3190,7 +3190,7 @@ struct RollCovOnlineXY : public Worker {
 };
 
 // 'Worker' function for computing rolling covariances using a standard algorithm
-struct RollCovBatchXX : public Worker {
+struct RollCovBatchMatXX : public Worker {
   
   const RMatrix<double> x;       // source
   const int n;
@@ -3206,12 +3206,12 @@ struct RollCovBatchXX : public Worker {
   arma::cube& arma_cov;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollCovBatchXX(const NumericMatrix x, const int n,
-                 const int n_rows_xy, const int n_cols_x,
-                 const int width, const arma::vec arma_weights,
-                 const bool center, const bool scale, 
-                 const int min_obs, const arma::uvec arma_any_na,
-                 const bool na_restore, arma::cube& arma_cov)
+  RollCovBatchMatXX(const NumericMatrix x, const int n,
+                    const int n_rows_xy, const int n_cols_x,
+                    const int width, const arma::vec arma_weights,
+                    const bool center, const bool scale, 
+                    const int min_obs, const arma::uvec arma_any_na,
+                    const bool na_restore, arma::cube& arma_cov)
     : x(x), n(n),
       n_rows_xy(n_rows_xy), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
@@ -3405,7 +3405,7 @@ struct RollCovBatchXX : public Worker {
 };
 
 // 'Worker' function for computing rolling covariances using a standard algorithm
-struct RollCovBatchXY : public Worker {
+struct RollCovBatchMatXY : public Worker {
   
   const RMatrix<double> x;       // source
   const RMatrix<double> y;       // source
@@ -3423,13 +3423,13 @@ struct RollCovBatchXY : public Worker {
   arma::cube& arma_cov;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollCovBatchXY(const NumericMatrix x, const NumericMatrix y,
-                 const int n, const int n_rows_xy,
-                 const int n_cols_x, const int n_cols_y,
-                 const int width, const arma::vec arma_weights,
-                 const bool center, const bool scale,
-                 const int min_obs, const arma::uvec arma_any_na,
-                 const bool na_restore, arma::cube& arma_cov)
+  RollCovBatchMatXY(const NumericMatrix x, const NumericMatrix y,
+                    const int n, const int n_rows_xy,
+                    const int n_cols_x, const int n_cols_y,
+                    const int width, const arma::vec arma_weights,
+                    const bool center, const bool scale,
+                    const int min_obs, const arma::uvec arma_any_na,
+                    const bool na_restore, arma::cube& arma_cov)
     : x(x), y(y),
       n(n), n_rows_xy(n_rows_xy),
       n_cols_x(n_cols_x), n_cols_y(n_cols_y),

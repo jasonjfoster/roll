@@ -50,7 +50,7 @@ scale_z <- function(x, center = TRUE, scale = TRUE) {
   if ((scale && (n_rows_x > 1)) || !scale) {
     result <- result[length(result)]
   } else {
-    result <- NA
+    result <- as.numeric(NA)
   }
   
   return(result)
@@ -59,17 +59,41 @@ scale_z <- function(x, center = TRUE, scale = TRUE) {
 
 rollapplyr_cube <- function(f, x, y, width) {
   
-  n_rows_xy <- nrow(x)
-  n_cols_x <- ncol(x)
-  r_cube <- array(NA, c(n_cols_x, n_cols_x, n_rows_xy))
-  
-  for (i in 1:n_rows_xy) {
+  if (is.matrix(x) || is.matrix(y)) {
     
-    result <- f(x[max(1, i - width + 1):i, , drop = FALSE],
-                y[max(1, i - width + 1):i, , drop = FALSE])
+    x <- as.matrix(x)
+    y <- as.matrix(y)
     
-    if (!anyNA(result)) {
-      r_cube[ , , i] <- result
+    n_rows_xy <- nrow(x)
+    n_cols_x <- ncol(x)
+    n_cols_y <- ncol(y)
+    r_cube <- array(NA, c(n_cols_x, n_cols_y, n_rows_xy))
+    
+    for (i in 1:n_rows_xy) {
+      
+      result <- f(x[max(1, i - width + 1):i, , drop = FALSE],
+                  y[max(1, i - width + 1):i, , drop = FALSE])
+      
+      if (!anyNA(result)) {
+        r_cube[ , , i] <- result
+      }
+      
+    }
+    
+  } else {
+    
+    n_rows_xy <- length(x)
+    r_cube <- array(NA, n_rows_xy)
+    
+    for (i in 1:n_rows_xy) {
+      
+      result <- f(x[max(1, i - width + 1):i],
+                  y[max(1, i - width + 1):i])
+      
+      if (!anyNA(result)) {
+        r_cube[i] <- result
+      }
+      
     }
     
   }
