@@ -4201,7 +4201,7 @@ struct RollLmInterceptTRUE : public Worker {
 };
 
 // 'Worker' function for rolling linear models
-struct RollLmInterceptFALSE : public Worker {
+struct RollLmInterceptMatFALSE : public Worker {
   
   const arma::cube arma_cov;    // source
   const int n;
@@ -4215,11 +4215,11 @@ struct RollLmInterceptFALSE : public Worker {
   arma::mat& arma_se;
   
   // initialize with source and destination
-  RollLmInterceptFALSE(const arma::cube arma_cov, const int n,
-                       const int n_rows_xy, const int n_cols_x,
-                       const int width, const arma::vec arma_n_obs,
-                       const arma::vec arma_sum_w, arma::mat& arma_coef,
-                       arma::vec& arma_rsq, arma::mat& arma_se)
+  RollLmInterceptMatFALSE(const arma::cube arma_cov, const int n,
+                          const int n_rows_xy, const int n_cols_x,
+                          const int width, const arma::vec arma_n_obs,
+                          const arma::vec arma_sum_w, arma::mat& arma_coef,
+                          arma::vec& arma_rsq, arma::mat& arma_se)
     : arma_cov(arma_cov), n(n),
       n_rows_xy(n_rows_xy), n_cols_x(n_cols_x),
       width(width), arma_n_obs(arma_n_obs),

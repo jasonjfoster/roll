@@ -2219,4 +2219,109 @@ struct RollCovBatchVecXY : public Worker {
 
 };
 
+// 'Worker' function for rolling linear models
+struct RollLmInterceptVecFALSE : public Worker {
+  
+  const arma::cube arma_cov;    // source
+  const int n;
+  const int n_rows_xy;
+  const int width;
+  const arma::vec arma_n_obs;
+  const arma::vec arma_sum_w;
+  arma::vec& arma_coef;         // destination (pass by reference)
+  arma::vec& arma_rsq;
+  arma::vec& arma_se;
+  
+  // initialize with source and destination
+  RollLmInterceptVecFALSE(const arma::cube arma_cov, const int n,
+                          const int n_rows_xy,
+                          const int width, const arma::vec arma_n_obs,
+                          const arma::vec arma_sum_w, arma::vec& arma_coef,
+                          arma::vec& arma_rsq, arma::vec& arma_se)
+    : arma_cov(arma_cov), n(n),
+      n_rows_xy(n_rows_xy),
+      width(width), arma_n_obs(arma_n_obs),
+      arma_sum_w(arma_sum_w), arma_coef(arma_coef),
+      arma_rsq(arma_rsq), arma_se(arma_se) { }
+  
+  // function call operator that iterates by slice
+  void operator()(std::size_t begin_slice, std::size_t end_slice) {
+    for (std::size_t i = begin_slice; i < end_slice; i++) {
+      
+      arma::mat sigma = arma_cov.slice(i);
+      arma::mat A = sigma.submat(0, 0, 0, 0);
+      arma::mat b = sigma.submat(0, 1, 0, 1);
+      arma::vec coef(1);
+      
+      // check if missing value is present
+      bool any_na = sigma.has_nan();
+      
+      // don't compute if missing value 
+      if (!any_na) {
+        
+        // check if solution is found      
+        bool status_solve = arma::solve(coef, A, b, arma::solve_opts::no_approx);
+        int df_fit = 1;
+        
+        // don't find approximate solution for rank deficient system,
+        // and the width and current row must be greater than the
+        // number of variables
+        if (status_solve && (arma_n_obs[i] >= df_fit)) {
+          
+          // coefficients
+          arma::mat trans_coef = trans(coef);
+          arma_coef[i] = as_scalar(trans_coef);
+          
+          // r-squared
+          long double var_y = sigma(1, 1);
+          if ((var_y < 0) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {
+            arma_rsq[i] = NA_REAL;
+          } else {
+            arma_rsq[i] = as_scalar(trans_coef * A * coef) / var_y;
+          }
+          
+          // check if matrix is singular
+          arma::mat A_inv(1, 1);
+          bool status_inv = arma::inv(A_inv, A);
+          int df_resid = arma_n_obs[i] - 2 + 1;
+          
+          if (status_inv && (df_resid > 0)) {
+            
+            // residual variance
+            long double var_resid = (1 - arma_rsq[i]) * var_y / df_resid;
+            
+            // standard errors
+            if ((var_resid < 0) || (sqrt(var_resid) <= sqrt(arma::datum::eps))) {
+              var_resid = 0;
+            }
+            
+            arma_se[i] = as_scalar(sqrt(var_resid * trans(diagvec(A_inv))));
+            
+          } else {
+            
+            arma_se[i] = NA_REAL;
+            
+          }
+          
+        } else {
+          
+          arma_coef[i] = NA_REAL;
+          arma_rsq[i] = NA_REAL;
+          arma_se[i] = NA_REAL;
+          
+        }
+        
+      } else {
+        
+        arma_coef[i] = NA_REAL;
+        arma_rsq[i] = NA_REAL;
+        arma_se[i] = NA_REAL;
+        
+      }
+      
+    }
+  }
+  
+};
+
 #endif
