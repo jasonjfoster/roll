@@ -1116,7 +1116,7 @@ struct RollMeanBatchMat : public Worker {
 };
 
 // 'Worker' function for computing rolling minimums using a standard algorithm
-struct RollMinBatch : public Worker {
+struct RollMinBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -1130,11 +1130,11 @@ struct RollMinBatch : public Worker {
   arma::mat& arma_min;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollMinBatch(const NumericMatrix x, const int n,
-               const int n_rows_x, const int n_cols_x,
-               const int width, const arma::vec arma_weights,
-               const int min_obs, const arma::uvec arma_any_na,
-               const bool na_restore, arma::mat& arma_min)
+  RollMinBatchMat(const NumericMatrix x, const int n,
+                  const int n_rows_x, const int n_cols_x,
+                  const int width, const arma::vec arma_weights,
+                  const int min_obs, const arma::uvec arma_any_na,
+                  const bool na_restore, arma::mat& arma_min)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
@@ -1212,7 +1212,7 @@ struct RollMinBatch : public Worker {
 };
 
 // 'Worker' function for computing rolling maximums using a standard algorithm
-struct RollMaxBatch : public Worker {
+struct RollMaxBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -1226,11 +1226,11 @@ struct RollMaxBatch : public Worker {
   arma::mat& arma_max;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollMaxBatch(const NumericMatrix x, const int n,
-               const int n_rows_x, const int n_cols_x,
-               const int width, const arma::vec arma_weights,
-               const int min_obs, const arma::uvec arma_any_na,
-               const bool na_restore, arma::mat& arma_max)
+  RollMaxBatchMat(const NumericMatrix x, const int n,
+                  const int n_rows_x, const int n_cols_x,
+                  const int width, const arma::vec arma_weights,
+                  const int min_obs, const arma::uvec arma_any_na,
+                  const bool na_restore, arma::mat& arma_max)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
@@ -1310,7 +1310,7 @@ struct RollMaxBatch : public Worker {
 };
 
 // 'Worker' function for computing rolling medians using a standard algorithm
-struct RollMedianBatch : public Worker {
+struct RollMedianBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -1324,11 +1324,11 @@ struct RollMedianBatch : public Worker {
   arma::mat& arma_median;       // destination (pass by reference)
   
   // initialize with source and destination
-  RollMedianBatch(const NumericMatrix x, const int n,
-                  const int n_rows_x, const int n_cols_x,
-                  const int width, const arma::vec arma_weights,
-                  const int min_obs, const arma::uvec arma_any_na,
-                  const bool na_restore, arma::mat& arma_median)
+  RollMedianBatchMat(const NumericMatrix x, const int n,
+                     const int n_rows_x, const int n_cols_x,
+                     const int width, const arma::vec arma_weights,
+                     const int min_obs, const arma::uvec arma_any_na,
+                     const bool na_restore, arma::mat& arma_median)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),

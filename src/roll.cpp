@@ -620,12 +620,6 @@ SEXP roll_mean(const SEXP& x, const int& width,
     // otherwise check argument for errors
     check_min_obs(min_obs);
     
-    // default 'complete_obs' argument is 'false',
-    // otherwise check argument for errors
-    if (complete_obs) {
-      warning("'complete_obs' is only supported for matrices");
-    }
-    
     // compute rolling means
     if (status && online) {
       
@@ -662,200 +656,365 @@ SEXP roll_mean(const SEXP& x, const int& width,
 }
 
 // [[Rcpp::export(.roll_min)]]
-NumericMatrix roll_min(const NumericMatrix& x, const int& width,
-                       const arma::vec& weights, const int& min_obs,
-                       const bool& complete_obs, const bool& na_restore,
-                       const bool& online) {
+SEXP roll_min(const SEXP& x, const int& width,
+              const arma::vec& weights, const int& min_obs,
+              const bool& complete_obs, const bool& na_restore,
+              const bool& online) {
   
-  int n = weights.size();
-  int n_rows_x = x.nrow();
-  int n_cols_x = x.ncol();
-  arma::uvec arma_any_na(n_rows_x);
-  arma::mat arma_min(n_rows_x, n_cols_x);
-  
-  // check 'width' argument for errors
-  check_width(width);
-  
-  // default 'weights' argument is equal-weighted,
-  // otherwise check argument for errors
-  check_weights_p(weights);
-  
-  // default 'min_obs' argument is 'width',
-  // otherwise check argument for errors
-  check_min_obs(min_obs);
-  
-  // default 'complete_obs' argument is 'false',
-  // otherwise check argument for errors
-  if (complete_obs) {
-    arma_any_na = any_na_x(x);
+  if (Rf_isMatrix(x)) {
+    
+    NumericMatrix xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.nrow();
+    int n_cols_x = xx.ncol();
+    arma::uvec arma_any_na(n_rows_x);
+    arma::mat arma_min(n_rows_x, n_cols_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_p(weights);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'false',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      arma_any_na = any_na_x(x);
+    } else {
+      arma_any_na.fill(0);
+    }
+    
+    // compute rolling minimums
+    if (online) {
+      
+      warning("'online' is not supported");
+      RollMinBatchMat roll_min_batch(xx, n, n_rows_x, n_cols_x, width,
+                                     weights, min_obs,
+                                     arma_any_na, na_restore,
+                                     arma_min);
+      parallelFor(0, n_rows_x * n_cols_x, roll_min_batch);
+      
+    } else {
+      
+      RollMinBatchMat roll_min_batch(xx, n, n_rows_x, n_cols_x, width,
+                                     weights, min_obs,
+                                     arma_any_na, na_restore,
+                                     arma_min);
+      parallelFor(0, n_rows_x * n_cols_x, roll_min_batch);
+      
+    }
+    
+    // create and return a matrix or xts object
+    NumericMatrix result(wrap(arma_min));
+    List dimnames = xx.attr("dimnames");
+    result.attr("dimnames") = dimnames;
+    result.attr("index") = xx.attr("index");
+    result.attr(".indexCLASS") = xx.attr(".indexCLASS");
+    result.attr(".indexTZ") = xx.attr(".indexTZ");
+    result.attr("tclass") = xx.attr("tclass");
+    result.attr("tzone") = xx.attr("tzone");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
   } else {
-    arma_any_na.fill(0);
+    
+    NumericVector xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.size();
+    arma::vec arma_min(n_rows_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_p(weights);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // compute rolling minimums
+    if (online) {
+      
+      warning("'online' is not supported");
+      RollMinBatchVec roll_min_batch(x, n, n_rows_x, width,
+                                     weights, min_obs,
+                                     na_restore,
+                                     arma_min);
+      parallelFor(0, n_rows_x, roll_min_batch);
+      
+    } else {
+      
+      RollMinBatchVec roll_min_batch(x, n, n_rows_x, width,
+                                     weights, min_obs,
+                                     na_restore,
+                                     arma_min);
+      parallelFor(0, n_rows_x, roll_min_batch);
+      
+    }
+    
+    // create and return a vector object
+    NumericVector result(wrap(arma_min));
+    result.attr("dim") = R_NilValue;
+    List names = xx.attr("names");
+    if (names.size() > 1) {
+      result.attr("names") = names;
+    }
+    result.attr("index") = xx.attr("index");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
   }
-  
-  // compute rolling minimums
-  if (online) {
-    
-    warning("'online' is not supported");
-    RollMinBatch roll_min_batch(x, n, n_rows_x, n_cols_x, width,
-                                weights, min_obs,
-                                arma_any_na, na_restore,
-                                arma_min);
-    parallelFor(0, n_rows_x * n_cols_x, roll_min_batch);
-    
-  } else {
-    
-    RollMinBatch roll_min_batch(x, n, n_rows_x, n_cols_x, width,
-                                weights, min_obs,
-                                arma_any_na, na_restore,
-                                arma_min);
-    parallelFor(0, n_rows_x * n_cols_x, roll_min_batch);
-    
-  }
-  
-  // create and return a matrix or xts object
-  NumericMatrix result(wrap(arma_min));
-  List dimnames = x.attr("dimnames");
-  result.attr("dimnames") = dimnames;
-  result.attr("index") = x.attr("index");
-  result.attr(".indexCLASS") = x.attr(".indexCLASS");
-  result.attr(".indexTZ") = x.attr(".indexTZ");
-  result.attr("tclass") = x.attr("tclass");
-  result.attr("tzone") = x.attr("tzone");
-  result.attr("class") = x.attr("class");
-  
-  return result;
   
 }
 
 // [[Rcpp::export(.roll_max)]]
-NumericMatrix roll_max(const NumericMatrix& x, const int& width,
-                       const arma::vec& weights, const int& min_obs,
-                       const bool& complete_obs, const bool& na_restore,
-                       const bool& online) {
+SEXP roll_max(const SEXP& x, const int& width,
+              const arma::vec& weights, const int& min_obs,
+              const bool& complete_obs, const bool& na_restore,
+              const bool& online) {
   
-  int n = weights.size();
-  int n_rows_x = x.nrow();
-  int n_cols_x = x.ncol();
-  arma::uvec arma_any_na(n_rows_x);
-  arma::mat arma_max(n_rows_x, n_cols_x);
-  
-  // check 'width' argument for errors
-  check_width(width);
-  
-  // default 'weights' argument is equal-weighted,
-  // otherwise check argument for errors
-  check_weights_p(weights);
-  
-  // default 'min_obs' argument is 'width',
-  // otherwise check argument for errors
-  check_min_obs(min_obs);
-  
-  // default 'complete_obs' argument is 'false',
-  // otherwise check argument for errors
-  if (complete_obs) {
-    arma_any_na = any_na_x(x);
+  if (Rf_isMatrix(x)) {
+    
+    NumericMatrix xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.nrow();
+    int n_cols_x = xx.ncol();
+    arma::uvec arma_any_na(n_rows_x);
+    arma::mat arma_max(n_rows_x, n_cols_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_p(weights);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'false',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      arma_any_na = any_na_x(xx);
+    } else {
+      arma_any_na.fill(0);
+    }
+    
+    // compute rolling maximums
+    if (online) {
+      
+      warning("'online' is not supported");
+      RollMaxBatchMat roll_max_batch(xx, n, n_rows_x, n_cols_x, width,
+                                     weights, min_obs,
+                                     arma_any_na, na_restore,
+                                     arma_max);
+      parallelFor(0, n_rows_x * n_cols_x, roll_max_batch);
+      
+    } else {
+      
+      RollMaxBatchMat roll_max_batch(xx, n, n_rows_x, n_cols_x, width,
+                                     weights, min_obs,
+                                     arma_any_na, na_restore,
+                                     arma_max);
+      parallelFor(0, n_rows_x * n_cols_x, roll_max_batch);
+      
+    }
+    
+    // create and return a matrix or xts object
+    NumericMatrix result(wrap(arma_max));
+    List dimnames = xx.attr("dimnames");
+    result.attr("dimnames") = dimnames;
+    result.attr("index") = xx.attr("index");
+    result.attr(".indexCLASS") = xx.attr(".indexCLASS");
+    result.attr(".indexTZ") = xx.attr(".indexTZ");
+    result.attr("tclass") = xx.attr("tclass");
+    result.attr("tzone") = xx.attr("tzone");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
   } else {
-    arma_any_na.fill(0);
+    
+    NumericVector xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.size();
+    arma::vec arma_max(n_rows_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_p(weights);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // compute rolling maximums
+    if (online) {
+      
+      warning("'online' is not supported");
+      RollMaxBatchVec roll_max_batch(xx, n, n_rows_x, width,
+                                     weights, min_obs,
+                                     na_restore,
+                                     arma_max);
+      parallelFor(0, n_rows_x, roll_max_batch);
+      
+    } else {
+      
+      RollMaxBatchVec roll_max_batch(xx, n, n_rows_x, width,
+                                     weights, min_obs,
+                                     na_restore,
+                                     arma_max);
+      parallelFor(0, n_rows_x, roll_max_batch);
+      
+    }
+    
+    // create and return a vector object
+    NumericVector result(wrap(arma_max));
+    result.attr("dim") = R_NilValue;
+    List names = xx.attr("names");
+    if (names.size() > 1) {
+      result.attr("names") = names;
+    }
+    result.attr("index") = xx.attr("index");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
   }
-  
-  // compute rolling maximums
-  if (online) {
-    
-    warning("'online' is not supported");
-    RollMaxBatch roll_max_batch(x, n, n_rows_x, n_cols_x, width,
-                                weights, min_obs,
-                                arma_any_na, na_restore,
-                                arma_max);
-    parallelFor(0, n_rows_x * n_cols_x, roll_max_batch);
-    
-  } else {
-    
-    RollMaxBatch roll_max_batch(x, n, n_rows_x, n_cols_x, width,
-                                weights, min_obs,
-                                arma_any_na, na_restore,
-                                arma_max);
-    parallelFor(0, n_rows_x * n_cols_x, roll_max_batch);
-    
-  }
-  
-  // create and return a matrix or xts object
-  NumericMatrix result(wrap(arma_max));
-  List dimnames = x.attr("dimnames");
-  result.attr("dimnames") = dimnames;
-  result.attr("index") = x.attr("index");
-  result.attr(".indexCLASS") = x.attr(".indexCLASS");
-  result.attr(".indexTZ") = x.attr(".indexTZ");
-  result.attr("tclass") = x.attr("tclass");
-  result.attr("tzone") = x.attr("tzone");
-  result.attr("class") = x.attr("class");
-  
-  return result;
   
 }
 
 // [[Rcpp::export(.roll_median)]]
-NumericMatrix roll_median(const NumericMatrix& x, const int& width,
-                          const arma::vec& weights, const int& min_obs,
-                          const bool& complete_obs, const bool& na_restore,
-                          const bool& online) {
+SEXP roll_median(const SEXP& x, const int& width,
+                 const arma::vec& weights, const int& min_obs,
+                 const bool& complete_obs, const bool& na_restore,
+                 const bool& online) {
   
-  int n = weights.size();
-  int n_rows_x = x.nrow();
-  int n_cols_x = x.ncol();
-  arma::uvec arma_any_na(n_rows_x);
-  arma::mat arma_median(n_rows_x, n_cols_x);
-  
-  // check 'width' argument for errors
-  check_width(width);
-  
-  // default 'weights' argument is equal-weighted,
-  // otherwise check argument for errors
-  check_weights_p(weights);
-  
-  // default 'min_obs' argument is 'width',
-  // otherwise check argument for errors
-  check_min_obs(min_obs);
-  
-  // default 'complete_obs' argument is 'false',
-  // otherwise check argument for errors
-  if (complete_obs) {
-    arma_any_na = any_na_x(x);
+  if (Rf_isMatrix(x)) {
+    
+    NumericMatrix xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.nrow();
+    int n_cols_x = xx.ncol();
+    arma::uvec arma_any_na(n_rows_x);
+    arma::mat arma_median(n_rows_x, n_cols_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_p(weights);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'false',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      arma_any_na = any_na_x(xx);
+    } else {
+      arma_any_na.fill(0);
+    }
+    
+    // compute rolling median
+    if (online) {
+      
+      warning("'online' is not supported");
+      RollMedianBatchMat roll_median_batch(xx, n, n_rows_x, n_cols_x, width,
+                                           weights, min_obs,
+                                           arma_any_na, na_restore,
+                                           arma_median);
+      parallelFor(0, n_rows_x * n_cols_x, roll_median_batch);
+      
+    } else {
+      
+      RollMedianBatchMat roll_median_batch(xx, n, n_rows_x, n_cols_x, width,
+                                           weights, min_obs,
+                                           arma_any_na, na_restore,
+                                           arma_median);
+      parallelFor(0, n_rows_x * n_cols_x, roll_median_batch);
+      
+    }
+    
+    // create and return a matrix or xts object
+    NumericMatrix result(wrap(arma_median));
+    List dimnames = xx.attr("dimnames");
+    result.attr("dimnames") = dimnames;
+    result.attr("index") = xx.attr("index");
+    result.attr(".indexCLASS") = xx.attr(".indexCLASS");
+    result.attr(".indexTZ") = xx.attr(".indexTZ");
+    result.attr("tclass") = xx.attr("tclass");
+    result.attr("tzone") = xx.attr("tzone");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
   } else {
-    arma_any_na.fill(0);
+    
+    NumericVector xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.size();
+    arma::vec arma_median(n_rows_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_p(weights);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // compute rolling median
+    if (online) {
+      
+      warning("'online' is not supported"); 
+      RollMedianBatchVec roll_median_batch(xx, n, n_rows_x, width,
+                                           weights, min_obs,
+                                           na_restore,
+                                           arma_median);
+      parallelFor(0, n_rows_x, roll_median_batch);
+      
+    } else {
+      
+      RollMedianBatchVec roll_median_batch(xx, n, n_rows_x, width,
+                                           weights, min_obs,
+                                           na_restore,
+                                           arma_median);
+      parallelFor(0, n_rows_x, roll_median_batch);
+      
+    }
+    
+    // create and return a vector object
+    NumericVector result(wrap(arma_median));
+    result.attr("dim") = R_NilValue;
+    List names = xx.attr("names");
+    if (names.size() > 1) {
+      result.attr("names") = names;
+    }
+    result.attr("index") = xx.attr("index");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
   }
-  
-  // compute rolling median
-  if (online) {
-    
-    warning("'online' is not supported");
-    RollMedianBatch roll_median_batch(x, n, n_rows_x, n_cols_x, width,
-                                      weights, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_median);
-    parallelFor(0, n_rows_x * n_cols_x, roll_median_batch);
-    
-  } else {
-    
-    RollMedianBatch roll_median_batch(x, n, n_rows_x, n_cols_x, width,
-                                      weights, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_median);
-    parallelFor(0, n_rows_x * n_cols_x, roll_median_batch);
-    
-  }
-  
-  // create and return a matrix or xts object
-  NumericMatrix result(wrap(arma_median));
-  List dimnames = x.attr("dimnames");
-  result.attr("dimnames") = dimnames;
-  result.attr("index") = x.attr("index");
-  result.attr(".indexCLASS") = x.attr(".indexCLASS");
-  result.attr(".indexTZ") = x.attr(".indexTZ");
-  result.attr("tclass") = x.attr("tclass");
-  result.attr("tzone") = x.attr("tzone");
-  result.attr("class") = x.attr("class");
-  
-  return result;
   
 }
 
@@ -944,12 +1103,6 @@ SEXP roll_var(const SEXP& x, const int& width,
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
     check_min_obs(min_obs);
-    
-    // default 'complete_obs' argument is 'false',
-    // otherwise check argument for errors
-    if (complete_obs) {
-      warning("'complete_obs' is only supported for matrices");
-    }
     
     // compute rolling variances
     if (status && online) {
@@ -1072,12 +1225,6 @@ SEXP roll_sd(const SEXP& x, const int& width,
     // otherwise check argument for errors
     check_min_obs(min_obs);
     
-    // default 'complete_obs' argument is 'false',
-    // otherwise check argument for errors
-    if (complete_obs) {
-      warning("'complete_obs' is only supported for matrices");
-    }
-    
     // compute rolling standard deviations
     if (status && online) {
       
@@ -1199,12 +1346,6 @@ SEXP roll_scale(const SEXP& x, const int& width,
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
     check_min_obs(min_obs);
-    
-    // default 'complete_obs' argument is 'false',
-    // otherwise check argument for errors
-    if (complete_obs) {
-      warning("'complete_obs' is only supported for matrices");
-    }
     
     // compute rolling centering and scaling
     if (status && online) {
@@ -1573,12 +1714,6 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     // otherwise check argument for errors
     check_min_obs(min_obs);
     
-    // default 'complete_obs' argument is 'true',
-    // otherwise check argument for errors
-    if (complete_obs) {
-      warning("'complete_obs' is only supported for matrices");
-    }
-    
     // compute rolling covariances
     if (status && online) {
       
@@ -1605,23 +1740,23 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     } else {
       
       if (symmetric) {
-
+        
         // y is null
         RollCovBatchVecXX roll_cov_batch(xx, n, n_rows_xy, width,
                                          weights, center, scale, min_obs,
                                          na_restore,
                                          arma_cov);
         parallelFor(0, n_rows_xy, roll_cov_batch);
-
+        
       } else if (!symmetric) {
-
+        
         // y is not null
         RollCovBatchVecXY roll_cov_batch(xx, yy, n, n_rows_xy, width,
                                          weights, center, scale, min_obs,
                                          na_restore,
                                          arma_cov);
         parallelFor(0, n_rows_xy, roll_cov_batch);
-
+        
       }
       
     }
@@ -1849,7 +1984,7 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
                                              arma_n_obs, arma_sum_w,
                                              arma_coef, arma_rsq, arma_se);
       parallelFor(0, n_rows_xy, roll_lm_slices);
-
+      
       // create and return a list
       result = List::create(Named("coefficients") = arma_coef,
                             Named("r.squared") = arma_rsq,

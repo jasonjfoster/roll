@@ -226,6 +226,321 @@ struct RollMeanBatchVec : public Worker {
   
 };
 
+// 'Worker' function for computing rolling minimums using a standard algorithm
+struct RollMinBatchVec : public Worker {
+  
+  const RVector<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const bool na_restore;
+  arma::vec& arma_min;          // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollMinBatchVec(const NumericVector x, const int n,
+                  const int n_rows_x,
+                  const int width, const arma::vec arma_weights,
+                  const int min_obs,
+                  const bool na_restore, arma::vec& arma_min)
+    : x(x), n(n),
+      n_rows_x(n_rows_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs),
+      na_restore(na_restore), arma_min(arma_min) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z;
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+        
+        int offset = std::max(0, i - width + 1);
+        int n_size_x = i - offset + 1;
+        arma::vec x_subset(n_size_x);
+        
+        std::copy(x.begin() + offset, x.begin() + i + 1,
+                  x_subset.begin());
+        
+        // similar to R's sort with 'index.return = TRUE'
+        arma::ivec sort_ix = stl_sort_index(x_subset);
+        
+        int k = 0;
+        int count = 0;
+        int n_obs = 0;
+        long double min_x = 0;
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (n_size_x - 1 >= count)) {
+          
+          k = sort_ix[n_size_x - count - 1];
+          
+          // don't include if missing value
+          if (!std::isnan(x_subset[k])) {
+            
+            // last element of sorted array
+            // note: 'weights' must be greater than 0
+            min_x = x_subset[k];
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute the minimum
+        if ((n_obs >= min_obs)) {
+          arma_min[i] = min_x;
+        } else {
+          arma_min[i] = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        arma_min[i] = x[i];
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling maximums using a standard algorithm
+struct RollMaxBatchVec : public Worker {
+  
+  const RVector<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const bool na_restore;
+  arma::vec& arma_max;          // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollMaxBatchVec(const NumericVector x, const int n,
+                  const int n_rows_x,
+                  const int width, const arma::vec arma_weights,
+                  const int min_obs,
+                  const bool na_restore, arma::vec& arma_max)
+    : x(x), n(n),
+      n_rows_x(n_rows_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs),
+      na_restore(na_restore), arma_max(arma_max) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z;
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+        
+        int offset = std::max(0, i - width + 1);
+        int n_size_x = i - offset + 1;
+        arma::vec x_subset(n_size_x);
+        
+        std::copy(x.begin() + offset, x.begin() + i + 1,
+                  x_subset.begin());
+        
+        // similar to R's sort with 'index.return = TRUE'
+        arma::ivec sort_ix = stl_sort_index(x_subset);
+        
+        int k = 0;
+        int count = 0;
+        int n_obs = 0;
+        long double max_x = 0;
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (n_size_x - 1 >= count)) {
+          
+          k = sort_ix[n_size_x - count - 1];
+          
+          // don't include if missing value
+          if (!std::isnan(x_subset[k])) {
+            
+            // first element of sorted array
+            // note: 'weights' must be greater than 0
+            if (n_obs == 0) {
+              max_x = x_subset[k];
+            }
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute the maximum
+        if ((n_obs >= min_obs)) {
+          arma_max[i] = max_x;
+        } else {
+          arma_max[i] = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        arma_max[i] = x[i];
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling medians using a standard algorithm
+struct RollMedianBatchVec : public Worker {
+  
+  const RVector<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const bool na_restore;
+  arma::vec& arma_median;       // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollMedianBatchVec(const NumericVector x, const int n,
+                     const int n_rows_x,
+                     const int width, const arma::vec arma_weights,
+                     const int min_obs,
+                     const bool na_restore, arma::vec& arma_median)
+    : x(x), n(n),
+      n_rows_x(n_rows_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs),
+      na_restore(na_restore), arma_median(arma_median) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z;
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+        
+        int k = 0;
+        int count = 0;
+        long double sum_w = 0;
+        
+        int offset = std::max(0, i - width + 1);
+        int n_size_x = i - offset + 1;
+        arma::vec x_subset(n_size_x);
+        arma::vec arma_weights_subset(n_size_x);
+        
+        std::copy(x.begin() + offset, x.begin() + i + 1,
+                  x_subset.begin());
+        std::copy(arma_weights.begin() + n - n_size_x, arma_weights.begin() + n,
+                  arma_weights_subset.begin());
+        
+        // similar to R's sort with 'index.return = TRUE'
+        arma::ivec sort_ix = stl_sort_index(x_subset);
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (n_size_x - 1 >= count)) {
+          
+          k = sort_ix[n_size_x - count - 1];
+          
+          // don't include if missing value
+          if (!std::isnan(x_subset[k])) {
+            
+            // compute the rolling sum
+            sum_w += arma_weights_subset[k];
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        count = 0;
+        int n_obs = 0;
+        int temp_ix = 0;
+        long double sum_upper_w = 0;
+        long double sum_upper_x = 0;
+        long double sum_upper_w_temp = 0;
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (n_size_x - 1 >= count)) {
+          
+          k = sort_ix[n_size_x - count - 1];
+          
+          // don't include if missing value
+          if (!std::isnan(x_subset[k])) {
+            
+            // last element of sorted array that is half of 'weights'
+            // note: 'weights' must be greater than 0
+            if (sum_upper_w / sum_w <= 0.5) {
+              
+              temp_ix = n_size_x - count - 1;
+              sum_upper_w_temp = sum_upper_w;
+              
+              // compute the rolling sum
+              sum_upper_w += arma_weights_subset[k];
+              sum_upper_x = x_subset[k];
+              
+            }
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute the median
+        if ((n_obs >= min_obs)) {
+          
+          // average if upper and lower weight is equal
+          if (std::abs(sum_upper_w_temp / sum_w - 0.5) <= sqrt(arma::datum::eps)) {
+            
+            k = sort_ix[temp_ix + 1];
+            arma_median[i] = (x_subset[k] + sum_upper_x) / 2;
+            
+          } else {
+            arma_median[i] = sum_upper_x;
+          }
+          
+        } else {
+          arma_median[i] = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        arma_median[i] = x[i];
+        
+      }
+      
+    }
+  }
+  
+};
+
 // 'Worker' function for computing rolling variances using an online algorithm
 struct RollVarOnlineVec {
   
@@ -1375,18 +1690,18 @@ struct RollCovOnlineVecXX {
         
         // compute the sum of squares
         if (!std::isnan(x[i]) && (n_obs > 1)) {
-
+          
           sumsq_xy = lambda * sumsq_xy +
             w_new * (x_new - mean_x) * (x_new - mean_prev_x);
-
+          
         } else if (std::isnan(x[i])) {
-
+          
           sumsq_xy = lambda * sumsq_xy;
-
+          
         } else if (!std::isnan(x[i]) && (n_obs == 1) && !center) {
-
+          
           sumsq_xy = w_new * pow(x_new, (long double)2.0);
-
+          
         }
         
       }
@@ -1459,64 +1774,64 @@ struct RollCovOnlineVecXX {
         
         // compute the sum of squares
         if (!std::isnan(x[i]) && !std::isnan(x[i - width])) {
-
+          
           sumsq_xy = lambda * sumsq_xy +
             w_new * (x_new - mean_x) * (x_new - mean_prev_x) -
             lambda * w_old * (x_old - mean_x) * (x_old - mean_prev_x);
-
+          
         } else if (!std::isnan(x[i]) && std::isnan(x[i - width])) {
-
+          
           sumsq_xy = lambda * sumsq_xy +
             w_new * (x_new - mean_x) * (x_new - mean_prev_x);
-
+          
         } else if (std::isnan(x[i]) && !std::isnan(x[i - width])) {
-
+          
           sumsq_xy = lambda * sumsq_xy -
             lambda * w_old * (x_old - mean_x) * (x_old - mean_prev_x);
-
+          
         } else if (std::isnan(x[i]) || std::isnan(x[i - width])) {
-
+          
           sumsq_xy = lambda * sumsq_xy;
-
+          
         }
         
       }
       
       // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+        
+        // compute the unbiased estimate of variance
+        if ((n_obs > 1) && (n_obs >= min_obs)) {
           
-          // compute the unbiased estimate of variance
-          if ((n_obs > 1) && (n_obs >= min_obs)) {
+          if (scale) {
             
-            if (scale) {
-              
-              // don't compute if the standard deviation is zero
-              if ((sumsq_x < 0) || (sqrt(sumsq_x) <= sqrt(arma::datum::eps)))  {
-                arma_cov[i] = NA_REAL;
-              } else {
-                
-                if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
-                  arma_cov[i] = 0;
-                } else {
-                  arma_cov[i] = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_x));
-                }
-                
-              }
-              
-            } else if (!scale) {
+            // don't compute if the standard deviation is zero
+            if ((sumsq_x < 0) || (sqrt(sumsq_x) <= sqrt(arma::datum::eps)))  {
+              arma_cov[i] = NA_REAL;
+            } else {
               
               if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
                 arma_cov[i] = 0;
               } else {
-                arma_cov[i] = sumsq_xy / (sum_w - sumsq_w / sum_w);
+                arma_cov[i] = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_x));
               }
               
             }
             
-          } else {
-            arma_cov[i] = NA_REAL;
+          } else if (!scale) {
+            
+            if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+              arma_cov[i] = 0;
+            } else {
+              arma_cov[i] = sumsq_xy / (sum_w - sumsq_w / sum_w);
+            }
+            
           }
           
+        } else {
+          arma_cov[i] = NA_REAL;
+        }
+        
       } else {
         
         // can be either NA or NaN
@@ -1532,7 +1847,7 @@ struct RollCovOnlineVecXX {
 
 // 'Worker' function for computing rolling covariances using an online algorithm
 struct RollCovOnlineVecXY {
-
+  
   const RVector<double> x;      // source
   const RVector<double> y;      // source
   const int n;
@@ -1720,8 +2035,8 @@ struct RollCovOnlineVecXY {
           // compute the sum of squares
           if (!std::isnan(x[i]) && !std::isnan(y[i]) &&
               !std::isnan(x[i - width]) && !std::isnan(y[i - width])) {
-            
-            sumsq_x = lambda * sumsq_x +
+              
+              sumsq_x = lambda * sumsq_x +
               w_new * (x_new - mean_x) * (x_new - mean_prev_x) -
               lambda * w_old * (x_old - mean_x) * (x_old - mean_prev_x);
             sumsq_y = lambda * sumsq_y +
@@ -1740,7 +2055,7 @@ struct RollCovOnlineVecXY {
             !std::isnan(x[i - width]) && !std::isnan(y[i - width])) {
             
             sumsq_x = lambda * sumsq_x -
-              lambda * w_old * (x_old - mean_x) * (x_old - mean_prev_x);
+            lambda * w_old * (x_old - mean_x) * (x_old - mean_prev_x);
             sumsq_y = lambda * sumsq_y -
               lambda * w_old * (y_old - mean_y) * (y_old - mean_prev_y);
             
@@ -1757,8 +2072,8 @@ struct RollCovOnlineVecXY {
         // compute the sum of squares
         if (!std::isnan(x[i]) && !std::isnan(y[i]) &&
             !std::isnan(x[i - width]) && !std::isnan(y[i - width])) {
-          
-          sumsq_xy = lambda * sumsq_xy +
+            
+            sumsq_xy = lambda * sumsq_xy +
             w_new * (x_new - mean_x) * (y_new - mean_prev_y) -
             lambda * w_old * (x_old - mean_x) * (y_old - mean_prev_y);
           
@@ -1772,7 +2087,7 @@ struct RollCovOnlineVecXY {
           !std::isnan(x[i - width]) && !std::isnan(y[i - width])) {
           
           sumsq_xy = lambda * sumsq_xy -
-            lambda * w_old * (x_old - mean_x) * (y_old - mean_prev_y);
+          lambda * w_old * (x_old - mean_x) * (y_old - mean_prev_y);
           
         } else if (std::isnan(x[i]) || std::isnan(y[i]) ||
           std::isnan(x[i - width]) || std::isnan(y[i - width])) {
@@ -1834,12 +2149,12 @@ struct RollCovOnlineVecXY {
     }
     
   }
-
+  
 };
 
 // 'Worker' function for computing rolling covariances using a standard algorithm
 struct RollCovBatchVecXX : public Worker {
-
+  
   const RVector<double> x;       // source
   const int n;
   const int n_rows_xy;
@@ -1850,7 +2165,7 @@ struct RollCovBatchVecXX : public Worker {
   const int min_obs;
   const bool na_restore;
   arma::vec& arma_cov;          // destination (pass by reference)
-
+  
   // initialize with source and destination
   RollCovBatchVecXX(const NumericVector x, const int n,
                     const int n_rows_xy,
@@ -1864,164 +2179,164 @@ struct RollCovBatchVecXX : public Worker {
       center(center), scale(scale),
       min_obs(min_obs),
       na_restore(na_restore), arma_cov(arma_cov) { }
-
+  
   // function call operator that iterates by index
   void operator()(std::size_t begin_index, std::size_t end_index) {
     for (std::size_t z = begin_index; z < end_index; z++) {
-
+      
       // from 1D to 3D array (lower triangle)
       int i = z;
-
+      
       long double mean_x = 0;
       long double var_x = 0;
-
+      
       // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
-
-          if (center) {
-
-            int count = 0;
-            long double sum_w = 0;
-            long double sum_x = 0;
-
-            // number of observations is either the window size or,
-            // for partial results, the number of the current row
-            while ((width > count) && (i >= count)) {
-
-              // don't include if missing value
-              if (!std::isnan(x[i - count])) {
-
-                  // compute the rolling sum
-                  sum_w += arma_weights[n - count - 1];
-                sum_x += arma_weights[n - count - 1] * x[i - count];
-
-              }
-
-              count += 1;
-
-            }
-
-            // compute the mean
-            mean_x = sum_x / sum_w;
-
-          }
-
-          if (scale) {
-
-            int count = 0;
-            long double sumsq_x = 0;
-
-            // number of observations is either the window size or,
-            // for partial results, the number of the current row
-            while ((width > count) && (i >= count)) {
-
-              // don't include if missing value
-              if (!std::isnan(x[i - count])) {
-
-                  // compute the rolling sum of squares with 'center' argument
-                  if (center) {
-
-                    sumsq_x += arma_weights[n - count - 1] *
-                      pow(x[i - count] - mean_x, (long double)2.0);
-
-                  } else if (!center) {
-
-                    sumsq_x += arma_weights[n - count - 1] *
-                      pow(x[i - count], 2.0);
-
-                  }
-
-              }
-
-              count += 1;
-
-            }
-
-            // compute the unbiased estimate of variance
-            var_x = sumsq_x;
-
-          }
-
+        
+        if (center) {
+          
           int count = 0;
-          int n_obs = 0;
           long double sum_w = 0;
-          long double sumsq_w = 0;
-          long double sumsq_xy = 0;
-
+          long double sum_x = 0;
+          
           // number of observations is either the window size or,
           // for partial results, the number of the current row
           while ((width > count) && (i >= count)) {
-
+            
             // don't include if missing value
             if (!std::isnan(x[i - count])) {
-
-                sum_w += arma_weights[n - count - 1];
-              sumsq_w += pow(arma_weights[n - count - 1], 2.0);
-
+              
+              // compute the rolling sum
+              sum_w += arma_weights[n - count - 1];
+              sum_x += arma_weights[n - count - 1] * x[i - count];
+              
+            }
+            
+            count += 1;
+            
+          }
+          
+          // compute the mean
+          mean_x = sum_x / sum_w;
+          
+        }
+        
+        if (scale) {
+          
+          int count = 0;
+          long double sumsq_x = 0;
+          
+          // number of observations is either the window size or,
+          // for partial results, the number of the current row
+          while ((width > count) && (i >= count)) {
+            
+            // don't include if missing value
+            if (!std::isnan(x[i - count])) {
+              
               // compute the rolling sum of squares with 'center' argument
               if (center) {
-                sumsq_xy += arma_weights[n - count - 1] *
+                
+                sumsq_x += arma_weights[n - count - 1] *
                   pow(x[i - count] - mean_x, (long double)2.0);
+                
               } else if (!center) {
-                sumsq_xy += arma_weights[n - count - 1] *
+                
+                sumsq_x += arma_weights[n - count - 1] *
                   pow(x[i - count], 2.0);
+                
               }
-
-              n_obs += 1;
-
+              
             }
-
+            
             count += 1;
-
+            
           }
-
-          // compute the unbiased estimate of covariance
-          if ((n_obs > 1) && (n_obs >= min_obs)) {
-
-            if (scale) {
-
-              // don't compute if the standard deviation is zero
-              if ((var_x < 0) || (sqrt(var_x) <= sqrt(arma::datum::eps))) {
-                arma_cov[i] = NA_REAL;
-              } else {
-
-                if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
-                  arma_cov[i] = 0;
-                } else {
-                  arma_cov[i] = sumsq_xy / (sqrt(var_x) * sqrt(var_x));
-                }
-
-              }
-
-            } else if (!scale) {
-
+          
+          // compute the unbiased estimate of variance
+          var_x = sumsq_x;
+          
+        }
+        
+        int count = 0;
+        int n_obs = 0;
+        long double sum_w = 0;
+        long double sumsq_w = 0;
+        long double sumsq_xy = 0;
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (i >= count)) {
+          
+          // don't include if missing value
+          if (!std::isnan(x[i - count])) {
+            
+            sum_w += arma_weights[n - count - 1];
+            sumsq_w += pow(arma_weights[n - count - 1], 2.0);
+            
+            // compute the rolling sum of squares with 'center' argument
+            if (center) {
+              sumsq_xy += arma_weights[n - count - 1] *
+                pow(x[i - count] - mean_x, (long double)2.0);
+            } else if (!center) {
+              sumsq_xy += arma_weights[n - count - 1] *
+                pow(x[i - count], 2.0);
+            }
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute the unbiased estimate of covariance
+        if ((n_obs > 1) && (n_obs >= min_obs)) {
+          
+          if (scale) {
+            
+            // don't compute if the standard deviation is zero
+            if ((var_x < 0) || (sqrt(var_x) <= sqrt(arma::datum::eps))) {
+              arma_cov[i] = NA_REAL;
+            } else {
+              
               if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
                 arma_cov[i] = 0;
               } else {
-                arma_cov[i] = sumsq_xy / (sum_w - sumsq_w / sum_w);
+                arma_cov[i] = sumsq_xy / (sqrt(var_x) * sqrt(var_x));
               }
-
+              
             }
-
-          } else {
-            arma_cov[i] = NA_REAL;
+            
+          } else if (!scale) {
+            
+            if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
+              arma_cov[i] = 0;
+            } else {
+              arma_cov[i] = sumsq_xy / (sum_w - sumsq_w / sum_w);
+            }
+            
           }
-
+          
+        } else {
+          arma_cov[i] = NA_REAL;
+        }
+        
       } else {
-
+        
         // can be either NA or NaN
         arma_cov[i] = x[i];
-
+        
       }
-
+      
     }
   }
-
+  
 };
 
 // 'Worker' function for computing rolling covariances using a standard algorithm
 struct RollCovBatchVecXY : public Worker {
-
+  
   const RVector<double> x;       // source
   const RVector<double> y;       // source
   const int n;
@@ -2033,7 +2348,7 @@ struct RollCovBatchVecXY : public Worker {
   const int min_obs;
   const bool na_restore;
   arma::vec& arma_cov;          // destination (pass by reference)
-
+  
   // initialize with source and destination
   RollCovBatchVecXY(const NumericVector x, const NumericVector y,
                     const int n, const int n_rows_xy,
@@ -2047,112 +2362,112 @@ struct RollCovBatchVecXY : public Worker {
       center(center), scale(scale),
       min_obs(min_obs),
       na_restore(na_restore), arma_cov(arma_cov) { }
-
+  
   // function call operator that iterates by index
   void operator()(std::size_t begin_index, std::size_t end_index) {
     for (std::size_t z = begin_index; z < end_index; z++) {
-
+      
       // from 1D to 3D array
       int i = z;
-
+      
       long double mean_x = 0;
       long double mean_y = 0;
       long double var_x = 0;
       long double var_y = 0;
-
+      
       // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x[i]) &&
           !std::isnan(y[i]))) {
-
+          
           if (center) {
-
+            
             int count = 0;
             long double sum_w = 0;
             long double sum_x = 0;
             long double sum_y = 0;
-
+            
             // number of observations is either the window size or,
             // for partial results, the number of the current row
             while ((width > count) && (i >= count)) {
-
+              
               // don't include if missing value
               if (!std::isnan(x[i - count]) && !std::isnan(y[i - count])) {
-
-                  // compute the rolling sum
-                  sum_w += arma_weights[n - count - 1];
+                
+                // compute the rolling sum
+                sum_w += arma_weights[n - count - 1];
                 sum_x += arma_weights[n - count - 1] * x[i - count];
                 sum_y += arma_weights[n - count - 1] * y[i - count];
-
+                
               }
-
+              
               count += 1;
-
+              
             }
-
+            
             // compute the mean
             mean_x = sum_x / sum_w;
             mean_y = sum_y / sum_w;
-
+            
           }
-
+          
           if (scale) {
-
+            
             int count = 0;
             long double sumsq_x = 0;
             long double sumsq_y = 0;
-
+            
             // number of observations is either the window size or,
             // for partial results, the number of the current row
             while ((width > count) && (i >= count)) {
-
+              
               // don't include if missing value
               if (!std::isnan(x[i - count]) && !std::isnan(y[i - count])) {
-
-                  // compute the rolling sum of squares with 'center' argument
-                  if (center) {
-
-                    sumsq_x += arma_weights[n - count - 1] *
-                      pow(x[i - count] - mean_x, (long double)2.0);
-                    sumsq_y += arma_weights[n - count - 1] *
-                      pow(y[i - count] - mean_y, (long double)2.0);
-
-                  } else if (!center) {
-
-                    sumsq_x += arma_weights[n - count - 1] *
-                      pow(x[i - count], 2.0);
-                    sumsq_y += arma_weights[n - count - 1] *
-                      pow(y[i - count], 2.0);
-
-                  }
-
+                
+                // compute the rolling sum of squares with 'center' argument
+                if (center) {
+                  
+                  sumsq_x += arma_weights[n - count - 1] *
+                    pow(x[i - count] - mean_x, (long double)2.0);
+                  sumsq_y += arma_weights[n - count - 1] *
+                    pow(y[i - count] - mean_y, (long double)2.0);
+                  
+                } else if (!center) {
+                  
+                  sumsq_x += arma_weights[n - count - 1] *
+                    pow(x[i - count], 2.0);
+                  sumsq_y += arma_weights[n - count - 1] *
+                    pow(y[i - count], 2.0);
+                  
+                }
+                
               }
-
+              
               count += 1;
-
+              
             }
-
+            
             // compute the unbiased estimate of variance
             var_x = sumsq_x;
             var_y = sumsq_y;
-
+            
           }
-
+          
           int count = 0;
           int n_obs = 0;
           long double sum_w = 0;
           long double sumsq_w = 0;
           long double sumsq_xy = 0;
-
+          
           // number of observations is either the window size or,
           // for partial results, the number of the current row
           while ((width > count) && (i >= count)) {
-
+            
             // don't include if missing value
             if (!std::isnan(x[i - count]) && !std::isnan(y[i - count])) {
-
-                sum_w += arma_weights[n - count - 1];
+              
+              sum_w += arma_weights[n - count - 1];
               sumsq_w += pow(arma_weights[n - count - 1], 2.0);
-
+              
               // compute the rolling sum of squares with 'center' argument
               if (center) {
                 sumsq_xy += arma_weights[n - count - 1] *
@@ -2161,62 +2476,62 @@ struct RollCovBatchVecXY : public Worker {
                 sumsq_xy += arma_weights[n - count - 1] *
                   x[i - count] * y[i - count];
               }
-
+              
               n_obs += 1;
-
+              
             }
-
+            
             count += 1;
-
+            
           }
-
+          
           // compute the unbiased estimate of covariance
           if ((n_obs > 1) && (n_obs >= min_obs)) {
-
+            
             if (scale) {
-
+              
               // don't compute if the standard deviation is zero
               if ((var_x < 0) || (var_y < 0) ||
                   (sqrt(var_x) <= sqrt(arma::datum::eps)) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {
                 arma_cov[i] = NA_REAL;
               } else {
-
+                
                 if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
                   arma_cov[i] = 0;
                 } else {
                   arma_cov[i] = sumsq_xy / (sqrt(var_x) * sqrt(var_y));
                 }
-
+                
               }
-
+              
             } else if (!scale) {
-
+              
               if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
                 arma_cov[i] = 0;
               } else {
                 arma_cov[i] = sumsq_xy / (sum_w - sumsq_w / sum_w);
               }
-
+              
             }
-
+            
           } else {
             arma_cov[i] = NA_REAL;
           }
-
+          
       } else {
-
+        
         // can be either NA or NaN
         if (std::isnan(x[i])) {
           arma_cov[i] = x[i];
         } else {
           arma_cov[i] = y[i];
         }
-
+        
       }
-
+      
     }
   }
-
+  
 };
 
 // 'Worker' function for rolling linear models
