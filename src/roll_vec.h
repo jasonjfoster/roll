@@ -10,6 +10,442 @@ using namespace RcppParallel;
 
 arma::ivec stl_sort_index(arma::vec& x);
 
+// 'Worker' function for computing rolling sums using an online algorithm
+struct RollSumOnlineVec {
+  
+  const RVector<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const bool na_restore;
+  arma::vec& arma_sum;          // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollSumOnlineVec(const NumericVector x, const int n,
+                   const int n_rows_x,
+                   const int width, const arma::vec arma_weights,
+                   const int min_obs,
+                   const bool na_restore, arma::vec& arma_sum)
+    : x(x), n(n),
+      n_rows_x(n_rows_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs),
+      na_restore(na_restore), arma_sum(arma_sum) { }
+  
+  // function call operator that iterates by column
+  void operator()() {
+    
+    int n_obs = 0;
+    long double lambda = 0;
+    long double w_new = 0;
+    long double w_old = 0;
+    long double x_new = 0;
+    long double x_old = 0;
+    long double sum_x = 0;
+    
+    if (width > 1) {
+      lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed!
+    } else {
+      lambda = arma_weights[n - 1];
+    }
+    
+    for (int i = 0; i < n_rows_x; i++) {
+      
+      if (std::isnan(x[i])) {
+        
+        w_new = 0;
+        x_new = 0;
+        
+      } else {
+        
+        w_new = arma_weights[n - 1];
+        x_new = x[i];
+        
+      }
+      
+      // expanding window
+      if (i < width) {
+        
+        // don't include if missing value
+        if (!std::isnan(x[i])) {
+          n_obs += 1;
+        }
+        
+        if (width > 1) {
+          sum_x = lambda * sum_x + w_new * x_new;
+        } else {
+          sum_x = w_new * x_new;
+        }
+        
+      }
+      
+      // rolling window
+      if (i >= width) {
+        
+        // don't include if missing value
+        if (!std::isnan(x[i]) && std::isnan(x[i - width])) {
+          
+          n_obs += 1;
+          
+        } else if (std::isnan(x[i]) && !std::isnan(x[i - width])) {
+          
+          n_obs -= 1;
+          
+        }
+        
+        if (std::isnan(x[i - width])) {
+          
+          w_old = 0;
+          x_old = 0;
+          
+        } else {
+          
+          w_old = arma_weights[n - width];
+          x_old = x[i - width];
+          
+        }
+        
+        if (width > 1) {
+          sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+        } else {
+          sum_x = w_new * x_new;
+        }
+        
+      }
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+        
+        // compute the sum
+        if (n_obs >= min_obs) {
+          arma_sum[i] = sum_x;
+        } else {
+          arma_sum[i] = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        arma_sum[i] = x[i];
+        
+      }
+      
+    }
+    
+  }
+  
+};
+
+// 'Worker' function for computing rolling sums using a standard algorithm
+struct RollSumBatchVec : public Worker {
+  
+  const RVector<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const bool na_restore;
+  arma::vec& arma_sum;          // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollSumBatchVec(const NumericVector x, const int n,
+                  const int n_rows_x,
+                  const int width, const arma::vec arma_weights,
+                  const int min_obs,
+                  const bool na_restore, arma::vec& arma_sum)
+    : x(x), n(n),
+      n_rows_x(n_rows_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs),
+      na_restore(na_restore), arma_sum(arma_sum) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z;
+      
+      int count = 0;
+      int n_obs = 0;
+      long double sum_x = 0;
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (i >= count)) {
+          
+          // don't include if missing value
+          if (!std::isnan(x[i - count])) {
+            
+            // compute the rolling sum
+            sum_x += arma_weights[n - count - 1] * x[i - count];
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute the sum
+        if (n_obs >= min_obs) {
+          arma_sum[i] = sum_x;
+        } else {
+          arma_sum[i] = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        arma_sum[i] = x[i];
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling products using an online algorithm
+struct RollProdOnlineVec {
+  
+  const RVector<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const bool na_restore;
+  arma::vec& arma_prod;         // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollProdOnlineVec(const NumericVector x, const int n,
+                    const int n_rows_x,
+                    const int width, const arma::vec arma_weights,
+                    const int min_obs,
+                    const bool na_restore, arma::vec& arma_prod)
+    : x(x), n(n),
+      n_rows_x(n_rows_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs),
+      na_restore(na_restore), arma_prod(arma_prod) { }
+  
+  // function call operator that iterates by column
+  void operator()() {
+    
+    int n_obs = 0;
+    long double lambda = 0;
+    long double n_new = 0;
+    long double n_old = 0;
+    long double n_exp = 0;
+    long double w_new = 0;
+    long double w_old = 0;
+    long double x_new = 0;
+    long double x_old = 0;
+    long double prod_w = 1;
+    long double prod_x = 1;
+    
+    if (width > 1) {
+      lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed!
+    } else {
+      lambda = arma_weights[n - 1];
+    }
+    
+    for (int i = 0; i < n_rows_x; i++) {
+      
+      // expanding window
+      if (i < width) {
+        
+        // don't include if missing value
+        if (!std::isnan(x[i])) {
+          n_obs += 1;
+        }
+        
+        if (std::isnan(x[i])) {
+          
+          n_new = n_obs;
+          w_new = 1;
+          x_new = 1;
+          
+        } else {
+          
+          n_new = n_obs - 1;
+          w_new = arma_weights[n - 1];
+          x_new = x[i];
+          
+        }
+        
+        if (n_new == 0) {
+          n_exp = 1;
+        } else if (n_new > n_old) {
+          n_exp = n_exp * lambda;
+        } else if (n_new < n_old) {
+          n_exp = n_exp / lambda;
+        }
+        
+        n_old = n_new;
+        prod_w *= w_new * n_exp;
+        prod_x *= x_new;
+        
+      }
+      
+      // rolling window
+      if (i >= width) {
+        
+        // don't include if missing value
+        if (!std::isnan(x[i]) && std::isnan(x[i - width])) {
+          
+          n_obs += 1;
+          
+        } else if (std::isnan(x[i]) && !std::isnan(x[i - width])) {
+          
+          n_obs -= 1;
+          
+        }
+        
+        if (std::isnan(x[i])) {
+          
+          n_new = n_obs;
+          w_new = 1;
+          x_new = 1;
+          
+        } else {
+          
+          n_new = n_obs - 1;
+          w_new = arma_weights[n - 1];
+          x_new = x[i];
+          
+        }
+        
+        if (std::isnan(x[i - width])) {
+          
+          w_old = 1;
+          x_old = 1;
+          
+        } else {
+          
+          w_old = arma_weights[n - width];
+          x_old = x[i - width];
+          
+        }
+        
+        if (n_new == 0) {
+          n_exp = 1;
+        } else if (n_new > n_old) {
+          n_exp = n_exp * lambda;
+        } else if (n_new < n_old) {
+          n_exp = n_exp / lambda;
+        }
+        
+        n_old = n_new;
+        prod_w *= w_new * n_exp / w_old;
+        prod_x *= x_new / x_old;
+        
+      }
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+        
+        // compute the product
+        if (n_obs >= min_obs) {
+          arma_prod[i] = prod_w * prod_x;
+        } else {
+          arma_prod[i] = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        arma_prod[i] = x[i];
+        
+      }
+      
+    }
+    
+  }
+  
+};
+
+// 'Worker' function for computing rolling products using a standard algorithm
+struct RollProdBatchVec : public Worker {
+  
+  const RVector<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const bool na_restore;
+  arma::vec& arma_prod;         // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollProdBatchVec(const NumericVector x, const int n,
+                   const int n_rows_x,
+                   const int width, const arma::vec arma_weights,
+                   const int min_obs,
+                   const bool na_restore, arma::vec& arma_prod)
+    : x(x), n(n),
+      n_rows_x(n_rows_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs),
+      na_restore(na_restore), arma_prod(arma_prod) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z;
+      
+      int count = 0;
+      int n_obs = 0;
+      long double prod_x = 1;
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (i >= count)) {
+          
+          // don't include if missing value
+          if (!std::isnan(x[i - count])) {
+            
+            // compute the rolling product
+            prod_x *= arma_weights[n - count - 1] * x[i - count];
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute the product
+        if (n_obs >= min_obs) {
+          arma_prod[i] = prod_x;
+        } else {
+          arma_prod[i] = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        arma_prod[i] = x[i];
+        
+      }
+      
+    }
+  }
+  
+};
+
 // 'Worker' function for computing rolling means using an online algorithm
 struct RollMeanOnlineVec {
   

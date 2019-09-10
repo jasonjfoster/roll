@@ -403,134 +403,244 @@ LogicalMatrix roll_all(const LogicalMatrix& x, const int& width,
 }
 
 // [[Rcpp::export(.roll_sum)]]
-NumericMatrix roll_sum(const NumericMatrix& x, const int& width,
-                       const arma::vec& weights, const int& min_obs,
-                       const bool& complete_obs, const bool& na_restore,
-                       const bool& online) {
+SEXP roll_sum(const SEXP& x, const int& width,
+              const arma::vec& weights, const int& min_obs,
+              const bool& complete_obs, const bool& na_restore,
+              const bool& online) {
   
-  int n = weights.size();
-  int n_rows_x = x.nrow();
-  int n_cols_x = x.ncol();
-  arma::uvec arma_any_na(n_rows_x);
-  arma::mat arma_sum(n_rows_x, n_cols_x);
-  
-  // check 'width' argument for errors
-  check_width(width);
-  
-  // default 'weights' argument is equal-weighted,
-  // otherwise check argument for errors
-  check_weights_x(n_rows_x, width, weights);
-  bool status = check_lambda(weights, online);
-  
-  // default 'min_obs' argument is 'width',
-  // otherwise check argument for errors
-  check_min_obs(min_obs);
-  
-  // default 'complete_obs' argument is 'false',
-  // otherwise check argument for errors
-  if (complete_obs) {
-    arma_any_na = any_na_x(x);
+  if (Rf_isMatrix(x)) {
+    
+    NumericMatrix xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.nrow();
+    int n_cols_x = xx.ncol();
+    arma::uvec arma_any_na(n_rows_x);
+    arma::mat arma_sum(n_rows_x, n_cols_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_x(n_rows_x, width, weights);
+    bool status = check_lambda(weights, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'false',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      arma_any_na = any_na_x(xx);
+    } else {
+      arma_any_na.fill(0);
+    }
+    
+    // compute rolling sums
+    if (status && online) {
+      
+      RollSumOnlineMat roll_sum_online(xx, n, n_rows_x, n_cols_x, width,
+                                       weights, min_obs,
+                                       arma_any_na, na_restore,
+                                       arma_sum);
+      parallelFor(0, n_cols_x, roll_sum_online);
+      
+    } else {
+      
+      RollSumBatchMat roll_sum_batch(xx, n, n_rows_x, n_cols_x, width,
+                                     weights, min_obs,
+                                     arma_any_na, na_restore,
+                                     arma_sum);
+      parallelFor(0, n_rows_x * n_cols_x, roll_sum_batch);
+      
+    }
+    
+    // create and return a matrix or xts object
+    NumericMatrix result(wrap(arma_sum));
+    List dimnames = xx.attr("dimnames");
+    result.attr("dimnames") = dimnames;
+    result.attr("index") = xx.attr("index");
+    result.attr(".indexCLASS") = xx.attr(".indexCLASS");
+    result.attr(".indexTZ") = xx.attr(".indexTZ");
+    result.attr("tclass") = xx.attr("tclass");
+    result.attr("tzone") = xx.attr("tzone");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
   } else {
-    arma_any_na.fill(0);
+    
+    NumericVector xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.size();
+    arma::vec arma_sum(n_rows_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_x(n_rows_x, width, weights);
+    bool status = check_lambda(weights, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // compute rolling sums
+    if (status && online) {
+      
+      RollSumOnlineVec roll_sum_online(xx, n, n_rows_x, width,
+                                       weights, min_obs,
+                                       na_restore,
+                                       arma_sum);
+      roll_sum_online();
+      
+    } else {
+      
+      RollSumBatchVec roll_sum_batch(xx, n, n_rows_x, width,
+                                     weights, min_obs,
+                                     na_restore,
+                                     arma_sum);
+      parallelFor(0, n_rows_x, roll_sum_batch);
+      
+    }
+    
+    // create and return a vector object
+    NumericVector result(wrap(arma_sum));
+    result.attr("dim") = R_NilValue;
+    List names = xx.attr("names");
+    if (names.size() > 1) {
+      result.attr("names") = names;
+    }
+    result.attr("index") = xx.attr("index");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
   }
-  
-  // compute rolling sums
-  if (status && online) {
-    
-    RollSumOnline roll_sum_online(x, n, n_rows_x, n_cols_x, width,
-                                  weights, min_obs,
-                                  arma_any_na, na_restore,
-                                  arma_sum);
-    parallelFor(0, n_cols_x, roll_sum_online);
-    
-  } else {
-    
-    RollSumBatch roll_sum_batch(x, n, n_rows_x, n_cols_x, width,
-                                weights, min_obs,
-                                arma_any_na, na_restore,
-                                arma_sum);
-    parallelFor(0, n_rows_x * n_cols_x, roll_sum_batch);
-    
-  }
-  
-  // create and return a matrix or xts object
-  NumericMatrix result(wrap(arma_sum));
-  List dimnames = x.attr("dimnames");
-  result.attr("dimnames") = dimnames;
-  result.attr("index") = x.attr("index");
-  result.attr(".indexCLASS") = x.attr(".indexCLASS");
-  result.attr(".indexTZ") = x.attr(".indexTZ");
-  result.attr("tclass") = x.attr("tclass");
-  result.attr("tzone") = x.attr("tzone");
-  result.attr("class") = x.attr("class");
-  
-  return result;
   
 }
 
 // [[Rcpp::export(.roll_prod)]]
-NumericMatrix roll_prod(const NumericMatrix& x, const int& width,
-                        const arma::vec& weights, const int& min_obs,
-                        const bool& complete_obs, const bool& na_restore,
-                        const bool& online) {
+SEXP roll_prod(const SEXP& x, const int& width,
+               const arma::vec& weights, const int& min_obs,
+               const bool& complete_obs, const bool& na_restore,
+               const bool& online) {
   
-  int n = weights.size();
-  int n_rows_x = x.nrow();
-  int n_cols_x = x.ncol();
-  arma::uvec arma_any_na(n_rows_x);
-  arma::mat arma_prod(n_rows_x, n_cols_x);
-  
-  // check 'width' argument for errors
-  check_width(width);
-  
-  // default 'weights' argument is equal-weighted,
-  // otherwise check argument for errors
-  check_weights_x(n_rows_x, width, weights);
-  bool status = check_lambda(weights, online);
-  
-  // default 'min_obs' argument is 'width',
-  // otherwise check argument for errors
-  check_min_obs(min_obs);
-  
-  // default 'complete_obs' argument is 'false',
-  // otherwise check argument for errors
-  if (complete_obs) {
-    arma_any_na = any_na_x(x);
+  if (Rf_isMatrix(x)) {
+    
+    NumericMatrix xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.nrow();
+    int n_cols_x = xx.ncol();
+    arma::uvec arma_any_na(n_rows_x);
+    arma::mat arma_prod(n_rows_x, n_cols_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_x(n_rows_x, width, weights);
+    bool status = check_lambda(weights, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'false',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      arma_any_na = any_na_x(xx);
+    } else {
+      arma_any_na.fill(0);
+    }
+    
+    // compute rolling products
+    if (status && online) {
+      
+      RollProdOnlineMat roll_prod_online(xx, n, n_rows_x, n_cols_x, width,
+                                         weights, min_obs,
+                                         arma_any_na, na_restore, 
+                                         arma_prod);
+      parallelFor(0, n_cols_x, roll_prod_online);
+      
+    } else {
+      
+      RollProdBatchMat roll_prod_batch(xx, n, n_rows_x, n_cols_x, width,
+                                       weights, min_obs,
+                                       arma_any_na, na_restore,
+                                       arma_prod);
+      parallelFor(0, n_rows_x * n_cols_x, roll_prod_batch);
+      
+    }
+    
+    // create and return a matrix or xts object
+    NumericMatrix result(wrap(arma_prod));
+    List dimnames = xx.attr("dimnames");
+    result.attr("dimnames") = dimnames;
+    result.attr("index") = xx.attr("index");
+    result.attr(".indexCLASS") = xx.attr(".indexCLASS");
+    result.attr(".indexTZ") = xx.attr(".indexTZ");
+    result.attr("tclass") = xx.attr("tclass");
+    result.attr("tzone") = xx.attr("tzone");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
   } else {
-    arma_any_na.fill(0);
+    
+    NumericVector xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.size();
+    arma::vec arma_prod(n_rows_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_x(n_rows_x, width, weights);
+    bool status = check_lambda(weights, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // compute rolling products
+    if (status && online) {
+      
+      RollProdOnlineVec roll_prod_online(xx, n, n_rows_x, width,
+                                         weights, min_obs,
+                                         na_restore, 
+                                         arma_prod);
+      roll_prod_online();
+      
+    } else {
+      
+      RollProdBatchVec roll_prod_batch(xx, n, n_rows_x, width,
+                                       weights, min_obs,
+                                       na_restore,
+                                       arma_prod);
+      parallelFor(0, n_rows_x, roll_prod_batch);
+      
+    }
+    
+    // create and return a vector object
+    NumericVector result(wrap(arma_prod));
+    result.attr("dim") = R_NilValue;
+    List names = xx.attr("names");
+    if (names.size() > 1) {
+      result.attr("names") = names;
+    }
+    result.attr("index") = xx.attr("index");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
   }
-  
-  // compute rolling products
-  if (status && online) {
-    
-    RollProdOnline roll_prod_online(x, n, n_rows_x, n_cols_x, width,
-                                    weights, min_obs,
-                                    arma_any_na, na_restore, 
-                                    arma_prod);
-    parallelFor(0, n_cols_x, roll_prod_online);
-    
-  } else {
-    
-    RollProdBatch roll_prod_batch(x, n, n_rows_x, n_cols_x, width,
-                                  weights, min_obs,
-                                  arma_any_na, na_restore,
-                                  arma_prod);
-    parallelFor(0, n_rows_x * n_cols_x, roll_prod_batch);
-    
-  }
-  
-  // create and return a matrix or xts object
-  NumericMatrix result(wrap(arma_prod));
-  List dimnames = x.attr("dimnames");
-  result.attr("dimnames") = dimnames;
-  result.attr("index") = x.attr("index");
-  result.attr(".indexCLASS") = x.attr(".indexCLASS");
-  result.attr(".indexTZ") = x.attr(".indexTZ");
-  result.attr("tclass") = x.attr("tclass");
-  result.attr("tzone") = x.attr("tzone");
-  result.attr("class") = x.attr("class");
-  
-  return result;
   
 }
 

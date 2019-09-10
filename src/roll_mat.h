@@ -427,7 +427,7 @@ struct RollAllBatch : public Worker {
 };
 
 // 'Worker' function for computing rolling sums using an online algorithm
-struct RollSumOnline : public Worker {
+struct RollSumOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -441,11 +441,11 @@ struct RollSumOnline : public Worker {
   arma::mat& arma_sum;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollSumOnline(const NumericMatrix x, const int n,
-                const int n_rows_x, const int n_cols_x,
-                const int width, const arma::vec arma_weights,
-                const int min_obs, const arma::uvec arma_any_na,
-                const bool na_restore, arma::mat& arma_sum)
+  RollSumOnlineMat(const NumericMatrix x, const int n,
+                   const int n_rows_x, const int n_cols_x,
+                   const int width, const arma::vec arma_weights,
+                   const int min_obs, const arma::uvec arma_any_na,
+                   const bool na_restore, arma::mat& arma_sum)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
@@ -563,7 +563,7 @@ struct RollSumOnline : public Worker {
 };
 
 // 'Worker' function for computing rolling sums using a standard algorithm
-struct RollSumBatch : public Worker {
+struct RollSumBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -577,11 +577,11 @@ struct RollSumBatch : public Worker {
   arma::mat& arma_sum;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollSumBatch(const NumericMatrix x, const int n,
-               const int n_rows_x, const int n_cols_x,
-               const int width, const arma::vec arma_weights,
-               const int min_obs, const arma::uvec arma_any_na,
-               const bool na_restore, arma::mat& arma_sum)
+  RollSumBatchMat(const NumericMatrix x, const int n,
+                  const int n_rows_x, const int n_cols_x,
+                  const int width, const arma::vec arma_weights,
+                  const int min_obs, const arma::uvec arma_any_na,
+                  const bool na_restore, arma::mat& arma_sum)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
@@ -641,7 +641,7 @@ struct RollSumBatch : public Worker {
 };
 
 // 'Worker' function for computing rolling products using an online algorithm
-struct RollProdOnline : public Worker {
+struct RollProdOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -655,11 +655,11 @@ struct RollProdOnline : public Worker {
   arma::mat& arma_prod;         // destination (pass by reference)
   
   // initialize with source and destination
-  RollProdOnline(const NumericMatrix x, const int n,
-                 const int n_rows_x, const int n_cols_x,
-                 const int width, const arma::vec arma_weights,
-                 const int min_obs, const arma::uvec arma_any_na,
-                 const bool na_restore, arma::mat& arma_prod)
+  RollProdOnlineMat(const NumericMatrix x, const int n,
+                    const int n_rows_x, const int n_cols_x,
+                    const int width, const arma::vec arma_weights,
+                    const int min_obs, const arma::uvec arma_any_na,
+                    const bool na_restore, arma::mat& arma_prod)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
@@ -809,7 +809,7 @@ struct RollProdOnline : public Worker {
 };
 
 // 'Worker' function for computing rolling products using a standard algorithm
-struct RollProdBatch : public Worker {
+struct RollProdBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -823,11 +823,11 @@ struct RollProdBatch : public Worker {
   arma::mat& arma_prod;         // destination (pass by reference)
   
   // initialize with source and destination
-  RollProdBatch(const NumericMatrix x, const int n,
-                const int n_rows_x, const int n_cols_x,
-                const int width, const arma::vec arma_weights,
-                const int min_obs, const arma::uvec arma_any_na,
-                const bool na_restore, arma::mat& arma_prod)
+  RollProdBatchMat(const NumericMatrix x, const int n,
+                   const int n_rows_x, const int n_cols_x,
+                   const int width, const arma::vec arma_weights,
+                   const int min_obs, const arma::uvec arma_any_na,
+                   const bool na_restore, arma::mat& arma_prod)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
