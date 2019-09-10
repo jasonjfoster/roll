@@ -10,6 +10,396 @@ using namespace RcppParallel;
 
 arma::ivec stl_sort_index(arma::vec& x);
 
+// 'Worker' function for computing rolling any using an online algorithm
+struct RollAnyOnlineVec {
+  
+  const RVector<int> x;         // source
+  const int n_rows_x;
+  const int width;
+  const int min_obs;
+  const bool na_restore;
+  RVector<int> rcpp_any;        // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollAnyOnlineVec(const IntegerVector x, const int n_rows_x,
+                   const int width,
+                   const int min_obs,
+                   const bool na_restore, IntegerVector rcpp_any)
+    : x(x), n_rows_x(n_rows_x),
+      width(width),
+      min_obs(min_obs),
+      na_restore(na_restore), rcpp_any(rcpp_any) { }
+  
+  // function call operator that iterates by column
+  void operator()() {
+    
+    int count = 0;
+    int n_obs = 0;
+    int x_new = 0;
+    int x_old = 0;
+    int sum_x = 0;
+    
+    for (int i = 0; i < n_rows_x; i++) {
+      
+      if ((x[i] == NA_INTEGER) || (x[i] == 0)) {
+        
+        x_new = 0;
+        
+      } else {
+        
+        x_new = 1;
+        
+      }
+      
+      // expanding window
+      if (i < width) {
+        
+        // don't include if missing value
+        if (x[i] != NA_INTEGER) {
+          n_obs += 1;
+        }
+        
+        sum_x = sum_x + x_new;
+        
+        count += 1;
+        
+      }
+      
+      // rolling window
+      if (i >= width) {
+        
+        // don't include if missing value
+        if ((x[i] != NA_INTEGER) && (x[i - width] == NA_INTEGER)) {
+          
+          n_obs += 1;
+          
+        } else if ((x[i] == NA_INTEGER) && (x[i - width] != NA_INTEGER)) {
+          
+          n_obs -= 1;
+          
+        }
+        
+        if ((x[i - width] == NA_INTEGER) || (x[i - width] == 0)) {
+          
+          x_old = 0;
+          
+        } else {
+          
+          x_old = 1;
+          
+        }
+        
+        sum_x = sum_x + x_new - x_old;
+        
+      }
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && (x[i] != NA_INTEGER))) {
+        
+        // compute any
+        if (n_obs >= min_obs) {
+          
+          if (sum_x > 0) {
+            rcpp_any[i] = 1;
+          } else if (n_obs == count) {
+            rcpp_any[i] = 0;
+          } else {
+            rcpp_any[i] = NA_INTEGER;
+          }
+          
+        } else {
+          rcpp_any[i] = NA_INTEGER;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        rcpp_any[i] = x[i];
+        
+      }
+      
+    }
+    
+  }
+  
+};
+
+// 'Worker' function for computing rolling any using a standard algorithm
+struct RollAnyBatchVec : public Worker {
+  
+  const RVector<int> x;         // source
+  const int n_rows_x;
+  const int width;
+  const int min_obs;
+  const bool na_restore;
+  RVector<int> rcpp_any;        // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollAnyBatchVec(const IntegerVector x, const int n_rows_x,
+                  const int width,
+                  const int min_obs,
+                  const bool na_restore, IntegerVector rcpp_any)
+    : x(x), n_rows_x(n_rows_x),
+      width(width),
+      min_obs(min_obs),
+      na_restore(na_restore), rcpp_any(rcpp_any) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z;
+      
+      int count = 0;
+      int n_obs = 0;
+      int sum_x = 0;
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && (x[i] != NA_INTEGER))) {
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (i >= count)) {
+          
+          // don't include if missing value
+          if (x[i - count] != NA_INTEGER) {
+            
+            // compute the sum
+            if (x[i - count] == 1) {
+              sum_x = 1;
+            }
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute any
+        if (n_obs >= min_obs) {
+          
+          if (sum_x > 0) {
+            rcpp_any[i] = 1;
+          } else if (n_obs == count) {
+            rcpp_any[i] = 0;
+          } else {
+            rcpp_any[i] = NA_INTEGER;
+          }
+          
+        } else {
+          rcpp_any[i] = NA_INTEGER;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        rcpp_any[i] = x[i];
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling all using an online algorithm
+struct RollAllOnlineVec {
+  
+  const RVector<int> x;         // source
+  const int n_rows_x;
+  const int width;
+  const int min_obs;
+  const bool na_restore;
+  RVector<int> rcpp_all;        // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollAllOnlineVec(const IntegerVector x, const int n_rows_x,
+                   const int width,
+                   const int min_obs,
+                   const bool na_restore, IntegerVector rcpp_all)
+    : x(x), n_rows_x(n_rows_x),
+      width(width),
+      min_obs(min_obs),
+      na_restore(na_restore), rcpp_all(rcpp_all) { }
+  
+  // function call operator that iterates by column
+  void operator()() {
+    
+    int count = 0;
+    int n_obs = 0;
+    int x_new = 0;
+    int x_old = 0;
+    int sum_x = 0;
+    
+    for (int i = 0; i < n_rows_x; i++) {
+      
+      if ((x[i] == NA_INTEGER) || (x[i] != 0)) {
+        
+        x_new = 0;
+        
+      } else {
+        
+        x_new = 1;
+        
+      }
+      
+      // expanding window
+      if (i < width) {
+        
+        // don't include if missing value
+        if ((x[i] != NA_INTEGER)) {
+          n_obs += 1;
+        }
+        
+        sum_x = sum_x + x_new;
+        
+        count += 1;
+        
+      }
+      
+      // rolling window
+      if (i >= width) {
+        
+        // don't include if missing value
+        if ((x[i] != NA_INTEGER) && (x[i - width] == NA_INTEGER)) {
+          
+          n_obs += 1;
+          
+        } else if ((x[i] == NA_INTEGER) && (x[i - width] != NA_INTEGER)) {
+          
+          n_obs -= 1;
+          
+        }
+        
+        if ((x[i - width] == NA_INTEGER) || (x[i - width] != 0)) {
+          
+          x_old = 0;
+          
+        } else {
+          
+          x_old = 1;
+          
+        }
+        
+        sum_x = sum_x + x_new - x_old;
+        
+      }
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && (x[i] != NA_INTEGER))) {
+        
+        // compute all
+        if (n_obs >= min_obs) {
+          
+          if (sum_x > 0) {
+            rcpp_all[i] = 0;
+          } else if (n_obs == count) {
+            rcpp_all[i] = 1;
+          } else {
+            rcpp_all[i] = NA_INTEGER;
+          }
+          
+        } else {
+          rcpp_all[i] = NA_INTEGER;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        rcpp_all[i] = x[i];
+        
+      }
+      
+    }
+    
+  }
+  
+};
+
+// 'Worker' function for computing rolling all using a standard algorithm
+struct RollAllBatchVec : public Worker {
+  
+  const RVector<int> x;         // source
+  const int n_rows_x;
+  const int width;
+  const int min_obs;
+  const bool na_restore;
+  RVector<int> rcpp_all;        // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollAllBatchVec(const IntegerVector x, const int n_rows_x,
+                  const int width,
+                  const int min_obs,
+                  const bool na_restore, IntegerVector rcpp_all)
+    : x(x), n_rows_x(n_rows_x),
+      width(width),
+      min_obs(min_obs),
+      na_restore(na_restore), rcpp_all(rcpp_all) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z;
+      
+      int count = 0;
+      int n_obs = 0;
+      int sum_x = 0;
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && (x[i] != NA_INTEGER))) {
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (i >= count)) {
+          
+          // don't include if missing value
+          if (x[i - count] != NA_INTEGER) {
+            
+            // compute the sum
+            if (x[i - count] == 0) {
+              sum_x = 1;
+            }
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute all
+        if (n_obs >= min_obs) {
+          
+          if (sum_x > 0) {
+            rcpp_all[i] = 0;
+          } else if (n_obs == count) {
+            rcpp_all[i] = 1;
+          } else {
+            rcpp_all[i] = NA_INTEGER;
+          }
+          
+        } else {
+          rcpp_all[i] = NA_INTEGER;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        rcpp_all[i] = x[i];
+        
+      }
+      
+    }
+  }
+  
+};
+
 // 'Worker' function for computing rolling sums using an online algorithm
 struct RollSumOnlineVec {
   

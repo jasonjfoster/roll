@@ -11,7 +11,7 @@ using namespace RcppParallel;
 arma::ivec stl_sort_index(arma::vec& x);
 
 // 'Worker' function for computing rolling any using an online algorithm
-struct RollAnyOnline : public Worker {
+struct RollAnyOnlineMat : public Worker {
   
   const RMatrix<int> x;         // source
   const int n_rows_x;
@@ -23,10 +23,10 @@ struct RollAnyOnline : public Worker {
   RMatrix<int> rcpp_any;        // destination (pass by reference)
   
   // initialize with source and destination
-  RollAnyOnline(const IntegerMatrix x, const int n_rows_x,
-                const int n_cols_x, const int width,
-                const int min_obs, const IntegerVector rcpp_any_na,
-                const bool na_restore, IntegerMatrix rcpp_any)
+  RollAnyOnlineMat(const IntegerMatrix x, const int n_rows_x,
+                   const int n_cols_x, const int width,
+                   const int min_obs, const IntegerVector rcpp_any_na,
+                   const bool na_restore, IntegerMatrix rcpp_any)
     : x(x), n_rows_x(n_rows_x),
       n_cols_x(n_cols_x), width(width),
       min_obs(min_obs), rcpp_any_na(rcpp_any_na),
@@ -134,7 +134,7 @@ struct RollAnyOnline : public Worker {
 };
 
 // 'Worker' function for computing rolling any using a standard algorithm
-struct RollAnyBatch : public Worker {
+struct RollAnyBatchMat : public Worker {
   
   const RMatrix<int> x;         // source
   const int n_rows_x;
@@ -146,10 +146,10 @@ struct RollAnyBatch : public Worker {
   RMatrix<int> rcpp_any;        // destination (pass by reference)
   
   // initialize with source and destination
-  RollAnyBatch(const IntegerMatrix x, const int n_rows_x,
-               const int n_cols_x, const int width,
-               const int min_obs, const IntegerVector rcpp_any_na,
-               const bool na_restore, IntegerMatrix rcpp_any)
+  RollAnyBatchMat(const IntegerMatrix x, const int n_rows_x,
+                  const int n_cols_x, const int width,
+                  const int min_obs, const IntegerVector rcpp_any_na,
+                  const bool na_restore, IntegerMatrix rcpp_any)
     : x(x), n_rows_x(n_rows_x),
       n_cols_x(n_cols_x), width(width),
       min_obs(min_obs), rcpp_any_na(rcpp_any_na),
@@ -219,7 +219,7 @@ struct RollAnyBatch : public Worker {
 };
 
 // 'Worker' function for computing rolling all using an online algorithm
-struct RollAllOnline : public Worker {
+struct RollAllOnlineMat : public Worker {
   
   const RMatrix<int> x;         // source
   const int n_rows_x;
@@ -231,10 +231,10 @@ struct RollAllOnline : public Worker {
   RMatrix<int> rcpp_all;        // destination (pass by reference)
   
   // initialize with source and destination
-  RollAllOnline(const IntegerMatrix x, const int n_rows_x,
-                const int n_cols_x, const int width,
-                const int min_obs, const IntegerVector rcpp_any_na,
-                const bool na_restore, IntegerMatrix rcpp_all)
+  RollAllOnlineMat(const IntegerMatrix x, const int n_rows_x,
+                   const int n_cols_x, const int width,
+                   const int min_obs, const IntegerVector rcpp_any_na,
+                   const bool na_restore, IntegerMatrix rcpp_all)
     : x(x), n_rows_x(n_rows_x),
       n_cols_x(n_cols_x), width(width),
       min_obs(min_obs), rcpp_any_na(rcpp_any_na),
@@ -342,7 +342,7 @@ struct RollAllOnline : public Worker {
 };
 
 // 'Worker' function for computing rolling all using a standard algorithm
-struct RollAllBatch : public Worker {
+struct RollAllBatchMat : public Worker {
   
   const RMatrix<int> x;         // source
   const int n_rows_x;
@@ -354,10 +354,10 @@ struct RollAllBatch : public Worker {
   RMatrix<int> rcpp_all;        // destination (pass by reference)
   
   // initialize with source and destination
-  RollAllBatch(const IntegerMatrix x, const int n_rows_x,
-               const int n_cols_x, const int width,
-               const int min_obs, const IntegerVector rcpp_any_na,
-               const bool na_restore, IntegerMatrix rcpp_all)
+  RollAllBatchMat(const IntegerMatrix x, const int n_rows_x,
+                  const int n_cols_x, const int width,
+                  const int min_obs, const IntegerVector rcpp_any_na,
+                  const bool na_restore, IntegerMatrix rcpp_all)
     : x(x), n_rows_x(n_rows_x),
       n_cols_x(n_cols_x), width(width),
       min_obs(min_obs), rcpp_any_na(rcpp_any_na),

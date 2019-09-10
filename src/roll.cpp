@@ -291,114 +291,210 @@ arma::ivec stl_sort_index(arma::vec& x) {
 }
 
 // [[Rcpp::export(.roll_any)]]
-LogicalMatrix roll_any(const LogicalMatrix& x, const int& width,
-                       const int& min_obs, const bool& complete_obs,
-                       const bool& na_restore, const bool& online) {
+SEXP roll_any(const SEXP& x, const int& width,
+              const int& min_obs, const bool& complete_obs,
+              const bool& na_restore, const bool& online) {
   
-  int n_rows_x = x.nrow();
-  int n_cols_x = x.ncol();
-  IntegerVector rcpp_any_na(n_rows_x);
-  IntegerMatrix rcpp_x(x);
-  IntegerMatrix rcpp_any(n_rows_x, n_cols_x);
-  
-  // check 'width' argument for errors
-  check_width(width);
-  
-  // default 'min_obs' argument is 'width',
-  // otherwise check argument for errors
-  check_min_obs(min_obs);
-  
-  // default 'complete_obs' argument is 'false',
-  // otherwise check argument for errors
-  if (complete_obs) {
-    rcpp_any_na = any_na_i(rcpp_x);
-  }
-  
-  // compute rolling any
-  if (online) {
+  if (Rf_isMatrix(x)) {
     
-    RollAnyOnline roll_any_online(rcpp_x, n_rows_x, n_cols_x, width,
-                                  min_obs, rcpp_any_na, na_restore,
-                                  rcpp_any);
-    parallelFor(0, n_cols_x, roll_any_online);
+    LogicalMatrix xx(x);
+    int n_rows_x = xx.nrow();
+    int n_cols_x = xx.ncol();
+    IntegerVector rcpp_any_na(n_rows_x);
+    IntegerMatrix rcpp_x(xx);
+    IntegerMatrix rcpp_any(n_rows_x, n_cols_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'false',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      rcpp_any_na = any_na_i(rcpp_x);
+    }
+    
+    // compute rolling any
+    if (online) {
+      
+      RollAnyOnlineMat roll_any_online(rcpp_x, n_rows_x, n_cols_x, width,
+                                       min_obs, rcpp_any_na, na_restore,
+                                       rcpp_any);
+      parallelFor(0, n_cols_x, roll_any_online);
+      
+    } else {
+      
+      RollAnyBatchMat roll_any_batch(rcpp_x, n_rows_x, n_cols_x, width,
+                                     min_obs, rcpp_any_na, na_restore,
+                                     rcpp_any);
+      parallelFor(0, n_rows_x * n_cols_x, roll_any_batch);
+      
+    }
+    
+    // create and return a matrix or xts object
+    LogicalMatrix result(rcpp_any);
+    List dimnames = xx.attr("dimnames");
+    result.attr("dimnames") = dimnames;
+    result.attr("index") = xx.attr("index");
+    result.attr(".indexCLASS") = xx.attr(".indexCLASS");
+    result.attr(".indexTZ") = xx.attr(".indexTZ");
+    result.attr("tclass") = xx.attr("tclass");
+    result.attr("tzone") = xx.attr("tzone");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
     
   } else {
     
-    RollAnyBatch roll_any_batch(rcpp_x, n_rows_x, n_cols_x, width,
-                                min_obs, rcpp_any_na, na_restore,
-                                rcpp_any);
-    parallelFor(0, n_rows_x * n_cols_x, roll_any_batch);
+    LogicalVector xx(x);
+    int n_rows_x = xx.size();
+    IntegerVector rcpp_x(xx);
+    IntegerVector rcpp_any(n_rows_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // compute rolling any
+    if (online) {
+      
+      RollAnyOnlineVec roll_any_online(rcpp_x, n_rows_x, width,
+                                       min_obs, na_restore,
+                                       rcpp_any);
+      roll_any_online();
+      
+    } else {
+      
+      RollAnyBatchVec roll_any_batch(rcpp_x, n_rows_x, width,
+                                     min_obs, na_restore,
+                                     rcpp_any);
+      parallelFor(0, n_rows_x, roll_any_batch);
+      
+    }
+    
+    // create and return a vector object
+    LogicalVector result(wrap(rcpp_any));
+    result.attr("dim") = R_NilValue;
+    List names = xx.attr("names");
+    if (names.size() > 1) {
+      result.attr("names") = names;
+    }
+    result.attr("index") = xx.attr("index");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
     
   }
-  
-  // create and return a matrix or xts object
-  LogicalMatrix result(rcpp_any);
-  List dimnames = x.attr("dimnames");
-  result.attr("dimnames") = dimnames;
-  result.attr("index") = x.attr("index");
-  result.attr(".indexCLASS") = x.attr(".indexCLASS");
-  result.attr(".indexTZ") = x.attr(".indexTZ");
-  result.attr("tclass") = x.attr("tclass");
-  result.attr("tzone") = x.attr("tzone");
-  result.attr("class") = x.attr("class");
-  
-  return result;
   
 }
 
 // [[Rcpp::export(.roll_all)]]
-LogicalMatrix roll_all(const LogicalMatrix& x, const int& width,
-                       const int& min_obs, const bool& complete_obs,
-                       const bool& na_restore, const bool& online) {
+SEXP roll_all(const SEXP& x, const int& width,
+              const int& min_obs, const bool& complete_obs,
+              const bool& na_restore, const bool& online) {
   
-  int n_rows_x = x.nrow();
-  int n_cols_x = x.ncol();
-  IntegerVector rcpp_any_na(n_rows_x);
-  IntegerMatrix rcpp_x(x);
-  IntegerMatrix rcpp_all(n_rows_x, n_cols_x);
-  
-  // check 'width' argument for errors
-  check_width(width);
-  
-  // default 'min_obs' argument is 'width',
-  // otherwise check argument for errors
-  check_min_obs(min_obs);
-  
-  // default 'complete_obs' argument is 'false',
-  // otherwise check argument for errors
-  if (complete_obs) {
-    rcpp_any_na = any_na_i(rcpp_x);
-  }
-  
-  // compute rolling all
-  if (online) {
+  if (Rf_isMatrix(x)) {
     
-    RollAllOnline roll_all_online(rcpp_x, n_rows_x, n_cols_x, width,
-                                  min_obs, rcpp_any_na, na_restore,
-                                  rcpp_all);
-    parallelFor(0, n_cols_x, roll_all_online);
+    LogicalMatrix xx(x);
+    int n_rows_x = xx.nrow();
+    int n_cols_x = xx.ncol();
+    IntegerVector rcpp_any_na(n_rows_x);
+    IntegerMatrix rcpp_x(xx);
+    IntegerMatrix rcpp_all(n_rows_x, n_cols_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'false',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      rcpp_any_na = any_na_i(rcpp_x);
+    }
+    
+    // compute rolling all
+    if (online) {
+      
+      RollAllOnlineMat roll_all_online(rcpp_x, n_rows_x, n_cols_x, width,
+                                       min_obs, rcpp_any_na, na_restore,
+                                       rcpp_all);
+      parallelFor(0, n_cols_x, roll_all_online);
+      
+    } else {
+      
+      RollAllBatchMat roll_all_batch(rcpp_x, n_rows_x, n_cols_x, width,
+                                     min_obs, rcpp_any_na, na_restore,
+                                     rcpp_all);
+      parallelFor(0, n_rows_x * n_cols_x, roll_all_batch);
+      
+    }
+    
+    // create and return a matrix or xts object
+    LogicalMatrix result(rcpp_all);
+    List dimnames = xx.attr("dimnames");
+    result.attr("dimnames") = dimnames;
+    result.attr("index") = xx.attr("index");
+    result.attr(".indexCLASS") = xx.attr(".indexCLASS");
+    result.attr(".indexTZ") = xx.attr(".indexTZ");
+    result.attr("tclass") = xx.attr("tclass");
+    result.attr("tzone") = xx.attr("tzone");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
     
   } else {
     
-    RollAllBatch roll_all_batch(rcpp_x, n_rows_x, n_cols_x, width,
-                                min_obs, rcpp_any_na, na_restore,
-                                rcpp_all);
-    parallelFor(0, n_rows_x * n_cols_x, roll_all_batch);
+    LogicalVector xx(x);
+    int n_rows_x = xx.size();
+    IntegerVector rcpp_x(xx);
+    IntegerVector rcpp_all(n_rows_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // compute rolling all
+    if (online) {
+      
+      RollAllOnlineVec roll_all_online(rcpp_x, n_rows_x, width,
+                                       min_obs, na_restore,
+                                       rcpp_all);
+      roll_all_online();
+      
+    } else {
+      
+      RollAllBatchVec roll_all_batch(rcpp_x, n_rows_x, width,
+                                     min_obs, na_restore,
+                                     rcpp_all);
+      parallelFor(0, n_rows_x, roll_all_batch);
+      
+    }
+    
+    // create and return a vector object
+    LogicalVector result(wrap(rcpp_all));
+    result.attr("dim") = R_NilValue;
+    List names = xx.attr("names");
+    if (names.size() > 1) {
+      result.attr("names") = names;
+    }
+    result.attr("index") = xx.attr("index");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
     
   }
-  
-  // create and return a matrix or xts object
-  LogicalMatrix result(rcpp_all);
-  List dimnames = x.attr("dimnames");
-  result.attr("dimnames") = dimnames;
-  result.attr("index") = x.attr("index");
-  result.attr(".indexCLASS") = x.attr(".indexCLASS");
-  result.attr(".indexTZ") = x.attr(".indexTZ");
-  result.attr("tclass") = x.attr("tclass");
-  result.attr("tzone") = x.attr("tzone");
-  result.attr("class") = x.attr("class");
-  
-  return result;
   
 }
 

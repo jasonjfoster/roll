@@ -7,12 +7,12 @@
 using namespace Rcpp;
 
 // roll_any
-LogicalMatrix roll_any(const LogicalMatrix& x, const int& width, const int& min_obs, const bool& complete_obs, const bool& na_restore, const bool& online);
+SEXP roll_any(const SEXP& x, const int& width, const int& min_obs, const bool& complete_obs, const bool& na_restore, const bool& online);
 RcppExport SEXP _roll_roll_any(SEXP xSEXP, SEXP widthSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP onlineSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const LogicalMatrix& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const SEXP& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const int& >::type width(widthSEXP);
     Rcpp::traits::input_parameter< const int& >::type min_obs(min_obsSEXP);
     Rcpp::traits::input_parameter< const bool& >::type complete_obs(complete_obsSEXP);
@@ -23,12 +23,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_all
-LogicalMatrix roll_all(const LogicalMatrix& x, const int& width, const int& min_obs, const bool& complete_obs, const bool& na_restore, const bool& online);
+SEXP roll_all(const SEXP& x, const int& width, const int& min_obs, const bool& complete_obs, const bool& na_restore, const bool& online);
 RcppExport SEXP _roll_roll_all(SEXP xSEXP, SEXP widthSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP onlineSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const LogicalMatrix& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const SEXP& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const int& >::type width(widthSEXP);
     Rcpp::traits::input_parameter< const int& >::type min_obs(min_obsSEXP);
     Rcpp::traits::input_parameter< const bool& >::type complete_obs(complete_obsSEXP);
