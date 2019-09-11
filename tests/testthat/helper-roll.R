@@ -21,16 +21,27 @@ if (requireNamespace("zoo", quietly = TRUE)) {
 }
 
 test_data <- lapply(test_data, setNames, paste0("x", rep(1:n_vars)))
-test_data[[3]] <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+test_data <- c(test_data, list(matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)))
 
 set.seed(5640)
 idx <- sample(1:(n_obs * n_vars), n_obs / 4)
 test_data[[3]][idx] <- as.numeric(NA)
 
+# test data
+test_roll_x <- lapply(test_data, function(x){x[ , 1:2]})
+test_roll_y <- lapply(test_data, function(x){x[ , 3:4, drop = FALSE]})
+test_roll_x <- c(test_roll_x, list(rnorm(n_obs)))
+test_roll_y <- c(test_roll_y, list(rnorm(n_obs)))
+test_roll_null <- c(test_roll_x, list(NULL))
+
+test_zoo_x <- lapply(test_data, function(x){x[ , 1:2]})[-3]
+test_zoo_y <- lapply(test_data, function(x){x[ , 3:4, drop = FALSE]})[-3]
+test_zoo_yy <- lapply(test_data, function(x){x[ , 3, drop = FALSE]})[-3]
+test_zoo_x <- c(test_zoo_x, list(rnorm(n_obs)))
+test_zoo_y <- c(test_zoo_y, list(rnorm(n_obs)))
+test_zoo_yy <- c(test_zoo_yy, list(rnorm(n_obs)))
+
 # test arguments
-test_data_x <- lapply(test_data, function(x){x[ , 1:2]})
-test_data_y <- lapply(test_data, function(x){x[ , 3:4, drop = FALSE]})
-test_data_null <- c(test_data_x, list(NULL))
 test_width <- c(1, 2, 10, 20)
 test_intercept <- c(TRUE, FALSE)
 test_center <- c(TRUE, FALSE)
