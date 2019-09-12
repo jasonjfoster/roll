@@ -9,9 +9,9 @@ roll_lm(x, y, width, weights = rep(1, width), intercept = TRUE,
   online = TRUE)
 }
 \arguments{
-\item{x}{matrix or xts object. Rows are observations and columns are the independent variables.}
+\item{x}{vector or matrix. Rows are observations and columns are the independent variables.}
 
-\item{y}{matrix or xts object. Rows are observations and columns are the dependent variables.}
+\item{y}{vector or matrix. Rows are observations and columns are the dependent variables.}
 
 \item{width}{integer. Window size.}
 

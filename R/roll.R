@@ -2,7 +2,7 @@
 ##'
 ##' A function for computing rolling any of time-series data.
 ##'
-##' @param x logical matrix or xts object. Rows are observations and columns are variables.
+##' @param x logical vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
 ##' otherwise result is \code{NA}.
@@ -37,7 +37,7 @@ roll_any <- function(x, width, min_obs = width,
 ##'
 ##' A function for computing rolling all of time-series data.
 ##'
-##' @param x logical matrix or xts object. Rows are observations and columns are variables.
+##' @param x logical vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
 ##' otherwise result is \code{NA}.
@@ -72,7 +72,7 @@ roll_all <- function(x, width, min_obs = width,
 ##'
 ##' A function for computing rolling sums of time-series data.
 ##'
-##' @param x matrix or xts object. Rows are observations and columns are variables.
+##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
@@ -112,7 +112,7 @@ roll_sum <- function(x, width, weights = rep(1, width),
 ##'
 ##' A function for computing rolling products of time-series data.
 ##'
-##' @param x matrix or xts object. Rows are observations and columns are variables.
+##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
@@ -152,7 +152,7 @@ roll_prod <- function(x, width, weights = rep(1, width),
 ##'
 ##' A function for computing rolling means of time-series data.
 ##'
-##' @param x matrix or xts object. Rows are observations and columns are variables.
+##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
@@ -192,7 +192,7 @@ roll_mean <- function(x, width, weights = rep(1, width),
 ##'
 ##' A function for computing rolling medians of time-series data.
 ##'
-##' @param x matrix or xts object. Rows are observations and columns are variables.
+##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
@@ -232,7 +232,7 @@ roll_median <- function(x, width, weights = rep(1, width),
 ##'
 ##' A function for computing rolling maximums of time-series data.
 ##'
-##' @param x matrix or xts object. Rows are observations and columns are variables.
+##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
@@ -272,7 +272,7 @@ roll_max <- function(x, width, weights = rep(1, width),
 ##'
 ##' A function for computing rolling minimums of time-series data.
 ##'
-##' @param x matrix or xts object. Rows are observations and columns are variables.
+##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
@@ -312,7 +312,7 @@ roll_min <- function(x, width, weights = rep(1, width),
 ##'
 ##' A function for computing rolling variances of time-series data.
 ##'
-##' @param x matrix or xts object. Rows are observations and columns are variables.
+##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param center logical. If \code{TRUE} then the weighted mean of each variable is used,
@@ -357,7 +357,7 @@ roll_var <- function(x, width, weights = rep(1, width), center = TRUE,
 ##'
 ##' A function for computing rolling standard deviations of time-series data.
 ##'
-##' @param x matrix or xts object. Rows are observations and columns are variables.
+##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param center logical. If \code{TRUE} then the weighted mean of each variable is used,
@@ -402,7 +402,7 @@ roll_sd <- function(x, width, weights = rep(1, width), center = TRUE,
 ##'
 ##' A function for computing rolling scaling and centering of time-series data.
 ##'
-##' @param x matrix or xts object. Rows are observations and columns are variables.
+##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param center logical. If \code{TRUE} then the weighted mean of each variable is used,
@@ -456,8 +456,8 @@ roll_scale <- function(x, width, weights = rep(1, width), center = TRUE, scale =
 ##'
 ##' A function for computing rolling covariance matrices of time-series data.
 ##' 
-##' @param x matrix or xts object. Rows are observations and columns are variables.
-##' @param y matrix or xts object. Rows are observations and columns are variables.
+##' @param x vector or matrix. Rows are observations and columns are variables.
+##' @param y vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param center logical. If \code{TRUE} then the weighted mean of each variable is used,
@@ -505,8 +505,8 @@ roll_cov <- function(x, y = NULL, width, weights = rep(1, width), center = TRUE,
 ##'
 ##' A function for computing rolling correlation matrices of time-series data.
 ##' 
-##' @param x matrix or xts object. Rows are observations and columns are variables.
-##' @param y matrix or xts object. Rows are observations and columns are variables.
+##' @param x vector or matrix. Rows are observations and columns are variables.
+##' @param y vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param center logical. If \code{TRUE} then the weighted mean of each variable is used,
@@ -554,8 +554,8 @@ roll_cor <- function(x, y = NULL, width, weights = rep(1, width), center = TRUE,
 ##'
 ##' A function for computing rolling linear models of time-series data.
 ##' 
-##' @param x matrix or xts object. Rows are observations and columns are the independent variables.
-##' @param y matrix or xts object. Rows are observations and columns are the dependent variables.
+##' @param x vector or matrix. Rows are observations and columns are the independent variables.
+##' @param y vector or matrix. Rows are observations and columns are the dependent variables.
 ##' @param width integer. Window size.
 ##' @param weights vector. Weights for each observation within a window.
 ##' @param intercept logical. Either \code{TRUE} to include or \code{FALSE} to remove the intercept.

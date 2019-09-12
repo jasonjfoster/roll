@@ -24,14 +24,14 @@ test_data <- lapply(test_data, setNames, paste0("x", rep(1:n_vars)))
 test_data <- c(test_data, list(matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)))
 
 set.seed(5640)
-idx <- sample(1:(n_obs * n_vars), n_obs / 4)
+idx <- sample(1:(n_obs * n_vars), n_obs / 2)
 test_data[[3]][idx] <- as.numeric(NA)
 
 # test data
 test_roll_x <- lapply(test_data, function(x){x[ , 1:2]})
 test_roll_y <- lapply(test_data, function(x){x[ , 3:4, drop = FALSE]})
-test_roll_x <- c(test_roll_x, list(rnorm(n_obs)))
-test_roll_y <- c(test_roll_y, list(rnorm(n_obs)))
+test_roll_x <- c(test_roll_x, list(test_roll_x[[3]][ , 1]))
+test_roll_y <- c(test_roll_y, list(test_roll_y[[3]][ , 1]))
 test_roll_null <- c(test_roll_x, list(NULL))
 
 test_zoo_x <- lapply(test_data, function(x){x[ , 1:2]})[-3]

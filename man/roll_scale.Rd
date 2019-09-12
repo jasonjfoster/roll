@@ -9,7 +9,7 @@ roll_scale(x, width, weights = rep(1, width), center = TRUE,
   na_restore = FALSE, online = TRUE)
 }
 \arguments{
-\item{x}{matrix or xts object. Rows are observations and columns are variables.}
+\item{x}{vector or matrix. Rows are observations and columns are variables.}
 
 \item{width}{integer. Window size.}
 

@@ -8,7 +8,7 @@ roll_max(x, width, weights = rep(1, width), min_obs = width,
   complete_obs = FALSE, na_restore = FALSE, online = FALSE)
 }
 \arguments{
-\item{x}{matrix or xts object. Rows are observations and columns are variables.}
+\item{x}{vector or matrix. Rows are observations and columns are variables.}
 
 \item{width}{integer. Window size.}
 
