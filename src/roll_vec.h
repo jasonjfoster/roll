@@ -22,12 +22,10 @@ struct RollAnyOnlineVec {
   
   // initialize with source and destination
   RollAnyOnlineVec(const IntegerVector x, const int n_rows_x,
-                   const int width,
-                   const int min_obs,
+                   const int width, const int min_obs,
                    const bool na_restore, IntegerVector rcpp_any)
     : x(x), n_rows_x(n_rows_x),
-      width(width),
-      min_obs(min_obs),
+      width(width), min_obs(min_obs),
       na_restore(na_restore), rcpp_any(rcpp_any) { }
   
   // function call operator that iterates by column
@@ -136,12 +134,10 @@ struct RollAnyBatchVec : public Worker {
   
   // initialize with source and destination
   RollAnyBatchVec(const IntegerVector x, const int n_rows_x,
-                  const int width,
-                  const int min_obs,
+                  const int width, const int min_obs,
                   const bool na_restore, IntegerVector rcpp_any)
     : x(x), n_rows_x(n_rows_x),
-      width(width),
-      min_obs(min_obs),
+      width(width), min_obs(min_obs),
       na_restore(na_restore), rcpp_any(rcpp_any) { }
   
   // function call operator that iterates by index
@@ -217,12 +213,10 @@ struct RollAllOnlineVec {
   
   // initialize with source and destination
   RollAllOnlineVec(const IntegerVector x, const int n_rows_x,
-                   const int width,
-                   const int min_obs,
+                   const int width, const int min_obs,
                    const bool na_restore, IntegerVector rcpp_all)
     : x(x), n_rows_x(n_rows_x),
-      width(width),
-      min_obs(min_obs),
+      width(width), min_obs(min_obs),
       na_restore(na_restore), rcpp_all(rcpp_all) { }
   
   // function call operator that iterates by column
@@ -331,12 +325,10 @@ struct RollAllBatchVec : public Worker {
   
   // initialize with source and destination
   RollAllBatchVec(const IntegerVector x, const int n_rows_x,
-                  const int width,
-                  const int min_obs,
+                  const int width, const int min_obs,
                   const bool na_restore, IntegerVector rcpp_all)
     : x(x), n_rows_x(n_rows_x),
-      width(width),
-      min_obs(min_obs),
+      width(width), min_obs(min_obs),
       na_restore(na_restore), rcpp_all(rcpp_all) { }
   
   // function call operator that iterates by index
@@ -414,14 +406,12 @@ struct RollSumOnlineVec {
   
   // initialize with source and destination
   RollSumOnlineVec(const NumericVector x, const int n,
-                   const int n_rows_x,
-                   const int width, const arma::vec arma_weights,
-                   const int min_obs,
+                   const int n_rows_x, const int width,
+                   const arma::vec arma_weights, const int min_obs,
                    const bool na_restore, arma::vec& arma_sum)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      min_obs(min_obs),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
       na_restore(na_restore), arma_sum(arma_sum) { }
   
   // function call operator that iterates by column
@@ -542,14 +532,12 @@ struct RollSumBatchVec : public Worker {
   
   // initialize with source and destination
   RollSumBatchVec(const NumericVector x, const int n,
-                  const int n_rows_x,
-                  const int width, const arma::vec arma_weights,
-                  const int min_obs,
+                  const int n_rows_x, const int width,
+                  const arma::vec arma_weights, const int min_obs,
                   const bool na_restore, arma::vec& arma_sum)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      min_obs(min_obs),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
       na_restore(na_restore), arma_sum(arma_sum) { }
   
   // function call operator that iterates by index
@@ -616,14 +604,12 @@ struct RollProdOnlineVec {
   
   // initialize with source and destination
   RollProdOnlineVec(const NumericVector x, const int n,
-                    const int n_rows_x,
-                    const int width, const arma::vec arma_weights,
-                    const int min_obs,
+                    const int n_rows_x, const int width,
+                    const arma::vec arma_weights, const int min_obs,
                     const bool na_restore, arma::vec& arma_prod)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      min_obs(min_obs),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
       na_restore(na_restore), arma_prod(arma_prod) { }
   
   // function call operator that iterates by column
@@ -776,14 +762,12 @@ struct RollProdBatchVec : public Worker {
   
   // initialize with source and destination
   RollProdBatchVec(const NumericVector x, const int n,
-                   const int n_rows_x,
-                   const int width, const arma::vec arma_weights,
-                   const int min_obs,
+                   const int n_rows_x, const int width,
+                   const arma::vec arma_weights, const int min_obs,
                    const bool na_restore, arma::vec& arma_prod)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      min_obs(min_obs),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
       na_restore(na_restore), arma_prod(arma_prod) { }
   
   // function call operator that iterates by index
@@ -850,14 +834,12 @@ struct RollMeanOnlineVec {
   
   // initialize with source and destination
   RollMeanOnlineVec(const NumericVector x, const int n,
-                    const int n_rows_x,
-                    const int width, const arma::vec arma_weights,
-                    const int min_obs,
+                    const int n_rows_x, const int width,
+                    const arma::vec arma_weights, const int min_obs,
                     const bool na_restore, arma::vec& arma_mean)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      min_obs(min_obs),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
       na_restore(na_restore), arma_mean(arma_mean) { }
   
   // function call operator that iterates by index
@@ -991,14 +973,12 @@ struct RollMeanBatchVec : public Worker {
   
   // initialize with source and destination
   RollMeanBatchVec(const NumericVector x, const int n,
-                   const int n_rows_x,
-                   const int width, const arma::vec arma_weights,
-                   const int min_obs,
+                   const int n_rows_x, const int width,
+                   const arma::vec arma_weights, const int min_obs,
                    const bool na_restore, arma::vec& arma_mean)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      min_obs(min_obs),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
       na_restore(na_restore), arma_mean(arma_mean) { }
   
   // function call operator that iterates by index
@@ -1066,14 +1046,12 @@ struct RollMinBatchVec : public Worker {
   
   // initialize with source and destination
   RollMinBatchVec(const NumericVector x, const int n,
-                  const int n_rows_x,
-                  const int width, const arma::vec arma_weights,
-                  const int min_obs,
+                  const int n_rows_x, const int width,
+                  const arma::vec arma_weights, const int min_obs,
                   const bool na_restore, arma::vec& arma_min)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      min_obs(min_obs),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
       na_restore(na_restore), arma_min(arma_min) { }
   
   // function call operator that iterates by index
@@ -1155,14 +1133,12 @@ struct RollMaxBatchVec : public Worker {
   
   // initialize with source and destination
   RollMaxBatchVec(const NumericVector x, const int n,
-                  const int n_rows_x,
-                  const int width, const arma::vec arma_weights,
-                  const int min_obs,
+                  const int n_rows_x, const int width,
+                  const arma::vec arma_weights, const int min_obs,
                   const bool na_restore, arma::vec& arma_max)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      min_obs(min_obs),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
       na_restore(na_restore), arma_max(arma_max) { }
   
   // function call operator that iterates by index
@@ -1246,14 +1222,12 @@ struct RollMedianBatchVec : public Worker {
   
   // initialize with source and destination
   RollMedianBatchVec(const NumericVector x, const int n,
-                     const int n_rows_x,
-                     const int width, const arma::vec arma_weights,
-                     const int min_obs,
+                     const int n_rows_x, const int width,
+                     const arma::vec arma_weights, const int min_obs,
                      const bool na_restore, arma::vec& arma_median)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      min_obs(min_obs),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
       na_restore(na_restore), arma_median(arma_median) { }
   
   // function call operator that iterates by index
@@ -1382,16 +1356,14 @@ struct RollVarOnlineVec {
   
   // initialize with source and destination
   RollVarOnlineVec(const NumericVector x, const int n,
-                   const int n_rows_x,
-                   const int width, const arma::vec arma_weights,
-                   const bool center, const int min_obs,
-                   const bool na_restore,
+                   const int n_rows_x, const int width,
+                   const arma::vec arma_weights, const bool center,
+                   const int min_obs, const bool na_restore,
                    arma::vec& arma_var)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      center(center), min_obs(min_obs),
-      na_restore(na_restore),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), center(center),
+      min_obs(min_obs), na_restore(na_restore),
       arma_var(arma_var) { }
   
   // function call operator that iterates by index
@@ -1576,16 +1548,14 @@ struct RollVarBatchVec : public Worker {
   
   // initialize with source and destination
   RollVarBatchVec(const NumericVector x, const int n,
-                  const int n_rows_x,
-                  const int width, const arma::vec arma_weights,
-                  const bool center, const int min_obs,
-                  const bool na_restore,
+                  const int n_rows_x, const int width,
+                  const arma::vec arma_weights, const bool center,
+                  const int min_obs, const bool na_restore,
                   arma::vec& arma_var)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      center(center), min_obs(min_obs),
-      na_restore(na_restore),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), center(center),
+      min_obs(min_obs), na_restore(na_restore),
       arma_var(arma_var) { }
   
   // function call operator that iterates by index
@@ -1701,16 +1671,14 @@ struct RollSdOnlineVec {
   
   // initialize with source and destination
   RollSdOnlineVec(const NumericVector x, const int n,
-                  const int n_rows_x,
-                  const int width, const arma::vec arma_weights,
-                  const bool center, const int min_obs,
-                  const bool na_restore,
+                  const int n_rows_x, const int width,
+                  const arma::vec arma_weights, const bool center,
+                  const int min_obs, const bool na_restore,
                   arma::vec& arma_sd)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      center(center), min_obs(min_obs),
-      na_restore(na_restore),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), center(center),
+      min_obs(min_obs), na_restore(na_restore),
       arma_sd(arma_sd) { }
   
   // function call operator that iterates by index
@@ -1895,16 +1863,14 @@ struct RollSdBatchVec : public Worker {
   
   // initialize with source and destination
   RollSdBatchVec(const NumericVector x, const int n,
-                 const int n_rows_x,
-                 const int width, const arma::vec arma_weights,
-                 const bool center, const int min_obs,
-                 const bool na_restore,
+                 const int n_rows_x, const int width,
+                 const arma::vec arma_weights, const bool center,
+                 const int min_obs, const bool na_restore,
                  arma::vec& arma_sd)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      center(center), min_obs(min_obs),
-      na_restore(na_restore),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), center(center),
+      min_obs(min_obs), na_restore(na_restore),
       arma_sd(arma_sd) { }
   
   // function call operator that iterates by index
@@ -2021,16 +1987,14 @@ struct RollScaleOnlineVec {
   
   // initialize with source and destination
   RollScaleOnlineVec(const NumericVector x, const int n,
-                     const int n_rows_x,
-                     const int width, const arma::vec arma_weights,
-                     const bool center, const bool scale,
-                     const int min_obs,
+                     const int n_rows_x, const int width,
+                     const arma::vec arma_weights, const bool center,
+                     const bool scale, const int min_obs,
                      const bool na_restore, arma::vec& arma_scale)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      center(center), scale(scale),
-      min_obs(min_obs),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), center(center),
+      scale(scale), min_obs(min_obs),
       na_restore(na_restore), arma_scale(arma_scale) { }
   
   // function call operator that iterates by column
@@ -2258,16 +2222,14 @@ struct RollScaleBatchVec : public Worker {
   
   // initialize with source and destination
   RollScaleBatchVec(const NumericVector x, const int n,
-                    const int n_rows_x,
-                    const int width, const arma::vec arma_weights,
-                    const bool center, const bool scale,
-                    const int min_obs,
+                    const int n_rows_x, const int width,
+                    const arma::vec arma_weights, const bool center,
+                    const bool scale, const int min_obs,
                     const bool na_restore, arma::vec& arma_scale)
     : x(x), n(n),
-      n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
-      center(center), scale(scale),
-      min_obs(min_obs),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), center(center),
+      scale(scale), min_obs(min_obs),
       na_restore(na_restore), arma_scale(arma_scale) { }
   
   // function call operator that iterates by index
@@ -2425,16 +2387,14 @@ struct RollCovOnlineVecXX {
   
   // initialize with source and destination
   RollCovOnlineVecXX(const NumericVector x, const int n,
-                     const int n_rows_xy,
-                     const int width, const arma::vec arma_weights,
-                     const bool center, const bool scale,
-                     const int min_obs,
+                     const int n_rows_xy, const int width,
+                     const arma::vec arma_weights, const bool center,
+                     const bool scale, const int min_obs,
                      const bool na_restore, arma::vec& arma_cov)
     : x(x), n(n),
-      n_rows_xy(n_rows_xy),
-      width(width), arma_weights(arma_weights),
-      center(center), scale(scale),
-      min_obs(min_obs),
+      n_rows_xy(n_rows_xy), width(width),
+      arma_weights(arma_weights), center(center),
+      scale(scale), min_obs(min_obs),
       na_restore(na_restore), arma_cov(arma_cov) { }
   
   // function call operator that iterates by column
@@ -2691,14 +2651,14 @@ struct RollCovOnlineVecXY {
                      const int n, const int n_rows_xy,
                      const int width, const arma::vec arma_weights,
                      const bool center, const bool scale,
-                     const int min_obs,
-                     const bool na_restore, arma::vec& arma_cov)
+                     const int min_obs, const bool na_restore,
+                     arma::vec& arma_cov)
     : x(x), y(y),
       n(n), n_rows_xy(n_rows_xy),
       width(width), arma_weights(arma_weights),
       center(center), scale(scale),
-      min_obs(min_obs),
-      na_restore(na_restore), arma_cov(arma_cov) { }
+      min_obs(min_obs), na_restore(na_restore),
+      arma_cov(arma_cov) { }
   
   // function call operator that iterates by column
   void operator()() {
@@ -2994,16 +2954,14 @@ struct RollCovBatchVecXX : public Worker {
   
   // initialize with source and destination
   RollCovBatchVecXX(const NumericVector x, const int n,
-                    const int n_rows_xy,
-                    const int width, const arma::vec arma_weights,
-                    const bool center, const bool scale,
-                    const int min_obs,
+                    const int n_rows_xy, const int width,
+                    const arma::vec arma_weights, const bool center,
+                    const bool scale, const int min_obs,
                     const bool na_restore, arma::vec& arma_cov)
     : x(x), n(n),
-      n_rows_xy(n_rows_xy),
-      width(width), arma_weights(arma_weights),
-      center(center), scale(scale),
-      min_obs(min_obs),
+      n_rows_xy(n_rows_xy), width(width),
+      arma_weights(arma_weights), center(center),
+      scale(scale), min_obs(min_obs),
       na_restore(na_restore), arma_cov(arma_cov) { }
   
   // function call operator that iterates by index
@@ -3180,14 +3138,14 @@ struct RollCovBatchVecXY : public Worker {
                     const int n, const int n_rows_xy,
                     const int width, const arma::vec arma_weights,
                     const bool center, const bool scale,
-                    const int min_obs,
-                    const bool na_restore, arma::vec& arma_cov)
+                    const int min_obs, const bool na_restore,
+                    arma::vec& arma_cov)
     : x(x), y(y),
       n(n), n_rows_xy(n_rows_xy),
       width(width), arma_weights(arma_weights),
       center(center), scale(scale),
-      min_obs(min_obs),
-      na_restore(na_restore), arma_cov(arma_cov) { }
+      min_obs(min_obs), na_restore(na_restore),
+      arma_cov(arma_cov) { }
   
   // function call operator that iterates by index
   void operator()(std::size_t begin_index, std::size_t end_index) {
@@ -3375,15 +3333,15 @@ struct RollLmInterceptVecFALSE : public Worker {
   
   // initialize with source and destination
   RollLmInterceptVecFALSE(const arma::cube arma_cov, const int n,
-                          const int n_rows_xy,
-                          const int width, const arma::vec arma_n_obs,
-                          const arma::vec arma_sum_w, arma::vec& arma_coef,
-                          arma::vec& arma_rsq, arma::vec& arma_se)
+                          const int n_rows_xy, const int width,
+                          const arma::vec arma_n_obs, const arma::vec arma_sum_w,
+                          arma::vec& arma_coef, arma::vec& arma_rsq,
+                          arma::vec& arma_se)
     : arma_cov(arma_cov), n(n),
-      n_rows_xy(n_rows_xy),
-      width(width), arma_n_obs(arma_n_obs),
-      arma_sum_w(arma_sum_w), arma_coef(arma_coef),
-      arma_rsq(arma_rsq), arma_se(arma_se) { }
+      n_rows_xy(n_rows_xy), width(width),
+      arma_n_obs(arma_n_obs), arma_sum_w(arma_sum_w),
+      arma_coef(arma_coef), arma_rsq(arma_rsq),
+      arma_se(arma_se) { }
   
   // function call operator that iterates by slice
   void operator()(std::size_t begin_slice, std::size_t end_slice) {

@@ -33,6 +33,8 @@ test_roll_y <- lapply(test_data, function(x){x[ , 3:4, drop = FALSE]})
 test_roll_x <- c(test_roll_x, list(test_roll_x[[3]][ , 1]))
 test_roll_y <- c(test_roll_y, list(test_roll_y[[3]][ , 1]))
 test_roll_null <- c(test_roll_x, list(NULL))
+names(test_roll_x[[4]]) <- zoo::index(test_roll_x[[1]])
+names(test_roll_y[[4]]) <- zoo::index(test_roll_y[[1]])
 
 test_zoo_x <- lapply(test_data, function(x){x[ , 1:2]})[-3]
 test_zoo_y <- lapply(test_data, function(x){x[ , 3:4, drop = FALSE]})[-3]

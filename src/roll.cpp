@@ -382,7 +382,7 @@ SEXP roll_any(const SEXP& x, const int& width,
     LogicalVector result(wrap(rcpp_any));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
-    if (names.size() > 1) {
+    if (names.size() > 0) {
       result.attr("names") = names;
     }
     result.attr("index") = xx.attr("index");
@@ -486,7 +486,7 @@ SEXP roll_all(const SEXP& x, const int& width,
     LogicalVector result(wrap(rcpp_all));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
-    if (names.size() > 1) {
+    if (names.size() > 0) {
       result.attr("names") = names;
     }
     result.attr("index") = xx.attr("index");
@@ -607,7 +607,7 @@ SEXP roll_sum(const SEXP& x, const int& width,
     NumericVector result(wrap(arma_sum));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
-    if (names.size() > 1) {
+    if (names.size() > 0) {
       result.attr("names") = names;
     }
     result.attr("index") = xx.attr("index");
@@ -728,7 +728,7 @@ SEXP roll_prod(const SEXP& x, const int& width,
     NumericVector result(wrap(arma_prod));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
-    if (names.size() > 1) {
+    if (names.size() > 0) {
       result.attr("names") = names;
     }
     result.attr("index") = xx.attr("index");
@@ -849,7 +849,7 @@ SEXP roll_mean(const SEXP& x, const int& width,
     NumericVector result(wrap(arma_mean));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
-    if (names.size() > 1) {
+    if (names.size() > 0) {
       result.attr("names") = names;
     }
     result.attr("index") = xx.attr("index");
@@ -970,7 +970,7 @@ SEXP roll_min(const SEXP& x, const int& width,
     NumericVector result(wrap(arma_min));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
-    if (names.size() > 1) {
+    if (names.size() > 0) {
       result.attr("names") = names;
     }
     result.attr("index") = xx.attr("index");
@@ -1091,7 +1091,7 @@ SEXP roll_max(const SEXP& x, const int& width,
     NumericVector result(wrap(arma_max));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
-    if (names.size() > 1) {
+    if (names.size() > 0) {
       result.attr("names") = names;
     }
     result.attr("index") = xx.attr("index");
@@ -1212,7 +1212,7 @@ SEXP roll_median(const SEXP& x, const int& width,
     NumericVector result(wrap(arma_median));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
-    if (names.size() > 1) {
+    if (names.size() > 0) {
       result.attr("names") = names;
     }
     result.attr("index") = xx.attr("index");
@@ -1333,7 +1333,7 @@ SEXP roll_var(const SEXP& x, const int& width,
     NumericVector result(wrap(arma_var));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
-    if (names.size() > 1) {
+    if (names.size() > 0) {
       result.attr("names") = names;
     }
     result.attr("index") = xx.attr("index");
@@ -1454,7 +1454,7 @@ SEXP roll_sd(const SEXP& x, const int& width,
     NumericVector result(wrap(arma_sd));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
-    if (names.size() > 1) {
+    if (names.size() > 0) {
       result.attr("names") = names;
     }
     result.attr("index") = xx.attr("index");
@@ -1576,7 +1576,7 @@ SEXP roll_scale(const SEXP& x, const int& width,
     NumericVector result(wrap(arma_scale));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
-    if (names.size() > 1) {
+    if (names.size() > 0) {
       result.attr("names") = names;
     }
     result.attr("index") = xx.attr("index");
@@ -2658,7 +2658,7 @@ List roll_lm(const SEXP& x, const SEXP& y,
       NumericVector coef(wrap(arma_coef_z));
       coef.attr("dim") = R_NilValue;
       List names = xx.attr("names");
-      if (names.size() > 1) {
+      if (names.size() > 0) {
         coef.attr("names") = names;
       }
       coef.attr("index") = xx.attr("index");
@@ -2667,7 +2667,7 @@ List roll_lm(const SEXP& x, const SEXP& y,
       // create and return a vector object for r-squareds
       NumericVector rsq(wrap(arma_rsq_z));
       rsq.attr("dim") = R_NilValue;
-      if (names.size() > 1) {
+      if (names.size() > 0) {
         rsq.attr("names") = names;
       }
       rsq.attr("index") = xx.attr("index");
@@ -2676,7 +2676,7 @@ List roll_lm(const SEXP& x, const SEXP& y,
       // create and return a vector object for standard errors
       NumericVector se(wrap(arma_se_z));
       se.attr("dim") = R_NilValue;
-      if (names.size() > 1) {
+      if (names.size() > 0) {
         se.attr("names") = names;
       }
       se.attr("index") = xx.attr("index");
