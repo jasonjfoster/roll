@@ -57,7 +57,6 @@ test_that("equal to online algorithm", {
                                      test_complete_obs[d], test_na_restore[e],
                                      test_online[2]))
               
-              # "'online' is not supported"
               expect_equal(roll_min(test_roll_x[[ax]], width,
                                     test_weights[[f]], test_min_obs[c],
                                     test_complete_obs[d], test_na_restore[e],
@@ -76,6 +75,7 @@ test_that("equal to online algorithm", {
                                     test_complete_obs[d], test_na_restore[e],
                                     test_online[2]))
               
+              # "'online' is not supported"
               expect_equal(roll_median(test_roll_x[[ax]], width,
                                        test_weights[[f]], test_min_obs[c],
                                        test_complete_obs[d], test_na_restore[e],
@@ -237,6 +237,7 @@ test_that("equivalent to zoo::rollapply", {
                           zoo::rollapplyr(test_zoo_x[[ax]], width = width,
                                           max, partial = TRUE))
         
+        # "'online' is not supported"
         expect_equivalent(roll_median(test_zoo_x[[ax]], width,
                                       test_weights[[1]], test_min_obs[1],
                                       test_complete_obs[2], test_na_restore[2],
@@ -283,6 +284,7 @@ test_that("equivalent to zoo::rollapply", {
                             rollapplyr_cube(cov, test_zoo_x[[ax]], test_zoo_y[[ay]],
                                             width))
           
+          # "the standard deviation is zero"
           expect_equivalent(roll_cor(test_zoo_x[[ax]], test_zoo_y[[ay]],
                                      width, test_weights[[1]],
                                      test_center[1], test_scale[1],
@@ -296,6 +298,8 @@ test_that("equivalent to zoo::rollapply", {
         for (ay in 1:(length(test_zoo_yy))) {
           for (i in 1:length(test_intercept)) {
             
+            # "essentially perfect fit: summary may be unreliable"
+            # "'complete_obs = FALSE' is not supported"
             expect_equivalent(roll_lm(test_zoo_x[[ax]], test_zoo_yy[[ay]],
                                       width, test_weights[[1]],
                                       test_intercept[i], test_min_obs[1],

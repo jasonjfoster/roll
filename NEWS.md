@@ -2,6 +2,8 @@
 
 ### Changes in roll version 1.1.3 (YYYY-MM-DD)
 
+* Implemented efficient algorithms for `roll_min` and `roll_max`
+
 * Added vector support to each function ([#20](https://github.com/jjf234/roll/issues/20))
 
 ### Changes in roll version 1.1.2 (2019-02-06)

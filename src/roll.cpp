@@ -1019,12 +1019,11 @@ SEXP roll_max(const SEXP& x, const int& width,
     // compute rolling maximums
     if (online) {
       
-      warning("'online' is not supported");
-      RollMaxBatchMat roll_max_batch(xx, n, n_rows_x, n_cols_x, width,
-                                     weights, min_obs,
-                                     arma_any_na, na_restore,
-                                     arma_max);
-      parallelFor(0, n_rows_x * n_cols_x, roll_max_batch);
+      RollMaxOnlineMat roll_max_online(xx, n, n_rows_x, n_cols_x, width,
+                                       weights, min_obs,
+                                       arma_any_na, na_restore,
+                                       arma_max);
+      parallelFor(0, n_cols_x, roll_max_online);
       
     } else {
       
@@ -1070,12 +1069,11 @@ SEXP roll_max(const SEXP& x, const int& width,
     // compute rolling maximums
     if (online) {
       
-      warning("'online' is not supported");
-      RollMaxBatchVec roll_max_batch(xx, n, n_rows_x, width,
-                                     weights, min_obs,
-                                     na_restore,
-                                     arma_max);
-      parallelFor(0, n_rows_x, roll_max_batch);
+      RollMaxOnlineVec roll_max_online(xx, n, n_rows_x, width,
+                                       weights, min_obs,
+                                       na_restore,
+                                       arma_max);
+      roll_max_online();
       
     } else {
       
