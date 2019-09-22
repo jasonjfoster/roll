@@ -296,7 +296,7 @@ roll_max <- function(x, width, weights = rep(1, width),
 ##' @export
 roll_min <- function(x, width, weights = rep(1, width),
                      min_obs = width, complete_obs = FALSE, na_restore = FALSE,
-                     online = FALSE) {
+                     online = TRUE) {
   return(.Call(`_roll_roll_min`,
                x,
                as.integer(width),

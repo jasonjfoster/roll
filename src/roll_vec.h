@@ -1032,6 +1032,118 @@ struct RollMeanBatchVec : public Worker {
   
 };
 
+// 'Worker' function for computing rolling minimums using an online algorithm
+struct RollMinOnlineVec {
+  
+  const RVector<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const bool na_restore;
+  arma::vec& arma_min;          // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollMinOnlineVec(const NumericVector x, const int n,
+                   const int n_rows_x, const int width,
+                   const arma::vec arma_weights, const int min_obs,
+                   const bool na_restore, arma::vec& arma_min)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
+      na_restore(na_restore), arma_min(arma_min) { }
+  
+  // function call operator that iterates by index
+  void operator()() {
+    
+    int n_obs = 0;
+    long double min_x = 0;
+    std::deque<int> deq(width);
+    
+    for (int i = 0; i <= n_rows_x; ++i) {
+      
+      // expanding window
+      if (i < width) {
+        
+        // don't include if missing value
+        if (!std::isnan(x[i])) {
+          n_obs += 1;
+        }
+        
+        while (!deq.empty() && (std::isnan(x[deq.back()]) || (x[i] <= x[deq.back()]))) {
+          deq.pop_back();
+        }
+        
+        if (!std::isnan(x[i])) {
+          deq.push_back(i);
+        }
+        
+        if (width > 1) {
+          min_x = x[deq.front()];
+        } else {
+          min_x = x[i];
+        }
+        
+      }
+      
+      // rolling window
+      if (i >= width) {
+        
+        // don't include if missing value
+        if (!std::isnan(x[i]) && std::isnan(x[i - width])) {
+          
+          n_obs += 1;
+          
+        } else if (std::isnan(x[i]) && !std::isnan(x[i - width])) {
+          
+          n_obs -= 1;
+          
+        }
+        
+        while (!deq.empty() && (deq.front() <= i - width)) {
+          deq.pop_front();
+        }
+        
+        while (!deq.empty() && (std::isnan(x[deq.back()]) || (x[i] <= x[deq.back()]))) {
+          deq.pop_back();
+        }
+        
+        if (!std::isnan(x[i])) {
+          deq.push_back(i);
+        }
+        
+        if (width > 1) {
+          min_x = x[deq.front()];
+        } else {
+          min_x = x[i];
+        }
+        
+      }
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+        
+        // compute the minimum
+        if (n_obs >= min_obs) {
+          arma_min[i] = min_x;
+        } else {
+          arma_min[i] = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        arma_min[i] = x[i];
+        
+      }
+      
+    }
+    
+  }
+  
+};
+
 // 'Worker' function for computing rolling minimums using a standard algorithm
 struct RollMinBatchVec : public Worker {
   

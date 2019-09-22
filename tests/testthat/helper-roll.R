@@ -1,5 +1,5 @@
 n_vars <- 4
-n_obs <- 20
+n_obs <- 20 # 2000
 lambda <- 0.9
 
 # test data

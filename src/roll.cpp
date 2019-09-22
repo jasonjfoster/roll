@@ -890,7 +890,7 @@ SEXP roll_min(const SEXP& x, const int& width,
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
     if (complete_obs) {
-      arma_any_na = any_na_x(x);
+      arma_any_na = any_na_x(xx);
     } else {
       arma_any_na.fill(0);
     }
@@ -898,12 +898,11 @@ SEXP roll_min(const SEXP& x, const int& width,
     // compute rolling minimums
     if (online) {
       
-      warning("'online' is not supported");
-      RollMinBatchMat roll_min_batch(xx, n, n_rows_x, n_cols_x, width,
-                                     weights, min_obs,
-                                     arma_any_na, na_restore,
-                                     arma_min);
-      parallelFor(0, n_rows_x * n_cols_x, roll_min_batch);
+      RollMinOnlineMat roll_min_online(xx, n, n_rows_x, n_cols_x, width,
+                                       weights, min_obs,
+                                       arma_any_na, na_restore,
+                                       arma_min);
+      parallelFor(0, n_cols_x, roll_min_online);
       
     } else {
       
@@ -949,16 +948,15 @@ SEXP roll_min(const SEXP& x, const int& width,
     // compute rolling minimums
     if (online) {
       
-      warning("'online' is not supported");
-      RollMinBatchVec roll_min_batch(x, n, n_rows_x, width,
-                                     weights, min_obs,
-                                     na_restore,
-                                     arma_min);
-      parallelFor(0, n_rows_x, roll_min_batch);
+      RollMinOnlineVec roll_min_online(xx, n, n_rows_x, width,
+                                       weights, min_obs,
+                                       na_restore,
+                                       arma_min);
+      roll_min_online();
       
     } else {
       
-      RollMinBatchVec roll_min_batch(x, n, n_rows_x, width,
+      RollMinBatchVec roll_min_batch(xx, n, n_rows_x, width,
                                      weights, min_obs,
                                      na_restore,
                                      arma_min);

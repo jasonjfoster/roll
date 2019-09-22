@@ -1115,6 +1115,138 @@ struct RollMeanBatchMat : public Worker {
   
 };
 
+// 'Worker' function for computing rolling minimums using an online algorithm
+struct RollMinOnlineMat : public Worker {
+  
+  const RMatrix<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int n_cols_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const arma::uvec arma_any_na;
+  const bool na_restore;
+  arma::mat& arma_min;          // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollMinOnlineMat(const NumericMatrix x, const int n,
+                   const int n_rows_x, const int n_cols_x,
+                   const int width, const arma::vec arma_weights,
+                   const int min_obs, const arma::uvec arma_any_na,
+                   const bool na_restore, arma::mat& arma_min)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), n_cols_x(n_cols_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs), arma_any_na(arma_any_na),
+      na_restore(na_restore), arma_min(arma_min) { }
+  
+  // function call operator that iterates by column
+  void operator()(std::size_t begin_col, std::size_t end_col) {
+    for (std::size_t j = begin_col; j < end_col; j++) {
+      
+      int n_obs = 0;
+      long double min_x = 0;
+      std::deque<int> deq(width);
+      
+      for (int i = 0; i < n_rows_x; i++) {
+        
+        // expanding window
+        if (i < width) {
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
+            n_obs += 1;
+          }
+          
+          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
+            
+            while (!deq.empty() && ((arma_any_na[deq.back()] != 0) ||
+                   std::isnan(x(deq.back(), j)) || (x(i, j) <= x(deq.back(), j)))) {
+              
+              deq.pop_back();
+              
+            }
+            
+            deq.push_back(i);
+            
+          }
+          
+          if (width > 1) {
+            min_x = x(deq.front(), j);
+          } else {
+            min_x = x(i, j);
+          }
+          
+        }
+        
+        // rolling window
+        if (i >= width) {
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) &&
+              ((arma_any_na[i - width] != 0) || std::isnan(x(i - width, j)))) {
+            
+            n_obs += 1;
+            
+          } else if (((arma_any_na[i] != 0) || std::isnan(x(i, j))) &&
+            (arma_any_na[i - width] == 0) && !std::isnan(x(i - width, j))) {
+            
+            n_obs -= 1;
+            
+          }
+          
+          while (!deq.empty() && (deq.front() <= i - width)) {
+            deq.pop_front();
+          }
+          
+          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
+            
+            while (!deq.empty() && ((arma_any_na[deq.back()] != 0) ||
+                   std::isnan(x(deq.back(), j)) || (x(i, j) <= x(deq.back(), j)))) {
+              
+              deq.pop_back();
+              
+            }
+            
+            deq.push_back(i);
+            
+          }
+          
+          if (width > 1) {
+            min_x = x(deq.front(), j);
+          } else {
+            min_x = x(i, j);
+          }
+          
+        }
+        
+        // don't compute if missing value and 'na_restore' argument is TRUE
+        if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+          
+          // compute the minimum
+          if (n_obs >= min_obs) {
+            arma_min(i, j) = min_x;
+          } else {
+            arma_min(i, j) = NA_REAL;
+          }
+          
+        } else {
+          
+          // can be either NA or NaN
+          arma_min(i, j) = x(i, j);
+          
+        }
+        
+      }
+      
+    }
+  }
+  
+};
+
 // 'Worker' function for computing rolling minimums using a standard algorithm
 struct RollMinBatchMat : public Worker {
   
@@ -1255,15 +1387,20 @@ struct RollMaxOnlineMat : public Worker {
           if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
             n_obs += 1;
           }
-
-          while (!deq.empty() && (std::isnan(x(deq.back(), j)) || (x(i, j) >= x(deq.back(), j)))) {
-            deq.pop_back();
-          }
-
+          
           if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
+            
+            while (!deq.empty() && ((arma_any_na[deq.back()] != 0) || 
+                   std::isnan(x(deq.back(), j)) || (x(i, j) >= x(deq.back(), j)))) {
+              
+              deq.pop_back();
+              
+            }
+            
             deq.push_back(i);
+            
           }
-
+          
           if (width > 1) {
             max_x = x(deq.front(), j);
           } else {
@@ -1288,19 +1425,23 @@ struct RollMaxOnlineMat : public Worker {
             n_obs -= 1;
             
           }
-
+          
+          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
+            
+            while (!deq.empty() && ((arma_any_na[deq.back()] != 0) ||
+                   std::isnan(x(deq.back(), j)) || (x(i, j) >= x(deq.back(), j)))) {
+              
+              deq.pop_back();
+              
+            }
+            
+            deq.push_back(i);
+          }
+          
           while (!deq.empty() && (deq.front() <= i - width)) {
             deq.pop_front();
           }
-
-          while (!deq.empty() && (std::isnan(x(deq.back(), j)) || (x(i, j) >= x(deq.back(), j)))) {
-            deq.pop_back();
-          }
-
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
-            deq.push_back(i);
-          }
-
+          
           if (width > 1) {
             max_x = x(deq.front(), j);
           } else {
