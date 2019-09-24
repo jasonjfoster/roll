@@ -188,9 +188,9 @@ roll_mean <- function(x, width, weights = rep(1, width),
   ))
 }
 
-##' Rolling Medians
+##' Rolling Minimums
 ##'
-##' A function for computing rolling medians of time-series data.
+##' A function for computing rolling minimums of time-series data.
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -201,23 +201,23 @@ roll_mean <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling medians.
+##' @return An object of the same class and dimension as \code{x} with the rolling minimums.
 ##' @examples
 ##' n_vars <- 3
 ##' n_obs <- 15
 ##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' 
-##' # rolling medians
-##' result <- roll_median(x, 5)
+##' # rolling minimums
+##' result <- roll_min(x, 5)
 ##' 
-##' # rolling medians with exponential decay
+##' # rolling minimums with exponential decay
 ##' weights <- 0.9 ^ (5:1)
-##' result <- roll_median(x, 5, weights)
+##' result <- roll_min(x, 5, weights)
 ##' @export
-roll_median <- function(x, width, weights = rep(1, width),
-                      min_obs = width, complete_obs = FALSE, na_restore = FALSE,
-                      online = FALSE) {
-  return(.Call(`_roll_roll_median`,
+roll_min <- function(x, width, weights = rep(1, width),
+                     min_obs = width, complete_obs = FALSE, na_restore = FALSE,
+                     online = TRUE) {
+  return(.Call(`_roll_roll_min`,
                x,
                as.integer(width),
                as.numeric(weights),
@@ -268,9 +268,9 @@ roll_max <- function(x, width, weights = rep(1, width),
   ))
 }
 
-##' Rolling Minimums
+##' Rolling Medians
 ##'
-##' A function for computing rolling minimums of time-series data.
+##' A function for computing rolling medians of time-series data.
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -281,23 +281,23 @@ roll_max <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling minimums.
+##' @return An object of the same class and dimension as \code{x} with the rolling medians.
 ##' @examples
 ##' n_vars <- 3
 ##' n_obs <- 15
 ##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
 ##' 
-##' # rolling minimums
-##' result <- roll_min(x, 5)
+##' # rolling medians
+##' result <- roll_median(x, 5)
 ##' 
-##' # rolling minimums with exponential decay
+##' # rolling medians with exponential decay
 ##' weights <- 0.9 ^ (5:1)
-##' result <- roll_min(x, 5, weights)
+##' result <- roll_median(x, 5, weights)
 ##' @export
-roll_min <- function(x, width, weights = rep(1, width),
-                     min_obs = width, complete_obs = FALSE, na_restore = FALSE,
-                     online = TRUE) {
-  return(.Call(`_roll_roll_min`,
+roll_median <- function(x, width, weights = rep(1, width),
+                      min_obs = width, complete_obs = FALSE, na_restore = FALSE,
+                      online = FALSE) {
+  return(.Call(`_roll_roll_median`,
                x,
                as.integer(width),
                as.numeric(weights),

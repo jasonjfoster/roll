@@ -2048,20 +2048,20 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
     // compute rolling covariances
     if (status && online) {
       
-      RollCovOnlineLm roll_cov_online(data, n, n_rows_xy, n_cols_x, width,
-                                      weights, intercept, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_n_obs, arma_sum_w, arma_mean,
-                                      arma_cov);
+      RollCovOnlineMatLm roll_cov_online(data, n, n_rows_xy, n_cols_x, width,
+                                         weights, intercept, min_obs,
+                                         arma_any_na, na_restore,
+                                         arma_n_obs, arma_sum_w, arma_mean,
+                                         arma_cov);
       parallelFor(0, n_cols_x, roll_cov_online);
       
     } else {
       
-      RollCovBatchLm roll_cov_batch(data, n, n_rows_xy, n_cols_x, width,
-                                    weights, intercept, min_obs,
-                                    arma_any_na, na_restore,
-                                    arma_n_obs, arma_sum_w, arma_mean,
-                                    arma_cov);
+      RollCovBatchMatLm roll_cov_batch(data, n, n_rows_xy, n_cols_x, width,
+                                       weights, intercept, min_obs,
+                                       arma_any_na, na_restore,
+                                       arma_n_obs, arma_sum_w, arma_mean,
+                                       arma_cov);
       parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_batch);
       
     }
@@ -2071,9 +2071,9 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
       arma::mat arma_coef(n_rows_xy, n_cols_x);
       arma::mat arma_se(n_rows_xy, n_cols_x);
-      RollLmInterceptTRUE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
-                                         arma_n_obs, arma_sum_w, arma_mean,
-                                         arma_coef, arma_rsq, arma_se);
+      RollMatLmInterceptTRUE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
+                                            arma_n_obs, arma_sum_w, arma_mean,
+                                            arma_coef, arma_rsq, arma_se);
       parallelFor(0, n_rows_xy, roll_lm_slices);
       
       result = List::create(Named("coefficients") = arma_coef,
@@ -2084,7 +2084,7 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
       arma::mat arma_coef(n_rows_xy, n_cols_x - 1);
       arma::mat arma_se(n_rows_xy, n_cols_x - 1);
-      RollLmInterceptMatFALSE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
+      RollMatLmInterceptFALSE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
                                              arma_n_obs, arma_sum_w,
                                              arma_coef, arma_rsq, arma_se);
       parallelFor(0, n_rows_xy, roll_lm_slices);
@@ -2146,20 +2146,20 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
     // compute rolling covariances
     if (status && online) {
       
-      RollCovOnlineLm roll_cov_online(data, n, n_rows_xy, n_cols_x, width,
-                                      weights, intercept, min_obs,
-                                      arma_any_na, na_restore,
-                                      arma_n_obs, arma_sum_w, arma_mean,
-                                      arma_cov);
+      RollCovOnlineMatLm roll_cov_online(data, n, n_rows_xy, n_cols_x, width,
+                                         weights, intercept, min_obs,
+                                         arma_any_na, na_restore,
+                                         arma_n_obs, arma_sum_w, arma_mean,
+                                         arma_cov);
       parallelFor(0, n_cols_x, roll_cov_online);
       
     } else {
       
-      RollCovBatchLm roll_cov_batch(data, n, n_rows_xy, n_cols_x, width,
-                                    weights, intercept, min_obs,
-                                    arma_any_na, na_restore,
-                                    arma_n_obs, arma_sum_w, arma_mean,
-                                    arma_cov);
+      RollCovBatchMatLm roll_cov_batch(data, n, n_rows_xy, n_cols_x, width,
+                                       weights, intercept, min_obs,
+                                       arma_any_na, na_restore,
+                                       arma_n_obs, arma_sum_w, arma_mean,
+                                       arma_cov);
       parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_batch);
       
     }
@@ -2169,9 +2169,9 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
       arma::mat arma_coef(n_rows_xy, n_cols_x);
       arma::mat arma_se(n_rows_xy, n_cols_x);
-      RollLmInterceptTRUE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
-                                         arma_n_obs, arma_sum_w, arma_mean,
-                                         arma_coef, arma_rsq, arma_se);
+      RollMatLmInterceptTRUE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
+                                            arma_n_obs, arma_sum_w, arma_mean,
+                                            arma_coef, arma_rsq, arma_se);
       parallelFor(0, n_rows_xy, roll_lm_slices);
       
       result = List::create(Named("coefficients") = arma_coef,
@@ -2182,7 +2182,7 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
       arma::vec arma_coef(n_rows_xy);
       arma::vec arma_se(n_rows_xy);
-      RollLmInterceptVecFALSE roll_lm_slices(arma_cov, n, n_rows_xy, width,
+      RollVecLmInterceptFALSE roll_lm_slices(arma_cov, n, n_rows_xy, width,
                                              arma_n_obs, arma_sum_w,
                                              arma_coef, arma_rsq, arma_se);
       parallelFor(0, n_rows_xy, roll_lm_slices);

@@ -1059,7 +1059,7 @@ struct RollMinOnlineVec {
     
     int n_obs = 0;
     long double min_x = 0;
-    std::deque<int> deq(width);
+    std::deque<int> deck(width);
     
     for (int i = 0; i <= n_rows_x; ++i) {
       
@@ -1071,16 +1071,18 @@ struct RollMinOnlineVec {
           n_obs += 1;
         }
         
-        while (!deq.empty() && (std::isnan(x[deq.back()]) || (x[i] <= x[deq.back()]))) {
-          deq.pop_back();
-        }
-        
         if (!std::isnan(x[i])) {
-          deq.push_back(i);
+          
+          while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] <= x[deck.back()]))) {
+            deck.pop_back();
+          }
+          
+          deck.push_back(i);
+          
         }
         
         if (width > 1) {
-          min_x = x[deq.front()];
+          min_x = x[deck.front()];
         } else {
           min_x = x[i];
         }
@@ -1101,20 +1103,22 @@ struct RollMinOnlineVec {
           
         }
         
-        while (!deq.empty() && (deq.front() <= i - width)) {
-          deq.pop_front();
-        }
-        
-        while (!deq.empty() && (std::isnan(x[deq.back()]) || (x[i] <= x[deq.back()]))) {
-          deq.pop_back();
-        }
-        
         if (!std::isnan(x[i])) {
-          deq.push_back(i);
+          
+          while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] <= x[deck.back()]))) {
+            deck.pop_back();
+          }
+          
+          deck.push_back(i);
+          
+        }
+        
+        while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+          deck.pop_front();
         }
         
         if (width > 1) {
-          min_x = x[deq.front()];
+          min_x = x[deck.front()];
         } else {
           min_x = x[i];
         }
@@ -1258,7 +1262,7 @@ struct RollMaxOnlineVec {
     
     int n_obs = 0;
     long double max_x = 0;
-    std::deque<int> deq(width);
+    std::deque<int> deck(width);
     
     for (int i = 0; i <= n_rows_x; ++i) {
       
@@ -1270,16 +1274,18 @@ struct RollMaxOnlineVec {
           n_obs += 1;
         }
         
-        while (!deq.empty() && (std::isnan(x[deq.back()]) || (x[i] >= x[deq.back()]))) {
-          deq.pop_back();
-        }
-        
         if (!std::isnan(x[i])) {
-          deq.push_back(i);
+          
+          while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] >= x[deck.back()]))) {
+            deck.pop_back();
+          }
+          
+          deck.push_back(i);
+          
         }
         
         if (width > 1) {
-          max_x = x[deq.front()];
+          max_x = x[deck.front()];
         } else {
           max_x = x[i];
         }
@@ -1300,20 +1306,22 @@ struct RollMaxOnlineVec {
           
         }
         
-        while (!deq.empty() && (deq.front() <= i - width)) {
-          deq.pop_front();
-        }
-        
-        while (!deq.empty() && (std::isnan(x[deq.back()]) || (x[i] >= x[deq.back()]))) {
-          deq.pop_back();
-        }
-        
         if (!std::isnan(x[i])) {
-          deq.push_back(i);
+          
+          while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] >= x[deck.back()]))) {
+            deck.pop_back();
+          }
+          
+          deck.push_back(i);
+          
+        }
+        
+        while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+          deck.pop_front();
         }
         
         if (width > 1) {
-          max_x = x[deq.front()];
+          max_x = x[deck.front()];
         } else {
           max_x = x[i];
         }
@@ -3543,7 +3551,7 @@ struct RollCovBatchVecXY : public Worker {
 };
 
 // 'Worker' function for rolling linear models
-struct RollLmInterceptVecFALSE : public Worker {
+struct RollVecLmInterceptFALSE : public Worker {
   
   const arma::cube arma_cov;    // source
   const int n;
@@ -3556,7 +3564,7 @@ struct RollLmInterceptVecFALSE : public Worker {
   arma::vec& arma_se;
   
   // initialize with source and destination
-  RollLmInterceptVecFALSE(const arma::cube arma_cov, const int n,
+  RollVecLmInterceptFALSE(const arma::cube arma_cov, const int n,
                           const int n_rows_xy, const int width,
                           const arma::vec arma_n_obs, const arma::vec arma_sum_w,
                           arma::vec& arma_coef, arma::vec& arma_rsq,

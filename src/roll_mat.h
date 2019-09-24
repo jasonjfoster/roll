@@ -1147,7 +1147,7 @@ struct RollMinOnlineMat : public Worker {
       
       int n_obs = 0;
       long double min_x = 0;
-      std::deque<int> deq(width);
+      std::deque<int> deck(width);
       
       for (int i = 0; i < n_rows_x; i++) {
         
@@ -1162,19 +1162,19 @@ struct RollMinOnlineMat : public Worker {
           
           if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
             
-            while (!deq.empty() && ((arma_any_na[deq.back()] != 0) ||
-                   std::isnan(x(deq.back(), j)) || (x(i, j) <= x(deq.back(), j)))) {
+            while (!deck.empty() && ((arma_any_na[deck.back()] != 0) ||
+                   std::isnan(x(deck.back(), j)) || (x(i, j) <= x(deck.back(), j)))) {
               
-              deq.pop_back();
+              deck.pop_back();
               
             }
             
-            deq.push_back(i);
+            deck.push_back(i);
             
           }
           
           if (width > 1) {
-            min_x = x(deq.front(), j);
+            min_x = x(deck.front(), j);
           } else {
             min_x = x(i, j);
           }
@@ -1198,25 +1198,25 @@ struct RollMinOnlineMat : public Worker {
             
           }
           
-          while (!deq.empty() && (deq.front() <= i - width)) {
-            deq.pop_front();
-          }
-          
           if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
             
-            while (!deq.empty() && ((arma_any_na[deq.back()] != 0) ||
-                   std::isnan(x(deq.back(), j)) || (x(i, j) <= x(deq.back(), j)))) {
+            while (!deck.empty() && ((arma_any_na[deck.back()] != 0) ||
+                   std::isnan(x(deck.back(), j)) || (x(i, j) <= x(deck.back(), j)))) {
               
-              deq.pop_back();
+              deck.pop_back();
               
             }
             
-            deq.push_back(i);
+            deck.push_back(i);
             
           }
           
+          while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+            deck.pop_front();
+          }
+          
           if (width > 1) {
-            min_x = x(deq.front(), j);
+            min_x = x(deck.front(), j);
           } else {
             min_x = x(i, j);
           }
@@ -1375,7 +1375,7 @@ struct RollMaxOnlineMat : public Worker {
       
       int n_obs = 0;
       long double max_x = 0;
-      std::deque<int> deq(width);
+      std::deque<int> deck(width);
       
       for (int i = 0; i < n_rows_x; i++) {
         
@@ -1390,19 +1390,19 @@ struct RollMaxOnlineMat : public Worker {
           
           if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
             
-            while (!deq.empty() && ((arma_any_na[deq.back()] != 0) || 
-                   std::isnan(x(deq.back(), j)) || (x(i, j) >= x(deq.back(), j)))) {
+            while (!deck.empty() && ((arma_any_na[deck.back()] != 0) || 
+                   std::isnan(x(deck.back(), j)) || (x(i, j) >= x(deck.back(), j)))) {
               
-              deq.pop_back();
+              deck.pop_back();
               
             }
             
-            deq.push_back(i);
+            deck.push_back(i);
             
           }
           
           if (width > 1) {
-            max_x = x(deq.front(), j);
+            max_x = x(deck.front(), j);
           } else {
             max_x = x(i, j);
           }
@@ -1428,22 +1428,23 @@ struct RollMaxOnlineMat : public Worker {
           
           if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
             
-            while (!deq.empty() && ((arma_any_na[deq.back()] != 0) ||
-                   std::isnan(x(deq.back(), j)) || (x(i, j) >= x(deq.back(), j)))) {
+            while (!deck.empty() && ((arma_any_na[deck.back()] != 0) ||
+                   std::isnan(x(deck.back(), j)) || (x(i, j) >= x(deck.back(), j)))) {
               
-              deq.pop_back();
+              deck.pop_back();
               
             }
             
-            deq.push_back(i);
+            deck.push_back(i);
+            
           }
           
-          while (!deq.empty() && (deq.front() <= i - width)) {
-            deq.pop_front();
+          while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+            deck.pop_front();
           }
           
           if (width > 1) {
-            max_x = x(deq.front(), j);
+            max_x = x(deck.front(), j);
           } else {
             max_x = x(i, j);
           }
@@ -3881,7 +3882,7 @@ struct RollCovBatchMatXY : public Worker {
 };
 
 // 'Worker' function for computing rolling covariances using an online algorithm
-struct RollCovOnlineLm : public Worker {
+struct RollCovOnlineMatLm : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -3899,13 +3900,13 @@ struct RollCovOnlineLm : public Worker {
   arma::cube& arma_cov;
   
   // initialize with source and destination
-  RollCovOnlineLm(const NumericMatrix x, const int n,
-                  const int n_rows_xy, const int n_cols_x,
-                  const int width, const arma::vec arma_weights,
-                  const bool intercept, const int min_obs,
-                  const arma::uvec arma_any_na, const bool na_restore,
-                  arma::vec& arma_n_obs, arma::vec& arma_sum_w,
-                  arma::mat& arma_mean, arma::cube& arma_cov)
+  RollCovOnlineMatLm(const NumericMatrix x, const int n,
+                     const int n_rows_xy, const int n_cols_x,
+                     const int width, const arma::vec arma_weights,
+                     const bool intercept, const int min_obs,
+                     const arma::uvec arma_any_na, const bool na_restore,
+                     arma::vec& arma_n_obs, arma::vec& arma_sum_w,
+                     arma::mat& arma_mean, arma::cube& arma_cov)
     : x(x), n(n),
       n_rows_xy(n_rows_xy), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
@@ -4172,7 +4173,7 @@ struct RollCovOnlineLm : public Worker {
 };
 
 // 'Worker' function for computing rolling covariances using a standard algorithm
-struct RollCovBatchLm : public Worker {
+struct RollCovBatchMatLm : public Worker {
   
   const RMatrix<double> x;      // source
   const int n;
@@ -4190,13 +4191,13 @@ struct RollCovBatchLm : public Worker {
   arma::cube& arma_cov;
   
   // initialize with source and destination
-  RollCovBatchLm(const NumericMatrix x, const int n,
-                 const int n_rows_xy, const int n_cols_x,
-                 const int width, const arma::vec arma_weights,
-                 const bool intercept, const int min_obs,
-                 const arma::uvec arma_any_na, const bool na_restore,
-                 arma::vec& arma_n_obs, arma::vec& arma_sum_w,
-                 arma::mat& arma_mean, arma::cube& arma_cov)
+  RollCovBatchMatLm(const NumericMatrix x, const int n,
+                    const int n_rows_xy, const int n_cols_x,
+                    const int width, const arma::vec arma_weights,
+                    const bool intercept, const int min_obs,
+                    const arma::uvec arma_any_na, const bool na_restore,
+                    arma::vec& arma_n_obs, arma::vec& arma_sum_w,
+                    arma::mat& arma_mean, arma::cube& arma_cov)
     : x(x), n(n),
       n_rows_xy(n_rows_xy), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
@@ -4339,7 +4340,7 @@ struct RollCovBatchLm : public Worker {
 };
 
 // 'Worker' function for rolling linear models
-struct RollLmInterceptTRUE : public Worker {
+struct RollMatLmInterceptTRUE : public Worker {
   
   const arma::cube arma_cov;    // source
   const int n;
@@ -4354,12 +4355,12 @@ struct RollLmInterceptTRUE : public Worker {
   arma::mat& arma_se;
   
   // initialize with source and destination
-  RollLmInterceptTRUE(const arma::cube arma_cov, const int n,
-                      const int n_rows_xy, const int n_cols_x,
-                      const int width, const arma::vec arma_n_obs,
-                      const arma::vec arma_sum_w, const arma::mat arma_mean,
-                      arma::mat& arma_coef, arma::vec& arma_rsq,
-                      arma::mat& arma_se)
+  RollMatLmInterceptTRUE(const arma::cube arma_cov, const int n,
+                         const int n_rows_xy, const int n_cols_x,
+                         const int width, const arma::vec arma_n_obs,
+                         const arma::vec arma_sum_w, const arma::mat arma_mean,
+                         arma::mat& arma_coef, arma::vec& arma_rsq,
+                         arma::mat& arma_se)
     : arma_cov(arma_cov), n(n),
       n_rows_xy(n_rows_xy), n_cols_x(n_cols_x),
       width(width), arma_n_obs(arma_n_obs),
@@ -4464,7 +4465,7 @@ struct RollLmInterceptTRUE : public Worker {
 };
 
 // 'Worker' function for rolling linear models
-struct RollLmInterceptMatFALSE : public Worker {
+struct RollMatLmInterceptFALSE : public Worker {
   
   const arma::cube arma_cov;    // source
   const int n;
@@ -4478,7 +4479,7 @@ struct RollLmInterceptMatFALSE : public Worker {
   arma::mat& arma_se;
   
   // initialize with source and destination
-  RollLmInterceptMatFALSE(const arma::cube arma_cov, const int n,
+  RollMatLmInterceptFALSE(const arma::cube arma_cov, const int n,
                           const int n_rows_xy, const int n_cols_x,
                           const int width, const arma::vec arma_n_obs,
                           const arma::vec arma_sum_w, arma::mat& arma_coef,
