@@ -1188,7 +1188,7 @@ struct RollMinBatchVec : public Worker {
                   x_subset.begin());
         
         // similar to R's sort with 'index.return = TRUE'
-        arma::ivec sort_ix = stl_sort_index(x_subset);
+        arma::ivec sort_ix = stl_sort_min(x_subset);
         
         int k = 0;
         int count = 0;
@@ -1391,7 +1391,7 @@ struct RollMaxBatchVec : public Worker {
                   x_subset.begin());
         
         // similar to R's sort with 'index.return = TRUE'
-        arma::ivec sort_ix = stl_sort_index(x_subset);
+        arma::ivec sort_ix = stl_sort_max(x_subset);
         
         int k = 0;
         int count = 0;
@@ -1409,9 +1409,7 @@ struct RollMaxBatchVec : public Worker {
             
             // first element of sorted array
             // note: 'weights' must be greater than 0
-            if (n_obs == 0) {
-              max_x = x_subset[k];
-            }
+            max_x = x_subset[k];
             
             n_obs += 1;
             
@@ -1432,6 +1430,404 @@ struct RollMaxBatchVec : public Worker {
         
         // can be either NA or NaN
         arma_max[i] = x[i];
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling index of minimums using an online algorithm
+struct RollIdxMinOnlineVec {
+  
+  const RVector<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const bool na_restore;
+  RVector<int> rcpp_idxmin;     // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollIdxMinOnlineVec(const NumericVector x, const int n,
+                      const int n_rows_x, const int width,
+                      const arma::vec arma_weights, const int min_obs,
+                      const bool na_restore, IntegerVector rcpp_idxmin)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
+      na_restore(na_restore), rcpp_idxmin(rcpp_idxmin) { }
+  
+  // function call operator that iterates by index
+  void operator()() {
+    
+    int n_obs = 0;
+    int idxmin_x = 0;
+    std::deque<int> deck(width);
+    
+    for (int i = 0; i <= n_rows_x; ++i) {
+      
+      // expanding window
+      if (i < width) {
+        
+        // don't include if missing value
+        if (!std::isnan(x[i])) {
+          n_obs += 1;
+        }
+        
+        if (!std::isnan(x[i])) {
+          
+          while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] < x[deck.back()]))) {
+            deck.pop_back();
+          }
+          
+          deck.push_back(i);
+          
+        }
+        
+        idxmin_x = deck.front() + 1;
+        
+      }
+      
+      // rolling window
+      if (i >= width) {
+        
+        // don't include if missing value
+        if (!std::isnan(x[i]) && std::isnan(x[i - width])) {
+          
+          n_obs += 1;
+          
+        } else if (std::isnan(x[i]) && !std::isnan(x[i - width])) {
+          
+          n_obs -= 1;
+          
+        }
+        
+        if (!std::isnan(x[i])) {
+          
+          while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] < x[deck.back()]))) {
+            deck.pop_back();
+          }
+          
+          deck.push_back(i);
+          
+        }
+        
+        while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+          deck.pop_front();
+        }
+        
+        if (width > 1) {
+          idxmin_x = width - (i - deck.front());
+        } else {
+          idxmin_x = deck.front();
+        }
+        
+      }
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+        
+        // compute the index of minimum
+        if (n_obs >= min_obs) {
+          rcpp_idxmin[i] = idxmin_x;
+        } else {
+          rcpp_idxmin[i] = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        rcpp_idxmin[i] = x[i];
+        
+      }
+      
+    }
+    
+  }
+  
+};
+
+// 'Worker' function for computing rolling index of minimums using a standard algorithm
+struct RollIdxMinBatchVec : public Worker {
+  
+  const RVector<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const bool na_restore;
+  RVector<int> rcpp_idxmin;     // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollIdxMinBatchVec(const NumericVector x, const int n,
+                     const int n_rows_x, const int width,
+                     const arma::vec arma_weights, const int min_obs,
+                     const bool na_restore, IntegerVector rcpp_idxmin)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
+      na_restore(na_restore), rcpp_idxmin(rcpp_idxmin) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z;
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+        
+        int offset = std::max(0, i - width + 1);
+        int n_size_x = i - offset + 1;
+        arma::vec x_subset(n_size_x);
+        
+        std::copy(x.begin() + offset, x.begin() + i + 1,
+                  x_subset.begin());
+        
+        // similar to R's sort with 'index.return = TRUE'
+        arma::ivec sort_ix = stl_sort_min(x_subset);
+        
+        int k = 0;
+        int count = 0;
+        int n_obs = 0;
+        int idxmin_x = 0;
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (n_size_x - 1 >= count)) {
+          
+          k = sort_ix[n_size_x - count - 1];
+          
+          // don't include if missing value
+          if (!std::isnan(x_subset[k])) {
+            
+            // last element of sorted array
+            // note: 'weights' must be greater than 0
+            idxmin_x = k + 1;
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute the index of minimum
+        if ((n_obs >= min_obs)) {
+          rcpp_idxmin[i] = idxmin_x;
+        } else {
+          rcpp_idxmin[i] = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        rcpp_idxmin[i] = x[i];
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling index of maximums using an online algorithm
+struct RollIdxMaxOnlineVec {
+  
+  const RVector<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const bool na_restore;
+  RVector<int> rcpp_idxmax;     // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollIdxMaxOnlineVec(const NumericVector x, const int n,
+                      const int n_rows_x, const int width,
+                      const arma::vec arma_weights, const int min_obs,
+                      const bool na_restore, IntegerVector rcpp_idxmax)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
+      na_restore(na_restore), rcpp_idxmax(rcpp_idxmax) { }
+  
+  // function call operator that iterates by index
+  void operator()() {
+    
+    int n_obs = 0;
+    int idxmax_x = 0;
+    std::deque<int> deck(width);
+    
+    for (int i = 0; i <= n_rows_x; ++i) {
+      
+      // expanding window
+      if (i < width) {
+        
+        // don't include if missing value
+        if (!std::isnan(x[i])) {
+          n_obs += 1;
+        }
+        
+        if (!std::isnan(x[i])) {
+          
+          while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] > x[deck.back()]))) {
+            deck.pop_back();
+          }
+          
+          deck.push_back(i);
+          
+        }
+        
+        idxmax_x = deck.front() + 1;
+        
+      }
+      
+      // rolling window
+      if (i >= width) {
+        
+        // don't include if missing value
+        if (!std::isnan(x[i]) && std::isnan(x[i - width])) {
+          
+          n_obs += 1;
+          
+        } else if (std::isnan(x[i]) && !std::isnan(x[i - width])) {
+          
+          n_obs -= 1;
+          
+        }
+        
+        if (!std::isnan(x[i])) {
+          
+          while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] >= x[deck.back()]))) {
+            deck.pop_back();
+          }
+          
+          deck.push_back(i);
+          
+        }
+        
+        while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+          deck.pop_front();
+        }
+        
+        if (width > 1) {
+          idxmax_x = width - (i - deck.front());
+        } else {
+          idxmax_x = deck.front();
+        }
+        
+      }
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+        
+        // compute the index of maximum
+        if (n_obs >= min_obs) {
+          rcpp_idxmax[i] = idxmax_x;
+        } else {
+          rcpp_idxmax[i] = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        rcpp_idxmax[i] = x[i];
+        
+      }
+      
+    }
+    
+  }
+  
+};
+
+// 'Worker' function for computing rolling index of maximums using a standard algorithm
+struct RollIdxMaxBatchVec : public Worker {
+  
+  const RVector<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const bool na_restore;
+  RVector<int> rcpp_idxmax;     // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollIdxMaxBatchVec(const NumericVector x, const int n,
+                     const int n_rows_x, const int width,
+                     const arma::vec arma_weights, const int min_obs,
+                     const bool na_restore, IntegerVector rcpp_idxmax)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), min_obs(min_obs),
+      na_restore(na_restore), rcpp_idxmax(rcpp_idxmax) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z;
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+        
+        int offset = std::max(0, i - width + 1);
+        int n_size_x = i - offset + 1;
+        arma::vec x_subset(n_size_x);
+        
+        std::copy(x.begin() + offset, x.begin() + i + 1,
+                  x_subset.begin());
+        
+        // similar to R's sort with 'index.return = TRUE'
+        arma::ivec sort_ix = stl_sort_max(x_subset);
+        
+        int k = 0;
+        int count = 0;
+        int n_obs = 0;
+        int idxmax_x = 0;
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (n_size_x - 1 >= count)) {
+          
+          k = sort_ix[n_size_x - count - 1];
+          
+          // don't include if missing value
+          if (!std::isnan(x_subset[k])) {
+            
+            // first element of sorted array
+            // note: 'weights' must be greater than 0
+            idxmax_x = k + 1;
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute the index of maximum
+        if ((n_obs >= min_obs)) {
+          rcpp_idxmax[i] = idxmax_x;
+        } else {
+          rcpp_idxmax[i] = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        rcpp_idxmax[i] = x[i];
         
       }
       
@@ -1487,7 +1883,7 @@ struct RollMedianBatchVec : public Worker {
                   arma_weights_subset.begin());
         
         // similar to R's sort with 'index.return = TRUE'
-        arma::ivec sort_ix = stl_sort_index(x_subset);
+        arma::ivec sort_ix = stl_sort_min(x_subset);
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
@@ -3551,7 +3947,7 @@ struct RollCovBatchVecXY : public Worker {
 };
 
 // 'Worker' function for rolling linear models
-struct RollVecLmInterceptFALSE : public Worker {
+struct RollLmVecInterceptFALSE : public Worker {
   
   const arma::cube arma_cov;    // source
   const int n;
@@ -3564,7 +3960,7 @@ struct RollVecLmInterceptFALSE : public Worker {
   arma::vec& arma_se;
   
   // initialize with source and destination
-  RollVecLmInterceptFALSE(const arma::cube arma_cov, const int n,
+  RollLmVecInterceptFALSE(const arma::cube arma_cov, const int n,
                           const int n_rows_xy, const int width,
                           const arma::vec arma_n_obs, const arma::vec arma_sum_w,
                           arma::vec& arma_coef, arma::vec& arma_rsq,

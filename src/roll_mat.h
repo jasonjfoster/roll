@@ -8,7 +8,8 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
-arma::ivec stl_sort_index(arma::vec& x);
+arma::ivec stl_sort_min(arma::vec& x);
+arma::ivec stl_sort_max(arma::vec& x);
 
 // 'Worker' function for computing rolling any using an online algorithm
 struct RollAnyOnlineMat : public Worker {
@@ -1295,7 +1296,7 @@ struct RollMinBatchMat : public Worker {
                   arma_any_na_subset.begin());
         
         // similar to R's sort with 'index.return = TRUE'
-        arma::ivec sort_ix = stl_sort_index(x_subset);
+        arma::ivec sort_ix = stl_sort_min(x_subset);
         
         int k = 0;
         int count = 0;
@@ -1523,7 +1524,7 @@ struct RollMaxBatchMat : public Worker {
                   arma_any_na_subset.begin());
         
         // similar to R's sort with 'index.return = TRUE'
-        arma::ivec sort_ix = stl_sort_index(x_subset);
+        arma::ivec sort_ix = stl_sort_max(x_subset);
         
         int k = 0;
         int count = 0;
@@ -1542,9 +1543,7 @@ struct RollMaxBatchMat : public Worker {
             
             // first element of sorted array
             // note: 'weights' must be greater than 0
-            if (n_obs == 0) {
-              max_x = x_subset[k];
-            }
+            max_x = x_subset[k];
             
             n_obs += 1;
             
@@ -1565,6 +1564,462 @@ struct RollMaxBatchMat : public Worker {
         
         // can be either NA or NaN
         arma_max(i, j) = x(i, j);
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling index of minimums using an online algorithm
+struct RollIdxMinOnlineMat : public Worker {
+  
+  const RMatrix<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int n_cols_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const RVector<int> rcpp_any_na;
+  const bool na_restore;
+  RMatrix<int> rcpp_idxmin;     // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollIdxMinOnlineMat(const NumericMatrix x, const int n,
+                      const int n_rows_x, const int n_cols_x,
+                      const int width, const arma::vec arma_weights,
+                      const int min_obs, const IntegerVector rcpp_any_na,
+                      const bool na_restore, IntegerMatrix rcpp_idxmin)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), n_cols_x(n_cols_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs), rcpp_any_na(rcpp_any_na),
+      na_restore(na_restore), rcpp_idxmin(rcpp_idxmin) { }
+  
+  // function call operator that iterates by column
+  void operator()(std::size_t begin_col, std::size_t end_col) {
+    for (std::size_t j = begin_col; j < end_col; j++) {
+      
+      int n_obs = 0;
+      int idxmin_x = 0;
+      std::deque<int> deck(width);
+      
+      for (int i = 0; i < n_rows_x; i++) {
+        
+        // expanding window
+        if (i < width) {
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((rcpp_any_na[i] == 0) && !std::isnan(x(i, j))) {
+            n_obs += 1;
+          }
+          
+          if ((rcpp_any_na[i] == 0) && !std::isnan(x(i, j))) {
+            
+            while (!deck.empty() && ((rcpp_any_na[deck.back()] != 0) ||
+                   std::isnan(x(deck.back(), j)) || (x(i, j) < x(deck.back(), j)))) {
+              
+              deck.pop_back();
+              
+            }
+            
+            deck.push_back(i);
+            
+          }
+          
+          if (width > 1) {
+            idxmin_x = deck.front() + 1;
+          } else {
+            idxmin_x = 1;
+          }
+          
+        }
+        
+        // rolling window
+        if (i >= width) {
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((rcpp_any_na[i] == 0) && !std::isnan(x(i, j)) &&
+              ((rcpp_any_na[i - width] != 0) || std::isnan(x(i - width, j)))) {
+            
+            n_obs += 1;
+            
+          } else if (((rcpp_any_na[i] != 0) || std::isnan(x(i, j))) &&
+            (rcpp_any_na[i - width] == 0) && !std::isnan(x(i - width, j))) {
+            
+            n_obs -= 1;
+            
+          }
+          
+          if ((rcpp_any_na[i] == 0) && !std::isnan(x(i, j))) {
+            
+            while (!deck.empty() && ((rcpp_any_na[deck.back()] != 0) ||
+                   std::isnan(x(deck.back(), j)) || (x(i, j) < x(deck.back(), j)))) {
+              
+              deck.pop_back();
+              
+            }
+            
+            deck.push_back(i);
+            
+          }
+          
+          while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+            deck.pop_front();
+          }
+          
+          if (width > 1) {
+            idxmin_x = width - (i - deck.front());
+          } else {
+            idxmin_x = 1;
+          }
+          
+        }
+        
+        // don't compute if missing value and 'na_restore' argument is TRUE
+        if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+          
+          // compute the index of minimum
+          if (n_obs >= min_obs) {
+            rcpp_idxmin(i, j) = idxmin_x;
+          } else {
+            rcpp_idxmin(i, j) = NA_REAL;
+          }
+          
+        } else {
+          
+          // can be either NA or NaN
+          rcpp_idxmin(i, j) = x(i, j);
+          
+        }
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling index of minimums using a standard algorithm
+struct RollIdxMinBatchMat : public Worker {
+  
+  const RMatrix<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int n_cols_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const RVector<int> rcpp_any_na;
+  const bool na_restore;
+  RMatrix<int> rcpp_idxmin;     // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollIdxMinBatchMat(const NumericMatrix x, const int n,
+                     const int n_rows_x, const int n_cols_x,
+                     const int width, const arma::vec arma_weights,
+                     const int min_obs, const IntegerVector rcpp_any_na,
+                     const bool na_restore, IntegerMatrix rcpp_idxmin)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), n_cols_x(n_cols_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs), rcpp_any_na(rcpp_any_na),
+      na_restore(na_restore), rcpp_idxmin(rcpp_idxmin) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z / n_cols_x;
+      int j = z % n_cols_x;
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+        
+        int offset = std::max(0, i - width + 1);
+        int n_size_x = i - offset + 1;
+        arma::vec x_subset(n_size_x);
+        arma::uvec arma_any_na_subset(n_size_x);
+        
+        std::copy(x.begin() + n_rows_x * j + offset, x.begin() + n_rows_x * j + i + 1,
+                  x_subset.begin());
+        std::copy(rcpp_any_na.begin() + offset, rcpp_any_na.begin() + i + 1,
+                  arma_any_na_subset.begin());
+        
+        // similar to R's sort with 'index.return = TRUE'
+        arma::ivec sort_ix = stl_sort_min(x_subset);
+        
+        int k = 0;
+        int count = 0;
+        int n_obs = 0;
+        int idxmin_x = 0;
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (n_size_x - 1 >= count)) {
+          
+          k = sort_ix[n_size_x - count - 1];
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
+            
+            // last element of sorted array
+            // note: 'weights' must be greater than 0
+            idxmin_x = k + 1;
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute the index of minimum
+        if ((n_obs >= min_obs)) {
+          rcpp_idxmin(i, j) = idxmin_x;
+        } else {
+          rcpp_idxmin(i, j) = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        rcpp_idxmin(i, j) = x(i, j);
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling index of maximums using an online algorithm
+struct RollIdxMaxOnlineMat : public Worker {
+  
+  const RMatrix<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int n_cols_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const RVector<int> rcpp_any_na;
+  const bool na_restore;
+  RMatrix<int> rcpp_idxmax;     // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollIdxMaxOnlineMat(const NumericMatrix x, const int n,
+                      const int n_rows_x, const int n_cols_x,
+                      const int width, const arma::vec arma_weights,
+                      const int min_obs, const IntegerVector rcpp_any_na,
+                      const bool na_restore, IntegerMatrix rcpp_idxmax)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), n_cols_x(n_cols_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs), rcpp_any_na(rcpp_any_na),
+      na_restore(na_restore), rcpp_idxmax(rcpp_idxmax) { }
+  
+  // function call operator that iterates by column
+  void operator()(std::size_t begin_col, std::size_t end_col) {
+    for (std::size_t j = begin_col; j < end_col; j++) {
+      
+      int n_obs = 0;
+      int idxmax_x = 0;
+      std::deque<int> deck(width);
+      
+      for (int i = 0; i < n_rows_x; i++) {
+        
+        // expanding window
+        if (i < width) {
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((rcpp_any_na[i] == 0) && !std::isnan(x(i, j))) {
+            n_obs += 1;
+          }
+          
+          if ((rcpp_any_na[i] == 0) && !std::isnan(x(i, j))) {
+            
+            while (!deck.empty() && ((rcpp_any_na[deck.back()] != 0) ||
+                   std::isnan(x(deck.back(), j)) || (x(i, j) > x(deck.back(), j)))) {
+              
+              deck.pop_back();
+              
+            }
+            
+            deck.push_back(i);
+            
+          }
+          
+          if (width > 1) {
+            idxmax_x = deck.front() + 1;
+          } else {
+            idxmax_x = 1;
+          }
+          
+        }
+        
+        // rolling window
+        if (i >= width) {
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((rcpp_any_na[i] == 0) && !std::isnan(x(i, j)) &&
+              ((rcpp_any_na[i - width] != 0) || std::isnan(x(i - width, j)))) {
+            
+            n_obs += 1;
+            
+          } else if (((rcpp_any_na[i] != 0) || std::isnan(x(i, j))) &&
+            (rcpp_any_na[i - width] == 0) && !std::isnan(x(i - width, j))) {
+            
+            n_obs -= 1;
+            
+          }
+          
+          if ((rcpp_any_na[i] == 0) && !std::isnan(x(i, j))) {
+            
+            while (!deck.empty() && ((rcpp_any_na[deck.back()] != 0) ||
+                   std::isnan(x(deck.back(), j)) || (x(i, j) > x(deck.back(), j)))) {
+              
+              deck.pop_back();
+              
+            }
+            
+            deck.push_back(i);
+            
+          }
+          
+          while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+            deck.pop_front();
+          }
+          
+          if (width > 1) {
+            idxmax_x = width - (i - deck.front());
+          } else {
+            idxmax_x = 1;
+          }
+          
+        }
+        
+        // don't compute if missing value and 'na_restore' argument is TRUE
+        if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+          
+          // compute the index of maximum
+          if (n_obs >= min_obs) {
+            rcpp_idxmax(i, j) = idxmax_x;
+          } else {
+            rcpp_idxmax(i, j) = NA_REAL;
+          }
+          
+        } else {
+          
+          // can be either NA or NaN
+          rcpp_idxmax(i, j) = x(i, j);
+          
+        }
+        
+      }
+      
+    }
+  }
+  
+};
+
+// 'Worker' function for computing rolling index of maximums using a standard algorithm
+struct RollIdxMaxBatchMat : public Worker {
+  
+  const RMatrix<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int n_cols_x;
+  const int width;
+  const arma::vec arma_weights;
+  const int min_obs;
+  const RVector<int> rcpp_any_na;
+  const bool na_restore;
+  RMatrix<int> rcpp_idxmax;     // destination (pass by reference)
+  
+  // initialize with source and destination
+  RollIdxMaxBatchMat(const NumericMatrix x, const int n,
+                     const int n_rows_x, const int n_cols_x,
+                     const int width, const arma::vec arma_weights,
+                     const int min_obs, const IntegerVector rcpp_any_na,
+                     const bool na_restore, IntegerMatrix rcpp_idxmax)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), n_cols_x(n_cols_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs), rcpp_any_na(rcpp_any_na),
+      na_restore(na_restore), rcpp_idxmax(rcpp_idxmax) { }
+  
+  // function call operator that iterates by index
+  void operator()(std::size_t begin_index, std::size_t end_index) {
+    for (std::size_t z = begin_index; z < end_index; z++) {
+      
+      // from 1D to 2D array
+      int i = z / n_cols_x;
+      int j = z % n_cols_x;
+      
+      // don't compute if missing value and 'na_restore' argument is TRUE
+      if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+        
+        int offset = std::max(0, i - width + 1);
+        int n_size_x = i - offset + 1;
+        arma::vec x_subset(n_size_x);
+        arma::uvec arma_any_na_subset(n_size_x);
+        
+        std::copy(x.begin() + n_rows_x * j + offset, x.begin() + n_rows_x * j + i + 1,
+                  x_subset.begin());
+        std::copy(rcpp_any_na.begin() + offset, rcpp_any_na.begin() + i + 1,
+                  arma_any_na_subset.begin());
+        
+        // similar to R's sort with 'index.return = TRUE'
+        arma::ivec sort_ix = stl_sort_max(x_subset);
+        
+        int k = 0;
+        int count = 0;
+        int n_obs = 0;
+        int idxmax_x = 0;
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        while ((width > count) && (n_size_x - 1 >= count)) {
+          
+          k = sort_ix[n_size_x - count - 1];
+          
+          // don't include if missing value and 'any_na' argument is 1
+          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+          if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
+            
+            // first element of sorted array
+            // note: 'weights' must be greater than 0
+            idxmax_x = k + 1;
+            
+            n_obs += 1;
+            
+          }
+          
+          count += 1;
+          
+        }
+        
+        // compute the index of maximum
+        if ((n_obs >= min_obs)) {
+          rcpp_idxmax(i, j) = idxmax_x;
+        } else {
+          rcpp_idxmax(i, j) = NA_REAL;
+        }
+        
+      } else {
+        
+        // can be either NA or NaN
+        rcpp_idxmax(i, j) = x(i, j);
         
       }
       
@@ -1628,7 +2083,7 @@ struct RollMedianBatchMat : public Worker {
                   arma_any_na_subset.begin());
         
         // similar to R's sort with 'index.return = TRUE'
-        arma::ivec sort_ix = stl_sort_index(x_subset);
+        arma::ivec sort_ix = stl_sort_min(x_subset);
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
@@ -4340,7 +4795,7 @@ struct RollCovBatchMatLm : public Worker {
 };
 
 // 'Worker' function for rolling linear models
-struct RollMatLmInterceptTRUE : public Worker {
+struct RollLmMatInterceptTRUE : public Worker {
   
   const arma::cube arma_cov;    // source
   const int n;
@@ -4355,7 +4810,7 @@ struct RollMatLmInterceptTRUE : public Worker {
   arma::mat& arma_se;
   
   // initialize with source and destination
-  RollMatLmInterceptTRUE(const arma::cube arma_cov, const int n,
+  RollLmMatInterceptTRUE(const arma::cube arma_cov, const int n,
                          const int n_rows_xy, const int n_cols_x,
                          const int width, const arma::vec arma_n_obs,
                          const arma::vec arma_sum_w, const arma::mat arma_mean,
@@ -4465,7 +4920,7 @@ struct RollMatLmInterceptTRUE : public Worker {
 };
 
 // 'Worker' function for rolling linear models
-struct RollMatLmInterceptFALSE : public Worker {
+struct RollLmMatInterceptFALSE : public Worker {
   
   const arma::cube arma_cov;    // source
   const int n;
@@ -4479,7 +4934,7 @@ struct RollMatLmInterceptFALSE : public Worker {
   arma::mat& arma_se;
   
   // initialize with source and destination
-  RollMatLmInterceptFALSE(const arma::cube arma_cov, const int n,
+  RollLmMatInterceptFALSE(const arma::cube arma_cov, const int n,
                           const int n_rows_xy, const int n_cols_x,
                           const int width, const arma::vec arma_n_obs,
                           const arma::vec arma_sum_w, arma::mat& arma_coef,

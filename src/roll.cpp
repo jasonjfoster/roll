@@ -272,16 +272,38 @@ arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
   
 }
 
-arma::ivec stl_sort_index(arma::vec& x) {
+arma::ivec stl_sort_min(arma::vec& x) {
   
   int n_rows_x = x.size();
   arma::ivec y(n_rows_x);
   std::iota(y.begin(), y.end(), 0);
   
   auto comparator = [&x](int a, int b) {
-    if (std::isnan(x[a])) return false;
-    if (std::isnan(x[b])) return true;
-    return x[a] < x[b];
+    long double x_a = x[a];
+    long double x_b = x[b];
+    if (std::isnan(x_a)) return false;
+    if (std::isnan(x_b)) return true;
+    return x_a < x_b;
+  };
+  
+  std::sort(y.begin(), y.end(), comparator);
+  
+  return y;
+  
+}
+
+arma::ivec stl_sort_max(arma::vec& x) {
+  
+  int n_rows_x = x.size();
+  arma::ivec y(n_rows_x);
+  std::iota(y.begin(), y.end(), 0);
+  
+  auto comparator = [&x](int a, int b) {
+    long double x_a = x[a];
+    long double x_b = x[b];
+    if (std::isnan(x_a)) return false;
+    if (std::isnan(x_b)) return true;
+    return x_a > x_b;
   };
   
   std::sort(y.begin(), y.end(), comparator);
@@ -1085,6 +1107,244 @@ SEXP roll_max(const SEXP& x, const int& width,
     
     // create and return a vector object
     NumericVector result(wrap(arma_max));
+    result.attr("dim") = R_NilValue;
+    List names = xx.attr("names");
+    if (names.size() > 0) {
+      result.attr("names") = names;
+    }
+    result.attr("index") = xx.attr("index");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
+  }
+  
+}
+
+// [[Rcpp::export(.roll_idxmin)]]
+SEXP roll_idxmin(const SEXP& x, const int& width,
+                 const arma::vec& weights, const int& min_obs,
+                 const bool& complete_obs, const bool& na_restore,
+                 const bool& online) {
+  
+  if (Rf_isMatrix(x)) {
+    
+    NumericMatrix xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.nrow();
+    int n_cols_x = xx.ncol();
+    IntegerVector rcpp_any_na(n_rows_x);
+    IntegerMatrix rcpp_idxmin(n_rows_x, n_cols_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_p(weights);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'false',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      rcpp_any_na = any_na_x(xx);
+    } else {
+      rcpp_any_na.fill(0);
+    }
+    
+    // compute rolling index of minimums
+    if (online) {
+      
+      RollIdxMinOnlineMat roll_idxmin_online(xx, n, n_rows_x, n_cols_x, width,
+                                             weights, min_obs,
+                                             rcpp_any_na, na_restore,
+                                             rcpp_idxmin);
+      parallelFor(0, n_cols_x, roll_idxmin_online);
+      
+    } else {
+      
+      RollIdxMinBatchMat roll_idxmin_batch(xx, n, n_rows_x, n_cols_x, width,
+                                           weights, min_obs,
+                                           rcpp_any_na, na_restore,
+                                           rcpp_idxmin);
+      parallelFor(0, n_rows_x * n_cols_x, roll_idxmin_batch);
+      
+    }
+    
+    // create and return a matrix or xts object
+    IntegerMatrix result(rcpp_idxmin);
+    List dimnames = xx.attr("dimnames");
+    result.attr("dimnames") = dimnames;
+    result.attr("index") = xx.attr("index");
+    result.attr(".indexCLASS") = xx.attr(".indexCLASS");
+    result.attr(".indexTZ") = xx.attr(".indexTZ");
+    result.attr("tclass") = xx.attr("tclass");
+    result.attr("tzone") = xx.attr("tzone");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
+  } else {
+    
+    NumericVector xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.size();
+    IntegerVector rcpp_idxmin(n_rows_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_p(weights);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // compute rolling index of minimums
+    if (online) {
+      
+      RollIdxMinOnlineVec roll_idxmin_online(xx, n, n_rows_x, width,
+                                             weights, min_obs,
+                                             na_restore,
+                                             rcpp_idxmin);
+      roll_idxmin_online();
+      
+    } else {
+      
+      RollIdxMinBatchVec roll_idxmin_batch(xx, n, n_rows_x, width,
+                                           weights, min_obs,
+                                           na_restore,
+                                           rcpp_idxmin);
+      parallelFor(0, n_rows_x, roll_idxmin_batch);
+      
+    }
+    
+    // create and return a vector object
+    IntegerVector result(wrap(rcpp_idxmin));
+    result.attr("dim") = R_NilValue;
+    List names = xx.attr("names");
+    if (names.size() > 0) {
+      result.attr("names") = names;
+    }
+    result.attr("index") = xx.attr("index");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
+  }
+  
+}
+
+// [[Rcpp::export(.roll_idxmax)]]
+SEXP roll_idxmax(const SEXP& x, const int& width,
+                 const arma::vec& weights, const int& min_obs,
+                 const bool& complete_obs, const bool& na_restore,
+                 const bool& online) {
+  
+  if (Rf_isMatrix(x)) {
+    
+    NumericMatrix xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.nrow();
+    int n_cols_x = xx.ncol();
+    IntegerVector rcpp_any_na(n_rows_x);
+    IntegerMatrix rcpp_idxmax(n_rows_x, n_cols_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_p(weights);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'false',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      rcpp_any_na = any_na_x(xx);
+    } else {
+      rcpp_any_na.fill(0);
+    }
+    
+    // compute rolling index of maximums
+    if (online) {
+      
+      RollIdxMaxOnlineMat roll_idxmax_online(xx, n, n_rows_x, n_cols_x, width,
+                                             weights, min_obs,
+                                             rcpp_any_na, na_restore,
+                                             rcpp_idxmax);
+      parallelFor(0, n_cols_x, roll_idxmax_online);
+      
+    } else {
+      
+      RollIdxMaxBatchMat roll_idxmax_batch(xx, n, n_rows_x, n_cols_x, width,
+                                           weights, min_obs,
+                                           rcpp_any_na, na_restore,
+                                           rcpp_idxmax);
+      parallelFor(0, n_rows_x * n_cols_x, roll_idxmax_batch);
+      
+    }
+    
+    // create and return a matrix or xts object
+    IntegerMatrix result(rcpp_idxmax);
+    List dimnames = xx.attr("dimnames");
+    result.attr("dimnames") = dimnames;
+    result.attr("index") = xx.attr("index");
+    result.attr(".indexCLASS") = xx.attr(".indexCLASS");
+    result.attr(".indexTZ") = xx.attr(".indexTZ");
+    result.attr("tclass") = xx.attr("tclass");
+    result.attr("tzone") = xx.attr("tzone");
+    result.attr("class") = xx.attr("class");
+    
+    return result;
+    
+  } else {
+    
+    NumericVector xx(x);
+    int n = weights.size();
+    int n_rows_x = xx.size();
+    IntegerVector rcpp_idxmin(n_rows_x);
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_p(weights);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // compute rolling index of minimums
+    if (online) {
+      
+      RollIdxMaxOnlineVec roll_idxmax_online(xx, n, n_rows_x, width,
+                                             weights, min_obs,
+                                             na_restore,
+                                             rcpp_idxmin);
+      roll_idxmax_online();
+      
+    } else {
+      
+      RollIdxMaxBatchVec roll_idxmax_batch(xx, n, n_rows_x, width,
+                                           weights, min_obs,
+                                           na_restore,
+                                           rcpp_idxmin);
+      parallelFor(0, n_rows_x, roll_idxmax_batch);
+      
+    }
+    
+    // create and return a vector object
+    IntegerVector result(wrap(rcpp_idxmin));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
     if (names.size() > 0) {
@@ -2071,7 +2331,7 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
       arma::mat arma_coef(n_rows_xy, n_cols_x);
       arma::mat arma_se(n_rows_xy, n_cols_x);
-      RollMatLmInterceptTRUE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
+      RollLmMatInterceptTRUE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
                                             arma_n_obs, arma_sum_w, arma_mean,
                                             arma_coef, arma_rsq, arma_se);
       parallelFor(0, n_rows_xy, roll_lm_slices);
@@ -2084,7 +2344,7 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
       arma::mat arma_coef(n_rows_xy, n_cols_x - 1);
       arma::mat arma_se(n_rows_xy, n_cols_x - 1);
-      RollMatLmInterceptFALSE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
+      RollLmMatInterceptFALSE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
                                              arma_n_obs, arma_sum_w,
                                              arma_coef, arma_rsq, arma_se);
       parallelFor(0, n_rows_xy, roll_lm_slices);
@@ -2169,7 +2429,7 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
       arma::mat arma_coef(n_rows_xy, n_cols_x);
       arma::mat arma_se(n_rows_xy, n_cols_x);
-      RollMatLmInterceptTRUE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
+      RollLmMatInterceptTRUE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
                                             arma_n_obs, arma_sum_w, arma_mean,
                                             arma_coef, arma_rsq, arma_se);
       parallelFor(0, n_rows_xy, roll_lm_slices);
@@ -2182,7 +2442,7 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
       arma::vec arma_coef(n_rows_xy);
       arma::vec arma_se(n_rows_xy);
-      RollVecLmInterceptFALSE roll_lm_slices(arma_cov, n, n_rows_xy, width,
+      RollLmVecInterceptFALSE roll_lm_slices(arma_cov, n, n_rows_xy, width,
                                              arma_n_obs, arma_sum_w,
                                              arma_coef, arma_rsq, arma_se);
       parallelFor(0, n_rows_xy, roll_lm_slices);

@@ -4,13 +4,15 @@
 #include <R_ext/Rdynload.h>
 
 /* FIXME: 
-Check these declarations against the C/Fortran source code.
-*/
+ Check these declarations against the C/Fortran source code.
+ */
 
 /* .Call calls */
 extern SEXP _roll_roll_all(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_any(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_cov(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _roll_roll_idxmax(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _roll_roll_idxmin(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_lm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_max(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_mean(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -26,6 +28,8 @@ static const R_CallMethodDef CallEntries[] = {
   {"_roll_roll_all",    (DL_FUNC) &_roll_roll_all,     6},
   {"_roll_roll_any",    (DL_FUNC) &_roll_roll_any,     6},
   {"_roll_roll_cov",    (DL_FUNC) &_roll_roll_cov,    10},
+  {"_roll_roll_idxmax", (DL_FUNC) &_roll_roll_idxmax,  7},
+  {"_roll_roll_idxmin", (DL_FUNC) &_roll_roll_idxmin,  7},
   {"_roll_roll_lm",     (DL_FUNC) &_roll_roll_lm,      9},
   {"_roll_roll_max",    (DL_FUNC) &_roll_roll_max,     7},
   {"_roll_roll_mean",   (DL_FUNC) &_roll_roll_mean,    7},

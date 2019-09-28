@@ -268,6 +268,86 @@ roll_max <- function(x, width, weights = rep(1, width),
   ))
 }
 
+##' Rolling Index of Minimums
+##'
+##' A function for computing rolling index of minimums of time-series data.
+##'
+##' @param x vector or matrix. Rows are observations and columns are variables.
+##' @param width integer. Window size.
+##' @param weights vector. Weights for each observation within a window.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is \code{NA}.
+##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
+##' if \code{FALSE} then each value is used.
+##' @param na_restore logical. Should missing values be restored?
+##' @param online logical. Process observations using an online algorithm.
+##' @return An object of the same class and dimension as \code{x} with the rolling index of minimums.
+##' @examples
+##' n_vars <- 3
+##' n_obs <- 15
+##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' 
+##' # rolling index of minimums
+##' result <- roll_idxmin(x, 5)
+##' 
+##' # rolling index of minimums with exponential decay
+##' weights <- 0.9 ^ (5:1)
+##' result <- roll_idxmin(x, 5, weights)
+##' @export
+roll_idxmin <- function(x, width, weights = rep(1, width),
+                     min_obs = width, complete_obs = FALSE, na_restore = FALSE,
+                     online = TRUE) {
+  return(.Call(`_roll_roll_idxmin`,
+               x,
+               as.integer(width),
+               as.numeric(weights),
+               as.integer(min_obs),
+               as.logical(complete_obs),
+               as.logical(na_restore),
+               as.logical(online)
+  ))
+}
+
+##' Rolling Index of Maximums
+##'
+##' A function for computing rolling index of maximums of time-series data.
+##'
+##' @param x vector or matrix. Rows are observations and columns are variables.
+##' @param width integer. Window size.
+##' @param weights vector. Weights for each observation within a window.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is \code{NA}.
+##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
+##' if \code{FALSE} then each value is used.
+##' @param na_restore logical. Should missing values be restored?
+##' @param online logical. Process observations using an online algorithm.
+##' @return An object of the same class and dimension as \code{x} with the rolling index of maximums
+##' @examples
+##' n_vars <- 3
+##' n_obs <- 15
+##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' 
+##' # rolling index of maximums
+##' result <- roll_idxmax(x, 5)
+##' 
+##' # rolling index of maximums with exponential decay
+##' weights <- 0.9 ^ (5:1)
+##' result <- roll_idxmax(x, 5, weights)
+##' @export
+roll_idxmax <- function(x, width, weights = rep(1, width),
+                        min_obs = width, complete_obs = FALSE, na_restore = FALSE,
+                        online = TRUE) {
+  return(.Call(`_roll_roll_idxmax`,
+               x,
+               as.integer(width),
+               as.numeric(weights),
+               as.integer(min_obs),
+               as.logical(complete_obs),
+               as.logical(na_restore),
+               as.logical(online)
+  ))
+}
+
 ##' Rolling Medians
 ##'
 ##' A function for computing rolling medians of time-series data.
