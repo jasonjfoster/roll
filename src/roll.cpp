@@ -272,38 +272,16 @@ arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
   
 }
 
-arma::ivec stl_sort_min(arma::vec& x) {
+arma::ivec stl_sort_index(arma::vec& x) {
   
   int n_rows_x = x.size();
   arma::ivec y(n_rows_x);
   std::iota(y.begin(), y.end(), 0);
   
   auto comparator = [&x](int a, int b) {
-    long double x_a = x[a];
-    long double x_b = x[b];
-    if (std::isnan(x_a)) return false;
-    if (std::isnan(x_b)) return true;
-    return x_a < x_b;
-  };
-  
-  std::sort(y.begin(), y.end(), comparator);
-  
-  return y;
-  
-}
-
-arma::ivec stl_sort_max(arma::vec& x) {
-  
-  int n_rows_x = x.size();
-  arma::ivec y(n_rows_x);
-  std::iota(y.begin(), y.end(), 0);
-  
-  auto comparator = [&x](int a, int b) {
-    long double x_a = x[a];
-    long double x_b = x[b];
-    if (std::isnan(x_a)) return false;
-    if (std::isnan(x_b)) return true;
-    return x_a > x_b;
+    if (std::isnan(x[a])) return false;
+    if (std::isnan(x[b])) return true;
+    return x[a] < x[b];
   };
   
   std::sort(y.begin(), y.end(), comparator);

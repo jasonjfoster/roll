@@ -1177,36 +1177,25 @@ struct RollMinBatchVec : public Worker {
       // from 1D to 2D array
       int i = z;
       
+      int count = 0;
+      int n_obs = 0;
+      int idxmin_x = i;
+      
       // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
         
-        int offset = std::max(0, i - width + 1);
-        int n_size_x = i - offset + 1;
-        arma::vec x_subset(n_size_x);
-        
-        std::copy(x.begin() + offset, x.begin() + i + 1,
-                  x_subset.begin());
-        
-        // similar to R's sort with 'index.return = TRUE'
-        arma::ivec sort_ix = stl_sort_min(x_subset);
-        
-        int k = 0;
-        int count = 0;
-        int n_obs = 0;
-        long double min_x = 0;
-        
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (n_size_x - 1 >= count)) {
-          
-          k = sort_ix[n_size_x - count - 1];
+        while ((width > count) && (i >= count)) {
           
           // don't include if missing value
-          if (!std::isnan(x_subset[k])) {
+          if (!std::isnan(x[i - count])) {
             
             // last element of sorted array
             // note: 'weights' must be greater than 0
-            min_x = x_subset[k];
+            if (std::isnan(x[idxmin_x]) || (x[i - count] <= x[idxmin_x])) {
+              idxmin_x = i - count;
+            }
             
             n_obs += 1;
             
@@ -1218,7 +1207,7 @@ struct RollMinBatchVec : public Worker {
         
         // compute the minimum
         if ((n_obs >= min_obs)) {
-          arma_min[i] = min_x;
+          arma_min[i] = x[idxmin_x];
         } else {
           arma_min[i] = NA_REAL;
         }
@@ -1380,36 +1369,25 @@ struct RollMaxBatchVec : public Worker {
       // from 1D to 2D array
       int i = z;
       
+      int count = 0;
+      int n_obs = 0;
+      int idxmax_x = i;
+      
       // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
         
-        int offset = std::max(0, i - width + 1);
-        int n_size_x = i - offset + 1;
-        arma::vec x_subset(n_size_x);
-        
-        std::copy(x.begin() + offset, x.begin() + i + 1,
-                  x_subset.begin());
-        
-        // similar to R's sort with 'index.return = TRUE'
-        arma::ivec sort_ix = stl_sort_max(x_subset);
-        
-        int k = 0;
-        int count = 0;
-        int n_obs = 0;
-        long double max_x = 0;
-        
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (n_size_x - 1 >= count)) {
-          
-          k = sort_ix[n_size_x - count - 1];
+        while ((width > count) && (i >= count)) {
           
           // don't include if missing value
-          if (!std::isnan(x_subset[k])) {
+          if (!std::isnan(x[i - count])) {
             
             // first element of sorted array
             // note: 'weights' must be greater than 0
-            max_x = x_subset[k];
+            if (std::isnan(x[idxmax_x]) || (x[i - count] >= x[idxmax_x])) {
+              idxmax_x = i - count;
+            }
             
             n_obs += 1;
             
@@ -1421,7 +1399,7 @@ struct RollMaxBatchVec : public Worker {
         
         // compute the maximum
         if ((n_obs >= min_obs)) {
-          arma_max[i] = max_x;
+          arma_max[i] = x[idxmax_x];
         } else {
           arma_max[i] = NA_REAL;
         }
@@ -1881,7 +1859,7 @@ struct RollMedianBatchVec : public Worker {
                   arma_weights_subset.begin());
         
         // similar to R's sort with 'index.return = TRUE'
-        arma::ivec sort_ix = stl_sort_min(x_subset);
+        arma::ivec sort_ix = stl_sort_index(x_subset);
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
