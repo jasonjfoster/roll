@@ -2,6 +2,8 @@
 
 ### Changes in roll version 1.1.3 (YYYY-MM-DD)
 
+* New `roll_idxmin` and `roll_idxmax` functions for computing rolling indices of minimums and maximums, respectively, of time-series data ([#22](https://github.com/jjf234/roll/issues/22))
+
 * Implemented efficient algorithms for `roll_min` and `roll_max` functions
 
 * Added vector support to each function ([#20](https://github.com/jjf234/roll/issues/20))

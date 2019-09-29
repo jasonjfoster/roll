@@ -2721,7 +2721,7 @@ List roll_lm(const SEXP& x, const SEXP& y,
       // create and return a matrix or xts object for coefficients
       NumericVector coef(wrap(arma_coef_z));
       coef.attr("dim") = IntegerVector::create(n_rows_xy, n_cols_x);
-      List dimnames_x = xxx.attr("dimnames");
+      List dimnames_x = xx.attr("dimnames");
       coef.attr("dimnames") = dimnames_lm_x(dimnames_x, n_cols_x, intercept);
       coef.attr("index") = yy.attr("index");
       coef.attr(".indexCLASS") = yy.attr(".indexCLASS");

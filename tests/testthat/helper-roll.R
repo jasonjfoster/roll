@@ -1,5 +1,5 @@
 n_vars <- 4
-n_obs <- 20 # 2000
+n_obs <- 20 # 200
 lambda <- 0.9
 
 # test data
@@ -218,7 +218,7 @@ rollapplyr_lm <- function(x, y, width, intercept) {
     result <- list("coefficients" = rep(as.numeric(NA), n_rows_xy),
                    "r.squared" = rep(as.numeric(NA), n_rows_xy),
                    "std.error" = rep(as.numeric(NA), n_rows_xy))
-
+    
     
     if (zoo::is.zoo(x)) {
       

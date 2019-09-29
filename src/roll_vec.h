@@ -1467,7 +1467,7 @@ struct RollIdxMinOnlineVec {
     int idxmin_x = 0;
     std::deque<int> deck(width);
     
-    for (int i = 0; i <= n_rows_x; ++i) {
+    for (int i = 0; i < n_rows_x; i++) {
       
       // expanding window
       if (i < width) {
@@ -1487,7 +1487,11 @@ struct RollIdxMinOnlineVec {
           
         }
         
-        idxmin_x = deck.front() + 1;
+        if (width > 1) {
+          idxmin_x = deck.front() + 1;
+        } else {
+          idxmin_x = 1;
+        }
         
       }
       
@@ -1522,7 +1526,7 @@ struct RollIdxMinOnlineVec {
         if (width > 1) {
           idxmin_x = width - (i - deck.front());
         } else {
-          idxmin_x = deck.front();
+          idxmin_x = 1;
         }
         
       }
@@ -1579,36 +1583,25 @@ struct RollIdxMinBatchVec : public Worker {
       // from 1D to 2D array
       int i = z;
       
+      int count = 0;
+      int n_obs = 0;
+      int idxmin_x = i;
+      
       // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
         
-        int offset = std::max(0, i - width + 1);
-        int n_size_x = i - offset + 1;
-        arma::vec x_subset(n_size_x);
-        
-        std::copy(x.begin() + offset, x.begin() + i + 1,
-                  x_subset.begin());
-        
-        // similar to R's sort with 'index.return = TRUE'
-        arma::ivec sort_ix = stl_sort_min(x_subset);
-        
-        int k = 0;
-        int count = 0;
-        int n_obs = 0;
-        int idxmin_x = 0;
-        
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (n_size_x - 1 >= count)) {
-          
-          k = sort_ix[n_size_x - count - 1];
+        while ((width > count) && (i >= count)) {
           
           // don't include if missing value
-          if (!std::isnan(x_subset[k])) {
+          if (!std::isnan(x[i - count])) {
             
             // last element of sorted array
             // note: 'weights' must be greater than 0
-            idxmin_x = k + 1;
+            if (std::isnan(x[idxmin_x]) || (x[i - count] <= x[idxmin_x])) {
+              idxmin_x = i - count;
+            }
             
             n_obs += 1;
             
@@ -1620,7 +1613,13 @@ struct RollIdxMinBatchVec : public Worker {
         
         // compute the index of minimum
         if ((n_obs >= min_obs)) {
-          rcpp_idxmin[i] = idxmin_x;
+          
+          if (i < width) {
+            rcpp_idxmin[i] = idxmin_x + 1;
+          } else if (i >= width) {
+            rcpp_idxmin[i] = width - (i - idxmin_x);
+          }
+          
         } else {
           rcpp_idxmin[i] = NA_REAL;
         }
@@ -1666,7 +1665,7 @@ struct RollIdxMaxOnlineVec {
     int idxmax_x = 0;
     std::deque<int> deck(width);
     
-    for (int i = 0; i <= n_rows_x; ++i) {
+    for (int i = 0; i < n_rows_x; i++) {
       
       // expanding window
       if (i < width) {
@@ -1686,7 +1685,11 @@ struct RollIdxMaxOnlineVec {
           
         }
         
-        idxmax_x = deck.front() + 1;
+        if (width > 1) {
+          idxmax_x = deck.front() + 1;
+        } else {
+          idxmax_x = 1;
+        }
         
       }
       
@@ -1706,7 +1709,7 @@ struct RollIdxMaxOnlineVec {
         
         if (!std::isnan(x[i])) {
           
-          while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] >= x[deck.back()]))) {
+          while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] > x[deck.back()]))) {
             deck.pop_back();
           }
           
@@ -1721,7 +1724,7 @@ struct RollIdxMaxOnlineVec {
         if (width > 1) {
           idxmax_x = width - (i - deck.front());
         } else {
-          idxmax_x = deck.front();
+          idxmax_x = 1;
         }
         
       }
@@ -1778,36 +1781,25 @@ struct RollIdxMaxBatchVec : public Worker {
       // from 1D to 2D array
       int i = z;
       
+      int count = 0;
+      int n_obs = 0;
+      int idxmax_x = i;
+      
       // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
         
-        int offset = std::max(0, i - width + 1);
-        int n_size_x = i - offset + 1;
-        arma::vec x_subset(n_size_x);
-        
-        std::copy(x.begin() + offset, x.begin() + i + 1,
-                  x_subset.begin());
-        
-        // similar to R's sort with 'index.return = TRUE'
-        arma::ivec sort_ix = stl_sort_max(x_subset);
-        
-        int k = 0;
-        int count = 0;
-        int n_obs = 0;
-        int idxmax_x = 0;
-        
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (n_size_x - 1 >= count)) {
-          
-          k = sort_ix[n_size_x - count - 1];
+        while ((width > count) && (i >= count)) {
           
           // don't include if missing value
-          if (!std::isnan(x_subset[k])) {
+          if (!std::isnan(x[i - count])) {
             
             // first element of sorted array
             // note: 'weights' must be greater than 0
-            idxmax_x = k + 1;
+            if (std::isnan(x[idxmax_x]) || (x[i - count] >= x[idxmax_x])) {
+              idxmax_x = i - count;
+            }
             
             n_obs += 1;
             
@@ -1819,7 +1811,13 @@ struct RollIdxMaxBatchVec : public Worker {
         
         // compute the index of maximum
         if ((n_obs >= min_obs)) {
-          rcpp_idxmax[i] = idxmax_x;
+          
+          if (i < width) {
+            rcpp_idxmax[i] = idxmax_x + 1;
+          } else if (i >= width) {
+            rcpp_idxmax[i] = width - (i - idxmax_x);
+          }
+          
         } else {
           rcpp_idxmax[i] = NA_REAL;
         }

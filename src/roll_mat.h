@@ -1738,40 +1738,29 @@ struct RollIdxMinBatchMat : public Worker {
       int i = z / n_cols_x;
       int j = z % n_cols_x;
       
+      int count = 0;
+      int n_obs = 0;
+      int idxmin_x = i;
+      
       // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
         
-        int offset = std::max(0, i - width + 1);
-        int n_size_x = i - offset + 1;
-        arma::vec x_subset(n_size_x);
-        arma::uvec arma_any_na_subset(n_size_x);
-        
-        std::copy(x.begin() + n_rows_x * j + offset, x.begin() + n_rows_x * j + i + 1,
-                  x_subset.begin());
-        std::copy(rcpp_any_na.begin() + offset, rcpp_any_na.begin() + i + 1,
-                  arma_any_na_subset.begin());
-        
-        // similar to R's sort with 'index.return = TRUE'
-        arma::ivec sort_ix = stl_sort_min(x_subset);
-        
-        int k = 0;
-        int count = 0;
-        int n_obs = 0;
-        int idxmin_x = 0;
-        
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (n_size_x - 1 >= count)) {
-          
-          k = sort_ix[n_size_x - count - 1];
+        while ((width > count) && (i >= count)) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
+          if ((rcpp_any_na[i - count] == 0) && !std::isnan(x(i - count, j))) {
             
             // last element of sorted array
             // note: 'weights' must be greater than 0
-            idxmin_x = k + 1;
+            if ((rcpp_any_na[idxmin_x] != 0) || std::isnan(x(idxmin_x, j)) ||
+                (x(i - count, j) <= x(idxmin_x, j))) {
+              
+              idxmin_x = i - count;
+              
+            }
             
             n_obs += 1;
             
@@ -1783,7 +1772,13 @@ struct RollIdxMinBatchMat : public Worker {
         
         // compute the index of minimum
         if ((n_obs >= min_obs)) {
-          rcpp_idxmin(i, j) = idxmin_x;
+          
+          if (i < width) {
+            rcpp_idxmin(i, j) = idxmin_x + 1;
+          } else if (i >= width) {
+            rcpp_idxmin(i, j) = width - (i - idxmin_x);
+          }
+          
         } else {
           rcpp_idxmin(i, j) = NA_REAL;
         }
@@ -1966,40 +1961,29 @@ struct RollIdxMaxBatchMat : public Worker {
       int i = z / n_cols_x;
       int j = z % n_cols_x;
       
+      int count = 0;
+      int n_obs = 0;
+      int idxmax_x = i;
+      
       // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
         
-        int offset = std::max(0, i - width + 1);
-        int n_size_x = i - offset + 1;
-        arma::vec x_subset(n_size_x);
-        arma::uvec arma_any_na_subset(n_size_x);
-        
-        std::copy(x.begin() + n_rows_x * j + offset, x.begin() + n_rows_x * j + i + 1,
-                  x_subset.begin());
-        std::copy(rcpp_any_na.begin() + offset, rcpp_any_na.begin() + i + 1,
-                  arma_any_na_subset.begin());
-        
-        // similar to R's sort with 'index.return = TRUE'
-        arma::ivec sort_ix = stl_sort_max(x_subset);
-        
-        int k = 0;
-        int count = 0;
-        int n_obs = 0;
-        int idxmax_x = 0;
-        
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (n_size_x - 1 >= count)) {
-          
-          k = sort_ix[n_size_x - count - 1];
+        while ((width > count) && (i >= count)) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
+          if ((rcpp_any_na[i - count] == 0) && !std::isnan(x(i - count, j))) {
             
             // first element of sorted array
             // note: 'weights' must be greater than 0
-            idxmax_x = k + 1;
+            if ((rcpp_any_na[idxmax_x] != 0) || std::isnan(x(idxmax_x, j)) ||
+                (x(i - count, j) >= x(idxmax_x, j))) {
+              
+              idxmax_x = i - count;
+              
+            }
             
             n_obs += 1;
             
@@ -2011,7 +1995,13 @@ struct RollIdxMaxBatchMat : public Worker {
         
         // compute the index of maximum
         if ((n_obs >= min_obs)) {
-          rcpp_idxmax(i, j) = idxmax_x;
+          
+          if (i < width) {
+            rcpp_idxmax(i, j) = idxmax_x + 1;
+          } else if (i >= width) {
+            rcpp_idxmax(i, j) = width - (i - idxmax_x);
+          }
+          
         } else {
           rcpp_idxmax(i, j) = NA_REAL;
         }

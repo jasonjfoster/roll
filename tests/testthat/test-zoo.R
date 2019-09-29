@@ -58,6 +58,20 @@ test_that("equivalent to zoo::rollapply", {
                           zoo::rollapplyr(test_zoo_x[[ax]], width = width,
                                           max, partial = TRUE))
         
+        expect_equivalent(roll_idxmin(test_zoo_x[[ax]], width,
+                                      test_weights[[1]], test_min_obs[1],
+                                      test_complete_obs[2], test_na_restore[2],
+                                      test_online[j]),
+                          zoo::rollapplyr(test_zoo_x[[ax]], width = width,
+                                          which.min, partial = TRUE))
+        
+        expect_equivalent(roll_idxmax(test_zoo_x[[ax]], width,
+                                      test_weights[[1]], test_min_obs[1],
+                                      test_complete_obs[2], test_na_restore[2],
+                                      test_online[j]),
+                          zoo::rollapplyr(test_zoo_x[[ax]], width = width,
+                                          which.max, partial = TRUE))
+        
         # "'online' is not supported"
         expect_equivalent(roll_median(test_zoo_x[[ax]], width,
                                       test_weights[[1]], test_min_obs[1],
