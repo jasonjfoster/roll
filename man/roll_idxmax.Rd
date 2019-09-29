@@ -25,10 +25,10 @@ if \code{FALSE} then each value is used.}
 \item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
-An object of the same class and dimension as \code{x} with the rolling index of maximums
+An object of the same class and dimension as \code{x} with the rolling index of maximums.
 }
 \description{
-A function for computing rolling index of maximums of time-series data.
+A function for computing the rolling index of maximums of time-series data.
 }
 \examples{
 n_vars <- 3

@@ -26,7 +26,7 @@ if \code{FALSE} then each value is used.}
 An object of the same class and dimension as \code{x} with the rolling any.
 }
 \description{
-A function for computing rolling any of time-series data.
+A function for computing the rolling any of time-series data.
 }
 \examples{
 n_vars <- 3

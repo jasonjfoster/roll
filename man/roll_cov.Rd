@@ -37,7 +37,7 @@ if \code{FALSE} then pairwise is used.}
 A cube with each slice the rolling covariance matrix.
 }
 \description{
-A function for computing rolling covariance matrices of time-series data.
+A function for computing the rolling covariance matrices of time-series data.
 }
 \details{
 The denominator used gives an unbiased estimate of the covariance, so if the weights are the 
