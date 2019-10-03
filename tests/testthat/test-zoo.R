@@ -1,5 +1,7 @@
 test_that("equivalent to zoo::rollapply", {
   
+  # skip("long-running test")
+  
   if (!requireNamespace("zoo", quietly = TRUE))
     skip("zoo package required for this test")
   

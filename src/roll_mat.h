@@ -10,7 +10,7 @@ using namespace RcppParallel;
 
 arma::ivec stl_sort_index(arma::vec& x);
 
-// 'Worker' function for computing rolling any using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollAnyOnlineMat : public Worker {
   
   const RMatrix<int> x;         // source
@@ -104,7 +104,6 @@ struct RollAnyOnlineMat : public Worker {
         // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && (x(i, j) != NA_INTEGER))) {
           
-          // compute any
           if (n_obs >= min_obs) {
             
             if (sum_x > 0) {
@@ -133,7 +132,7 @@ struct RollAnyOnlineMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling any using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollAnyBatchMat : public Worker {
   
   const RMatrix<int> x;         // source
@@ -191,7 +190,6 @@ struct RollAnyBatchMat : public Worker {
           
         }
         
-        // compute any
         if (n_obs >= min_obs) {
           
           if (sum_x > 0) {
@@ -218,7 +216,7 @@ struct RollAnyBatchMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling all using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollAllOnlineMat : public Worker {
   
   const RMatrix<int> x;         // source
@@ -312,7 +310,6 @@ struct RollAllOnlineMat : public Worker {
         // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && (x(i, j) != NA_INTEGER))) {
           
-          // compute all
           if (n_obs >= min_obs) {
             
             if (sum_x > 0) {
@@ -341,7 +338,7 @@ struct RollAllOnlineMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling all using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollAllBatchMat : public Worker {
   
   const RMatrix<int> x;         // source
@@ -399,7 +396,6 @@ struct RollAllBatchMat : public Worker {
           
         }
         
-        // compute all
         if (n_obs >= min_obs) {
           
           if (sum_x > 0) {
@@ -426,7 +422,7 @@ struct RollAllBatchMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling sums using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollSumOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -465,7 +461,7 @@ struct RollSumOnlineMat : public Worker {
       long double sum_x = 0;
       
       if (width > 1) {
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed!
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
       } else {
         lambda = arma_weights[n - 1];
       }
@@ -541,7 +537,6 @@ struct RollSumOnlineMat : public Worker {
         // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
-          // compute the sum
           if (n_obs >= min_obs) {
             arma_sum(i, j) = sum_x;
           } else {
@@ -562,7 +557,7 @@ struct RollSumOnlineMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling sums using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollSumBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -611,7 +606,7 @@ struct RollSumBatchMat : public Worker {
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
           if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j))) {
             
-            // compute the rolling sum
+            // compute the sum
             sum_x += arma_weights[n - count - 1] * x(i - count, j);
             n_obs += 1;
             
@@ -621,7 +616,6 @@ struct RollSumBatchMat : public Worker {
           
         }
         
-        // compute the sum
         if (n_obs >= min_obs) {
           arma_sum(i, j) = sum_x;
         } else {
@@ -640,7 +634,7 @@ struct RollSumBatchMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling products using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollProdOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -683,7 +677,7 @@ struct RollProdOnlineMat : public Worker {
       long double prod_x = 1;
       
       if (width > 1) {
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed!
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
       } else {
         lambda = arma_weights[n - 1];
       }
@@ -787,7 +781,6 @@ struct RollProdOnlineMat : public Worker {
         // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
-          // compute the product
           if (n_obs >= min_obs) {
             arma_prod(i, j) = prod_w * prod_x;
           } else {
@@ -808,7 +801,7 @@ struct RollProdOnlineMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling products using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollProdBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -857,7 +850,7 @@ struct RollProdBatchMat : public Worker {
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
           if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j))) {
             
-            // compute the rolling product
+            // compute the product
             prod_x *= arma_weights[n - count - 1] * x(i - count, j);
             n_obs += 1;
             
@@ -867,7 +860,6 @@ struct RollProdBatchMat : public Worker {
           
         }
         
-        // compute the product
         if (n_obs >= min_obs) {
           arma_prod(i, j) = prod_x;
         } else {
@@ -886,7 +878,7 @@ struct RollProdBatchMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling means using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollMeanOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -926,7 +918,7 @@ struct RollMeanOnlineMat : public Worker {
       long double sum_x = 0;
       
       if (width > 1) {
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed!
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
       } else {
         lambda = arma_weights[n - 1];
       }
@@ -1014,7 +1006,6 @@ struct RollMeanOnlineMat : public Worker {
         // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
-          // compute the mean
           if (n_obs >= min_obs) {
             arma_mean(i, j) = sum_x / sum_w;
           } else {
@@ -1035,7 +1026,7 @@ struct RollMeanOnlineMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling means using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollMeanBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -1085,7 +1076,7 @@ struct RollMeanBatchMat : public Worker {
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
           if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j))) {
             
-            // compute the rolling sum
+            // compute the sum
             sum_w += arma_weights[n - count - 1];
             sum_x += arma_weights[n - count - 1] * x(i - count, j);
             n_obs += 1;
@@ -1096,7 +1087,6 @@ struct RollMeanBatchMat : public Worker {
           
         }
         
-        // compute the mean
         if (n_obs >= min_obs) {
           arma_mean(i, j) = sum_x / sum_w;
         } else {
@@ -1115,7 +1105,7 @@ struct RollMeanBatchMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling minimums using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollMinOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -1226,7 +1216,6 @@ struct RollMinOnlineMat : public Worker {
         // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
-          // compute the minimum
           if (n_obs >= min_obs) {
             arma_min(i, j) = min_x;
           } else {
@@ -1247,7 +1236,7 @@ struct RollMinOnlineMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling minimums using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollMinBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -1313,7 +1302,6 @@ struct RollMinBatchMat : public Worker {
           
         }
         
-        // compute the minimum
         if ((n_obs >= min_obs)) {
           arma_min(i, j) = x(idxmin_x, j);
         } else {
@@ -1332,7 +1320,7 @@ struct RollMinBatchMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling maximums using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollMaxOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -1443,7 +1431,6 @@ struct RollMaxOnlineMat : public Worker {
         // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
-          // compute the maximum
           if (n_obs >= min_obs) {
             arma_max(i, j) = max_x;
           } else {
@@ -1464,7 +1451,7 @@ struct RollMaxOnlineMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling maximums using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollMaxBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -1530,7 +1517,6 @@ struct RollMaxBatchMat : public Worker {
           
         }
         
-        // compute the maximum
         if ((n_obs >= min_obs)) {
           arma_max(i, j) = x(idxmax_x, j);
         } else {
@@ -1549,7 +1535,7 @@ struct RollMaxBatchMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling index of minimums using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollIdxMinOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -1660,7 +1646,6 @@ struct RollIdxMinOnlineMat : public Worker {
         // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
-          // compute the index of minimum
           if (n_obs >= min_obs) {
             rcpp_idxmin(i, j) = idxmin_x;
           } else {
@@ -1681,7 +1666,7 @@ struct RollIdxMinOnlineMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling index of minimums using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollIdxMinBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -1747,7 +1732,6 @@ struct RollIdxMinBatchMat : public Worker {
           
         }
         
-        // compute the index of minimum
         if ((n_obs >= min_obs)) {
           
           if (i < width) {
@@ -1772,7 +1756,7 @@ struct RollIdxMinBatchMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling index of maximums using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollIdxMaxOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -1883,7 +1867,6 @@ struct RollIdxMaxOnlineMat : public Worker {
         // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
-          // compute the index of maximum
           if (n_obs >= min_obs) {
             rcpp_idxmax(i, j) = idxmax_x;
           } else {
@@ -1904,7 +1887,7 @@ struct RollIdxMaxOnlineMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling index of maximums using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollIdxMaxBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -1970,7 +1953,6 @@ struct RollIdxMaxBatchMat : public Worker {
           
         }
         
-        // compute the index of maximum
         if ((n_obs >= min_obs)) {
           
           if (i < width) {
@@ -1995,7 +1977,7 @@ struct RollIdxMaxBatchMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling medians using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollMedianBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -2062,7 +2044,7 @@ struct RollMedianBatchMat : public Worker {
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
           if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
             
-            // compute the rolling sum
+            // compute the sum
             sum_w += arma_weights_subset[k];
             
           }
@@ -2095,7 +2077,7 @@ struct RollMedianBatchMat : public Worker {
               temp_ix = n_size_x - count - 1;
               sum_upper_w_temp = sum_upper_w;
               
-              // compute the rolling sum
+              // compute the sum
               sum_upper_w += arma_weights_subset[k];
               sum_upper_x = x_subset[k];
               
@@ -2109,7 +2091,6 @@ struct RollMedianBatchMat : public Worker {
           
         }
         
-        // compute the median
         if ((n_obs >= min_obs)) {
           
           // average if upper and lower weight is equal
@@ -2138,7 +2119,7 @@ struct RollMedianBatchMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling variances using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollVarOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -2185,7 +2166,7 @@ struct RollVarOnlineMat : public Worker {
       long double mean_x = 0;
       
       if (width > 1) {
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed!
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
       } else {
         lambda = arma_weights[n - 1];
       }
@@ -2318,7 +2299,6 @@ struct RollVarOnlineMat : public Worker {
         // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
-          // compute the unbiased estimate of variance
           if ((n_obs > 1) && (n_obs >= min_obs)) {
             
             if (std::abs(sumsq_x) <= sqrt(arma::datum::eps)) {
@@ -2344,7 +2324,7 @@ struct RollVarOnlineMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling variances using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollVarBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -2400,7 +2380,7 @@ struct RollVarBatchMat : public Worker {
             // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
             if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j))) {
               
-              // compute the rolling sum
+              // compute the sum
               sum_w += arma_weights[n - count - 1];
               sum_x += arma_weights[n - count - 1] * x(i - count, j);
               
@@ -2432,7 +2412,7 @@ struct RollVarBatchMat : public Worker {
             sum_w += arma_weights[n - count - 1];
             sumsq_w += pow(arma_weights[n - count - 1], 2.0);
             
-            // compute the rolling sum of squares with 'center' argument
+            // compute the sum of squares with 'center' argument
             if (center) {
               sumsq_x += arma_weights[n - count - 1] *
                 pow(x(i - count, j) - mean_x, (long double)2.0);
@@ -2449,7 +2429,6 @@ struct RollVarBatchMat : public Worker {
           
         }
         
-        // compute the unbiased estimate of variance
         if ((n_obs > 1) && (n_obs >= min_obs)) {
           
           if (std::abs(sumsq_x) <= sqrt(arma::datum::eps)) {
@@ -2474,7 +2453,7 @@ struct RollVarBatchMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling standard deviations using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollSdOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -2521,7 +2500,7 @@ struct RollSdOnlineMat : public Worker {
       long double mean_x = 0;
       
       if (width > 1) {
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed!
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
       } else {
         lambda = arma_weights[n - 1];
       }
@@ -2654,7 +2633,6 @@ struct RollSdOnlineMat : public Worker {
         // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
-          // compute the unbiased estimate of standard deviation
           if ((n_obs > 1) && (n_obs >= min_obs)) {
             
             if (std::abs(sumsq_x) <= sqrt(arma::datum::eps)) {
@@ -2680,7 +2658,7 @@ struct RollSdOnlineMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling standard deviations using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollSdBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -2736,7 +2714,7 @@ struct RollSdBatchMat : public Worker {
             // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
             if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j))) {
               
-              // compute the rolling sum
+              // compute the sum
               sum_w += arma_weights[n - count - 1];
               sum_x += arma_weights[n - count - 1] * x(i - count, j);
               
@@ -2768,7 +2746,7 @@ struct RollSdBatchMat : public Worker {
             sum_w += arma_weights[n - count - 1];
             sumsq_w += pow(arma_weights[n - count - 1], 2.0);
             
-            // compute the rolling sum of squares with 'center' argument
+            // compute the sum of squares with 'center' argument
             if (center) {
               sumsq_x += arma_weights[n - count - 1] *
                 pow(x(i - count, j) - mean_x, (long double)2.0);
@@ -2785,7 +2763,6 @@ struct RollSdBatchMat : public Worker {
           
         }
         
-        // compute the unbiased estimate of standard deviation
         if ((n_obs > 1) && (n_obs >= min_obs)) {
           
           if (std::abs(sumsq_x) <= sqrt(arma::datum::eps)) {
@@ -2810,7 +2787,7 @@ struct RollSdBatchMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling centering and scaling using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollScaleOnlineMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -2860,7 +2837,7 @@ struct RollScaleOnlineMat : public Worker {
       long double x_ij = 0;
       
       if (width > 1) {
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed!
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
       } else {
         lambda = arma_weights[n - 1];
       }
@@ -3026,7 +3003,6 @@ struct RollScaleOnlineMat : public Worker {
         // don't compute if missing value and 'na_restore' argument is TRUE
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
-          // compute the unbiased estimate of centering and scaling
           if (n_obs >= min_obs) {
             
             if (scale && ((n_obs <= 1) || (var_x < 0) ||
@@ -3059,7 +3035,7 @@ struct RollScaleOnlineMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling centering and scaling using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollScaleBatchMat : public Worker {
   
   const RMatrix<double> x;      // source
@@ -3117,7 +3093,7 @@ struct RollScaleBatchMat : public Worker {
             // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
             if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j))) {
               
-              // compute the rolling sum
+              // compute the sum
               sum_w += arma_weights[n - count - 1];
               sum_x += arma_weights[n - count - 1] * x(i - count, j);
               
@@ -3151,7 +3127,7 @@ struct RollScaleBatchMat : public Worker {
               sum_w += arma_weights[n - count - 1];
               sumsq_w += pow(arma_weights[n - count - 1], 2.0);
               
-              // compute the rolling sum of squares with 'center' argument
+              // compute the sum of squares with 'center' argument
               if (center) {
                 sumsq_x += arma_weights[n - count - 1] *
                   pow(x(i - count, j) - mean_x, (long double)2.0);
@@ -3200,7 +3176,6 @@ struct RollScaleBatchMat : public Worker {
           
         }
         
-        // compute the unbiased estimate of centering and scaling
         if (n_obs >= min_obs) {
           
           if (scale && ((n_obs <= 1) || (var_x < 0) ||
@@ -3232,7 +3207,7 @@ struct RollScaleBatchMat : public Worker {
   
 };
 
-// 'Worker' function for computing rolling covariances using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollCovOnlineMatXX : public Worker {
   
   const RMatrix<double> x;      // source
@@ -3288,7 +3263,7 @@ struct RollCovOnlineMatXX : public Worker {
         long double mean_y = 0;
         
         if (width > 1) {
-          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed!
+          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
         } else {
           lambda = arma_weights[n - 1];
         }
@@ -3498,7 +3473,6 @@ struct RollCovOnlineMatXX : public Worker {
           if ((!na_restore) || (na_restore && !std::isnan(x(i, j)) &&
               !std::isnan(x(i, k)))) {
               
-              // compute the unbiased estimate of variance
               if ((n_obs > 1) && (n_obs >= min_obs)) {
                 
                 if (scale) {
@@ -3506,7 +3480,9 @@ struct RollCovOnlineMatXX : public Worker {
                   // don't compute if the standard deviation is zero
                   if ((sumsq_x < 0) || (sumsq_y < 0) ||
                       (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
+                    
                     arma_cov(j, k, i) = NA_REAL;
+                    
                   } else {
                     
                     if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
@@ -3553,7 +3529,7 @@ struct RollCovOnlineMatXX : public Worker {
   
 };
 
-// 'Worker' function for computing rolling covariances using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollCovOnlineMatXY : public Worker {
   
   const RMatrix<double> x;      // source
@@ -3613,7 +3589,7 @@ struct RollCovOnlineMatXY : public Worker {
         long double mean_y = 0;
         
         if (width > 1) {
-          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed!
+          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
         } else {
           lambda = arma_weights[n - 1];
         }
@@ -3823,7 +3799,6 @@ struct RollCovOnlineMatXY : public Worker {
           if ((!na_restore) || (na_restore && !std::isnan(x(i, j)) &&
               !std::isnan(y(i, k)))) {
               
-              // compute the unbiased estimate of variance
               if ((n_obs > 1) && (n_obs >= min_obs)) {
                 
                 if (scale) {
@@ -3831,7 +3806,9 @@ struct RollCovOnlineMatXY : public Worker {
                   // don't compute if the standard deviation is zero
                   if ((sumsq_x < 0) || (sumsq_y < 0) ||
                       (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
+                    
                     arma_cov(j, k, i) = NA_REAL;
+                    
                   } else {
                     
                     if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
@@ -3875,7 +3852,7 @@ struct RollCovOnlineMatXY : public Worker {
   
 };
 
-// 'Worker' function for computing rolling covariances using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollCovBatchMatXX : public Worker {
   
   const RMatrix<double> x;       // source
@@ -3942,7 +3919,7 @@ struct RollCovBatchMatXX : public Worker {
               if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j)) &&
                   !std::isnan(x(i - count, k))) {
                   
-                  // compute the rolling sum
+                  // compute the sum
                   sum_w += arma_weights[n - count - 1];
                 sum_x += arma_weights[n - count - 1] * x(i - count, j);
                 sum_y += arma_weights[n - count - 1] * x(i - count, k);
@@ -3974,7 +3951,7 @@ struct RollCovBatchMatXX : public Worker {
               if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j)) &&
                   !std::isnan(x(i - count, k))) {
                   
-                  // compute the rolling sum of squares with 'center' argument
+                  // compute the sum of squares with 'center' argument
                   if (center) {
                     
                     sumsq_x += arma_weights[n - count - 1] *
@@ -4021,7 +3998,7 @@ struct RollCovBatchMatXX : public Worker {
                 sum_w += arma_weights[n - count - 1];
               sumsq_w += pow(arma_weights[n - count - 1], 2.0);
               
-              // compute the rolling sum of squares with 'center' argument
+              // compute the sum of squares with 'center' argument
               if (center) {
                 sumsq_xy += arma_weights[n - count - 1] * 
                   (x(i - count, j) - mean_x) * (x(i - count, k) - mean_y);
@@ -4038,7 +4015,6 @@ struct RollCovBatchMatXX : public Worker {
             
           }
           
-          // compute the unbiased estimate of covariance
           if ((n_obs > 1) && (n_obs >= min_obs)) {
             
             if (scale) {
@@ -4046,7 +4022,9 @@ struct RollCovBatchMatXX : public Worker {
               // don't compute if the standard deviation is zero
               if ((var_x < 0) || (var_y < 0) ||
                   (sqrt(var_x) <= sqrt(arma::datum::eps)) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {
+                
                 arma_cov(j, k, i) = NA_REAL;
+                
               } else {
                 
                 if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
@@ -4090,7 +4068,7 @@ struct RollCovBatchMatXX : public Worker {
   
 };
 
-// 'Worker' function for computing rolling covariances using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollCovBatchMatXY : public Worker {
   
   const RMatrix<double> x;       // source
@@ -4158,7 +4136,7 @@ struct RollCovBatchMatXY : public Worker {
               if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j)) &&
                   !std::isnan(y(i - count, k))) {
                   
-                  // compute the rolling sum
+                  // compute the sum
                   sum_w += arma_weights[n - count - 1];
                 sum_x += arma_weights[n - count - 1] * x(i - count, j);
                 sum_y += arma_weights[n - count - 1] * y(i - count, k);
@@ -4190,7 +4168,7 @@ struct RollCovBatchMatXY : public Worker {
               if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j)) &&
                   !std::isnan(y(i - count, k))) {
                   
-                  // compute the rolling sum of squares with 'center' argument
+                  // compute the sum of squares with 'center' argument
                   if (center) {
                     
                     sumsq_x += arma_weights[n - count - 1] *
@@ -4237,7 +4215,7 @@ struct RollCovBatchMatXY : public Worker {
                 sum_w += arma_weights[n - count - 1];
               sumsq_w += pow(arma_weights[n - count - 1], 2.0);
               
-              // compute the rolling sum of squares with 'center' argument
+              // compute the sum of squares with 'center' argument
               if (center) {
                 sumsq_xy += arma_weights[n - count - 1] * 
                   (x(i - count, j) - mean_x) * (y(i - count, k) - mean_y);
@@ -4254,7 +4232,6 @@ struct RollCovBatchMatXY : public Worker {
             
           }
           
-          // compute the unbiased estimate of covariance
           if ((n_obs > 1) && (n_obs >= min_obs)) {
             
             if (scale) {
@@ -4262,7 +4239,9 @@ struct RollCovBatchMatXY : public Worker {
               // don't compute if the standard deviation is zero
               if ((var_x < 0) || (var_y < 0) ||
                   (sqrt(var_x) <= sqrt(arma::datum::eps)) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {
+                
                 arma_cov(j, k, i) = NA_REAL;
+                
               } else {
                 
                 if (std::abs(sumsq_xy) <= sqrt(arma::datum::eps)) {
@@ -4303,7 +4282,7 @@ struct RollCovBatchMatXY : public Worker {
   
 };
 
-// 'Worker' function for computing rolling covariances using an online algorithm
+// 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollCovOnlineMatLm : public Worker {
   
   const RMatrix<double> x;      // source
@@ -4361,7 +4340,7 @@ struct RollCovOnlineMatLm : public Worker {
         long double mean_y = 0;
         
         if (width > 1) {
-          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed!
+          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
         } else {
           lambda = arma_weights[n - 1];
         }
@@ -4558,7 +4537,6 @@ struct RollCovOnlineMatLm : public Worker {
           if ((!na_restore) || (na_restore && !std::isnan(x(i, j)) &&
               !std::isnan(x(i, k)))) {
               
-              // compute the unbiased estimate of variance
               // if ((n_obs > 1) && (n_obs >= min_obs)) {
               if (n_obs >= min_obs) {
                 
@@ -4594,7 +4572,7 @@ struct RollCovOnlineMatLm : public Worker {
   
 };
 
-// 'Worker' function for computing rolling covariances using a standard algorithm
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollCovBatchMatLm : public Worker {
   
   const RMatrix<double> x;      // source
@@ -4663,7 +4641,7 @@ struct RollCovBatchMatLm : public Worker {
               if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j)) &&
                   !std::isnan(x(i - count, k))) {
                   
-                  // compute the rolling sum
+                  // compute the sum
                   sum_w += arma_weights[n - count - 1];
                 sum_x += arma_weights[n - count - 1] * x(i - count, j);
                 sum_y += arma_weights[n - count - 1] * x(i - count, k);
@@ -4698,7 +4676,7 @@ struct RollCovBatchMatLm : public Worker {
                 sum_w += arma_weights[n - count - 1];
               sumsq_w += pow(arma_weights[n - count - 1], 2.0);
               
-              // compute the rolling sum of squares with 'center' argument
+              // compute the sum of squares with 'center' argument
               if (intercept) {
                 sumsq_xy += arma_weights[n - count - 1] * 
                   (x(i - count, j) - mean_x) * (x(i - count, k) - mean_y);
@@ -4728,7 +4706,6 @@ struct RollCovBatchMatLm : public Worker {
             arma_mean(i, j) = mean_x;
           }
           
-          // compute the unbiased estimate of covariance
           // if ((n_obs > 1) && (n_obs >= min_obs)) {
           if (n_obs >= min_obs) {
             
@@ -4761,7 +4738,7 @@ struct RollCovBatchMatLm : public Worker {
   
 };
 
-// 'Worker' function for rolling linear models
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollLmMatInterceptTRUE : public Worker {
   
   const arma::cube arma_cov;    // source
@@ -4886,7 +4863,7 @@ struct RollLmMatInterceptTRUE : public Worker {
   
 };
 
-// 'Worker' function for rolling linear models
+// 'Worker' function for computing the rolling statistic using a standard algorithm
 struct RollLmMatInterceptFALSE : public Worker {
   
   const arma::cube arma_cov;    // source

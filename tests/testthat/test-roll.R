@@ -1,5 +1,7 @@
 test_that("equal to online algorithm", {
   
+  # skip("long-running test")
+  
   for (ax in 1:length(test_roll_x)) {
     for (b in 1:length(test_width)) {
       
