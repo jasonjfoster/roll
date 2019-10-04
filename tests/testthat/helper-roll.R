@@ -27,7 +27,6 @@ set.seed(5640)
 idx <- sample(1:(n_obs * n_vars), n_obs / 2)
 test_data[[3]][idx] <- as.numeric(NA)
 
-# test data
 test_roll_x <- lapply(test_data, function(x){x[ , 1:2]})
 test_roll_y <- lapply(test_data, function(x){x[ , 3:4, drop = FALSE]})
 test_roll_x <- c(test_roll_x, list(test_roll_x[[3]][ , 1]))

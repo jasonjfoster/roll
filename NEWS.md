@@ -1,6 +1,6 @@
 ## News for package 'roll'
 
-### Changes in roll version 1.1.3 (YYYY-MM-DD)
+### Changes in roll version 1.1.3 (2019-10-04)
 
 * Added vector support to each function ([#20](https://github.com/jjf234/roll/issues/20))
 
