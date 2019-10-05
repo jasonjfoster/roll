@@ -1649,7 +1649,7 @@ struct RollIdxMinOnlineMat : public Worker {
           if (n_obs >= min_obs) {
             rcpp_idxmin(i, j) = idxmin_x;
           } else {
-            rcpp_idxmin(i, j) = NA_REAL;
+            rcpp_idxmin(i, j) = NA_INTEGER;
           }
           
         } else {
@@ -1741,7 +1741,7 @@ struct RollIdxMinBatchMat : public Worker {
           }
           
         } else {
-          rcpp_idxmin(i, j) = NA_REAL;
+          rcpp_idxmin(i, j) = NA_INTEGER;
         }
         
       } else {
@@ -1870,7 +1870,7 @@ struct RollIdxMaxOnlineMat : public Worker {
           if (n_obs >= min_obs) {
             rcpp_idxmax(i, j) = idxmax_x;
           } else {
-            rcpp_idxmax(i, j) = NA_REAL;
+            rcpp_idxmax(i, j) = NA_INTEGER;
           }
           
         } else {
@@ -1962,7 +1962,7 @@ struct RollIdxMaxBatchMat : public Worker {
           }
           
         } else {
-          rcpp_idxmax(i, j) = NA_REAL;
+          rcpp_idxmax(i, j) = NA_INTEGER;
         }
         
       } else {

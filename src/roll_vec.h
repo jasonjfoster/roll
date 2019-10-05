@@ -1501,7 +1501,7 @@ struct RollIdxMinOnlineVec {
         if (n_obs >= min_obs) {
           rcpp_idxmin[i] = idxmin_x;
         } else {
-          rcpp_idxmin[i] = NA_REAL;
+          rcpp_idxmin[i] = NA_INTEGER;
         }
         
       } else {
@@ -1583,7 +1583,7 @@ struct RollIdxMinBatchVec : public Worker {
           }
           
         } else {
-          rcpp_idxmin[i] = NA_REAL;
+          rcpp_idxmin[i] = NA_INTEGER;
         }
         
       } else {
@@ -1697,7 +1697,7 @@ struct RollIdxMaxOnlineVec {
         if (n_obs >= min_obs) {
           rcpp_idxmax[i] = idxmax_x;
         } else {
-          rcpp_idxmax[i] = NA_REAL;
+          rcpp_idxmax[i] = NA_INTEGER;
         }
         
       } else {
@@ -1779,7 +1779,7 @@ struct RollIdxMaxBatchVec : public Worker {
           }
           
         } else {
-          rcpp_idxmax[i] = NA_REAL;
+          rcpp_idxmax[i] = NA_INTEGER;
         }
         
       } else {
