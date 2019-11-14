@@ -2267,6 +2267,7 @@ struct RollSdOnlineVec {
     long double sumsq_x = 0;
     long double mean_prev_x = 0;
     long double mean_x = 0;
+    long double var_x = 0;
     
     if (width > 1) {
       lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
@@ -2323,6 +2324,8 @@ struct RollSdOnlineVec {
           sumsq_x = w_new * pow(x_new, (long double)2.0);
           
         }
+        
+        var_x = sumsq_x / (sum_w - sumsq_w / sum_w);
         
       }
       
@@ -2388,6 +2391,8 @@ struct RollSdOnlineVec {
           
         }
         
+        var_x = sumsq_x / (sum_w - sumsq_w / sum_w);
+        
       }
       
       // don't compute if missing value
@@ -2395,10 +2400,10 @@ struct RollSdOnlineVec {
         
         if ((n_obs > 1) && (n_obs >= min_obs)) {
           
-          if ((sumsq_x < 0) || (sqrt(sumsq_x) <= sqrt(arma::datum::eps))) {
+          if ((var_x < 0) || (sqrt(var_x) <= sqrt(arma::datum::eps))) {
             arma_sd[i] = 0;
           } else {
-            arma_sd[i] = sqrt(sumsq_x / (sum_w - sumsq_w / sum_w));
+            arma_sd[i] = sqrt(var_x);
           }
           
         } else {
@@ -3508,8 +3513,8 @@ struct RollCovBatchVecXX : public Worker {
       // from 1D to 3D array (lower triangle)
       int i = z;
       
+      long double sumsq_x = 0;
       long double mean_x = 0;
-      long double var_x = 0;
       
       // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
@@ -3545,7 +3550,6 @@ struct RollCovBatchVecXX : public Worker {
         if (scale) {
           
           int count = 0;
-          long double sumsq_x = 0;
           
           // number of observations is either the window size or,
           // for partial results, the number of the current row
@@ -3572,9 +3576,6 @@ struct RollCovBatchVecXX : public Worker {
             count += 1;
             
           }
-          
-          // compute the unbiased estimate of variance
-          var_x = sumsq_x;
           
         }
         
@@ -3616,10 +3617,10 @@ struct RollCovBatchVecXX : public Worker {
           if (scale) {
             
             // don't compute if the standard deviation is zero
-            if ((var_x < 0) || (sqrt(var_x) <= sqrt(arma::datum::eps))) {
+            if ((sumsq_x < 0) || (sqrt(sumsq_x) <= sqrt(arma::datum::eps))) {
               arma_cov[i] = NA_REAL;
             } else {
-              arma_cov[i] = sumsq_xy / (sqrt(var_x) * sqrt(var_x));
+              arma_cov[i] = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_x));
             }
             
           } else if (!scale) {
@@ -3678,10 +3679,10 @@ struct RollCovBatchVecXY : public Worker {
       // from 1D to 3D array
       int i = z;
       
+      long double sumsq_x = 0;
+      long double sumsq_y = 0;
       long double mean_x = 0;
       long double mean_y = 0;
-      long double var_x = 0;
-      long double var_y = 0;
       
       // don't compute if missing value and 'na_restore' argument is TRUE
       if ((!na_restore) || (na_restore && !std::isnan(x[i]) &&
@@ -3721,8 +3722,6 @@ struct RollCovBatchVecXY : public Worker {
           if (scale) {
             
             int count = 0;
-            long double sumsq_x = 0;
-            long double sumsq_y = 0;
             
             // number of observations is either the window size or,
             // for partial results, the number of the current row
@@ -3753,10 +3752,6 @@ struct RollCovBatchVecXY : public Worker {
               count += 1;
               
             }
-            
-            // compute the unbiased estimate of variance
-            var_x = sumsq_x;
-            var_y = sumsq_y;
             
           }
           
@@ -3798,13 +3793,13 @@ struct RollCovBatchVecXY : public Worker {
             if (scale) {
               
               // don't compute if the standard deviation is zero
-              if ((var_x < 0) || (var_y < 0) ||
-                  (sqrt(var_x) <= sqrt(arma::datum::eps)) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {
+              if ((sumsq_x < 0) || (sumsq_y < 0) ||
+                  (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
                 
                 arma_cov[i] = NA_REAL;
                 
               } else {
-                arma_cov[i] = sumsq_xy / (sqrt(var_x) * sqrt(var_y));
+                arma_cov[i] = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
               }
               
             } else if (!scale) {

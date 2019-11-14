@@ -8,7 +8,7 @@ test_that("equivalent to zoo::rollapply", {
   for (ax in 1:(length(test_zoo_x))) {
     for (b in 1:length(test_width)) {
 
-      width <- test_width[b]
+      width <- test_width[b]     
       test_weights <- list(rep(1, width))
 
       for (j in 1:length(test_online)) {
