@@ -58,7 +58,8 @@ void check_weights_lm(const int& n_rows_xy, const int& width,
   
 }
 
-bool check_lambda(const arma::vec& weights, const bool& online) {
+bool check_lambda(const arma::vec& weights, const int& n_rows_x,
+                  const int& width, const bool& online) {
   
   // check if equal-weights
   bool status_eq = all(weights == weights[0]);
@@ -80,8 +81,12 @@ bool check_lambda(const arma::vec& weights, const bool& online) {
       lambda = weights[n - i - 2] / weights[n - i - 1];
       
       // tolerance for consistency with R's all.equal
-      if ((i > 0) && (std::abs(lambda - lambda_prev) > sqrt(arma::datum::eps))) {
+      if (((i > 0) && (std::abs(lambda - lambda_prev) > sqrt(arma::datum::eps))) ||
+          ((weights[n - i - 2] > weights[n - i - 1]) && (width < n_rows_x)) ||
+          (std::isnan(lambda) || (std::isinf(lambda)))) {
+        
         status_exp = false;
+        
       }
       
       i += 1;
@@ -91,7 +96,7 @@ bool check_lambda(const arma::vec& weights, const bool& online) {
   }
   
   if (!status_exp && online) {
-    warning("'online' is only supported for equal or exponential 'weights'");
+    warning("'online' is only supported for equal or exponential decay 'weights'");
   }
   
   return status_exp;
@@ -519,7 +524,7 @@ SEXP roll_sum(const SEXP& x, const int& width,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_x(n_rows_x, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -578,7 +583,7 @@ SEXP roll_sum(const SEXP& x, const int& width,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_x(n_rows_x, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -640,7 +645,7 @@ SEXP roll_prod(const SEXP& x, const int& width,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_x(n_rows_x, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -699,7 +704,7 @@ SEXP roll_prod(const SEXP& x, const int& width,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_x(n_rows_x, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -761,7 +766,7 @@ SEXP roll_mean(const SEXP& x, const int& width,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_x(n_rows_x, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -820,7 +825,7 @@ SEXP roll_mean(const SEXP& x, const int& width,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_x(n_rows_x, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -1479,7 +1484,7 @@ SEXP roll_var(const SEXP& x, const int& width,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_x(n_rows_x, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -1538,7 +1543,7 @@ SEXP roll_var(const SEXP& x, const int& width,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_x(n_rows_x, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -1600,7 +1605,7 @@ SEXP roll_sd(const SEXP& x, const int& width,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_x(n_rows_x, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -1659,7 +1664,7 @@ SEXP roll_sd(const SEXP& x, const int& width,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_x(n_rows_x, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -1722,7 +1727,7 @@ SEXP roll_scale(const SEXP& x, const int& width,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_x(n_rows_x, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -1781,7 +1786,7 @@ SEXP roll_scale(const SEXP& x, const int& width,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_x(n_rows_x, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -1849,7 +1854,7 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_xy(n_rows_xy, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -1951,7 +1956,7 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_xy(n_rows_xy, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -2053,7 +2058,7 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_xy(n_rows_xy, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -2148,7 +2153,7 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_xy(n_rows_xy, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -2261,7 +2266,7 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_lm(n_rows_xy, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -2359,7 +2364,7 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_lm(n_rows_xy, width, weights);
-    bool status = check_lambda(weights, online);
+    bool status = check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
