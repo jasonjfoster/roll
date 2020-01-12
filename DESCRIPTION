@@ -1,7 +1,7 @@
 Package: roll
 Type: Package
 Title: Rolling Statistics
-Version: 1.1.3
+Version: 1.1.4
 Date: 2019-10-04
 Author: Jason Foster
 Maintainer: Jason Foster <jason.j.foster@gmail.com>

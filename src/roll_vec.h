@@ -121,8 +121,8 @@ struct RollAnyOnlineVec {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollAnyBatchVec : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollAnyOfflineVec : public Worker {
   
   const RVector<int> x;         // source
   const int n_rows_x;
@@ -132,9 +132,9 @@ struct RollAnyBatchVec : public Worker {
   RVector<int> rcpp_any;        // destination (pass by reference)
   
   // initialize with source and destination
-  RollAnyBatchVec(const IntegerVector x, const int n_rows_x,
-                  const int width, const int min_obs,
-                  const bool na_restore, IntegerVector rcpp_any)
+  RollAnyOfflineVec(const IntegerVector x, const int n_rows_x,
+                    const int width, const int min_obs,
+                    const bool na_restore, IntegerVector rcpp_any)
     : x(x), n_rows_x(n_rows_x),
       width(width), min_obs(min_obs),
       na_restore(na_restore), rcpp_any(rcpp_any) { }
@@ -310,8 +310,8 @@ struct RollAllOnlineVec {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollAllBatchVec : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollAllOfflineVec : public Worker {
   
   const RVector<int> x;         // source
   const int n_rows_x;
@@ -321,9 +321,9 @@ struct RollAllBatchVec : public Worker {
   RVector<int> rcpp_all;        // destination (pass by reference)
   
   // initialize with source and destination
-  RollAllBatchVec(const IntegerVector x, const int n_rows_x,
-                  const int width, const int min_obs,
-                  const bool na_restore, IntegerVector rcpp_all)
+  RollAllOfflineVec(const IntegerVector x, const int n_rows_x,
+                    const int width, const int min_obs,
+                    const bool na_restore, IntegerVector rcpp_all)
     : x(x), n_rows_x(n_rows_x),
       width(width), min_obs(min_obs),
       na_restore(na_restore), rcpp_all(rcpp_all) { }
@@ -513,8 +513,8 @@ struct RollSumOnlineVec {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollSumBatchVec : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollSumOfflineVec : public Worker {
   
   const RVector<double> x;      // source
   const int n;
@@ -526,10 +526,10 @@ struct RollSumBatchVec : public Worker {
   arma::vec& arma_sum;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollSumBatchVec(const NumericVector x, const int n,
-                  const int n_rows_x, const int width,
-                  const arma::vec arma_weights, const int min_obs,
-                  const bool na_restore, arma::vec& arma_sum)
+  RollSumOfflineVec(const NumericVector x, const int n,
+                    const int n_rows_x, const int width,
+                    const arma::vec arma_weights, const int min_obs,
+                    const bool na_restore, arma::vec& arma_sum)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
@@ -741,8 +741,8 @@ struct RollProdOnlineVec {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollProdBatchVec : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollProdOfflineVec : public Worker {
   
   const RVector<double> x;      // source
   const int n;
@@ -754,10 +754,10 @@ struct RollProdBatchVec : public Worker {
   arma::vec& arma_prod;         // destination (pass by reference)
   
   // initialize with source and destination
-  RollProdBatchVec(const NumericVector x, const int n,
-                   const int n_rows_x, const int width,
-                   const arma::vec arma_weights, const int min_obs,
-                   const bool na_restore, arma::vec& arma_prod)
+  RollProdOfflineVec(const NumericVector x, const int n,
+                     const int n_rows_x, const int width,
+                     const arma::vec arma_weights, const int min_obs,
+                     const bool na_restore, arma::vec& arma_prod)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
@@ -950,8 +950,8 @@ struct RollMeanOnlineVec {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollMeanBatchVec : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollMeanOfflineVec : public Worker {
   
   const RVector<double> x;      // source
   const int n;
@@ -963,10 +963,10 @@ struct RollMeanBatchVec : public Worker {
   arma::vec& arma_mean;         // destination (pass by reference)
   
   // initialize with source and destination
-  RollMeanBatchVec(const NumericVector x, const int n,
-                   const int n_rows_x, const int width,
-                   const arma::vec arma_weights, const int min_obs,
-                   const bool na_restore, arma::vec& arma_mean)
+  RollMeanOfflineVec(const NumericVector x, const int n,
+                     const int n_rows_x, const int width,
+                     const arma::vec arma_weights, const int min_obs,
+                     const bool na_restore, arma::vec& arma_mean)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
@@ -1137,8 +1137,8 @@ struct RollMinOnlineVec {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollMinBatchVec : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollMinOfflineVec : public Worker {
   
   const RVector<double> x;      // source
   const int n;
@@ -1150,10 +1150,10 @@ struct RollMinBatchVec : public Worker {
   arma::vec& arma_min;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollMinBatchVec(const NumericVector x, const int n,
-                  const int n_rows_x, const int width,
-                  const arma::vec arma_weights, const int min_obs,
-                  const bool na_restore, arma::vec& arma_min)
+  RollMinOfflineVec(const NumericVector x, const int n,
+                    const int n_rows_x, const int width,
+                    const arma::vec arma_weights, const int min_obs,
+                    const bool na_restore, arma::vec& arma_min)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
@@ -1327,8 +1327,8 @@ struct RollMaxOnlineVec {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollMaxBatchVec : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollMaxOfflineVec : public Worker {
   
   const RVector<double> x;      // source
   const int n;
@@ -1340,10 +1340,10 @@ struct RollMaxBatchVec : public Worker {
   arma::vec& arma_max;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollMaxBatchVec(const NumericVector x, const int n,
-                  const int n_rows_x, const int width,
-                  const arma::vec arma_weights, const int min_obs,
-                  const bool na_restore, arma::vec& arma_max)
+  RollMaxOfflineVec(const NumericVector x, const int n,
+                    const int n_rows_x, const int width,
+                    const arma::vec arma_weights, const int min_obs,
+                    const bool na_restore, arma::vec& arma_max)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
@@ -1517,8 +1517,8 @@ struct RollIdxMinOnlineVec {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollIdxMinBatchVec : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollIdxMinOfflineVec : public Worker {
   
   const RVector<double> x;      // source
   const int n;
@@ -1530,10 +1530,10 @@ struct RollIdxMinBatchVec : public Worker {
   RVector<int> rcpp_idxmin;     // destination (pass by reference)
   
   // initialize with source and destination
-  RollIdxMinBatchVec(const NumericVector x, const int n,
-                     const int n_rows_x, const int width,
-                     const arma::vec arma_weights, const int min_obs,
-                     const bool na_restore, IntegerVector rcpp_idxmin)
+  RollIdxMinOfflineVec(const NumericVector x, const int n,
+                       const int n_rows_x, const int width,
+                       const arma::vec arma_weights, const int min_obs,
+                       const bool na_restore, IntegerVector rcpp_idxmin)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
@@ -1713,8 +1713,8 @@ struct RollIdxMaxOnlineVec {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollIdxMaxBatchVec : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollIdxMaxOfflineVec : public Worker {
   
   const RVector<double> x;      // source
   const int n;
@@ -1726,10 +1726,10 @@ struct RollIdxMaxBatchVec : public Worker {
   RVector<int> rcpp_idxmax;     // destination (pass by reference)
   
   // initialize with source and destination
-  RollIdxMaxBatchVec(const NumericVector x, const int n,
-                     const int n_rows_x, const int width,
-                     const arma::vec arma_weights, const int min_obs,
-                     const bool na_restore, IntegerVector rcpp_idxmax)
+  RollIdxMaxOfflineVec(const NumericVector x, const int n,
+                       const int n_rows_x, const int width,
+                       const arma::vec arma_weights, const int min_obs,
+                       const bool na_restore, IntegerVector rcpp_idxmax)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
@@ -1794,8 +1794,8 @@ struct RollIdxMaxBatchVec : public Worker {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollMedianBatchVec : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollMedianOfflineVec : public Worker {
   
   const RVector<double> x;      // source
   const int n;
@@ -1807,10 +1807,10 @@ struct RollMedianBatchVec : public Worker {
   arma::vec& arma_median;       // destination (pass by reference)
   
   // initialize with source and destination
-  RollMedianBatchVec(const NumericVector x, const int n,
-                     const int n_rows_x, const int width,
-                     const arma::vec arma_weights, const int min_obs,
-                     const bool na_restore, arma::vec& arma_median)
+  RollMedianOfflineVec(const NumericVector x, const int n,
+                       const int n_rows_x, const int width,
+                       const arma::vec arma_weights, const int min_obs,
+                       const bool na_restore, arma::vec& arma_median)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
@@ -2111,8 +2111,8 @@ struct RollVarOnlineVec {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollVarBatchVec : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollVarOfflineVec : public Worker {
   
   const RVector<double> x;      // source
   const int n;
@@ -2125,11 +2125,11 @@ struct RollVarBatchVec : public Worker {
   arma::vec& arma_var;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollVarBatchVec(const NumericVector x, const int n,
-                  const int n_rows_x, const int width,
-                  const arma::vec arma_weights, const bool center,
-                  const int min_obs, const bool na_restore,
-                  arma::vec& arma_var)
+  RollVarOfflineVec(const NumericVector x, const int n,
+                    const int n_rows_x, const int width,
+                    const arma::vec arma_weights, const bool center,
+                    const int min_obs, const bool na_restore,
+                    arma::vec& arma_var)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), center(center),
@@ -2423,8 +2423,8 @@ struct RollSdOnlineVec {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollSdBatchVec : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollSdOfflineVec : public Worker {
   
   const RVector<double> x;      // source
   const int n;
@@ -2437,11 +2437,11 @@ struct RollSdBatchVec : public Worker {
   arma::vec& arma_sd;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollSdBatchVec(const NumericVector x, const int n,
-                 const int n_rows_x, const int width,
-                 const arma::vec arma_weights, const bool center,
-                 const int min_obs, const bool na_restore,
-                 arma::vec& arma_sd)
+  RollSdOfflineVec(const NumericVector x, const int n,
+                   const int n_rows_x, const int width,
+                   const arma::vec arma_weights, const bool center,
+                   const int min_obs, const bool na_restore,
+                   arma::vec& arma_sd)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), center(center),
@@ -2773,8 +2773,8 @@ struct RollScaleOnlineVec {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollScaleBatchVec : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollScaleOfflineVec : public Worker {
   
   const RVector<double> x;      // source
   const int n;
@@ -2788,11 +2788,11 @@ struct RollScaleBatchVec : public Worker {
   arma::vec& arma_scale;        // destination (pass by reference)
   
   // initialize with source and destination
-  RollScaleBatchVec(const NumericVector x, const int n,
-                    const int n_rows_x, const int width,
-                    const arma::vec arma_weights, const bool center,
-                    const bool scale, const int min_obs,
-                    const bool na_restore, arma::vec& arma_scale)
+  RollScaleOfflineVec(const NumericVector x, const int n,
+                      const int n_rows_x, const int width,
+                      const arma::vec arma_weights, const bool center,
+                      const bool scale, const int min_obs,
+                      const bool na_restore, arma::vec& arma_scale)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), center(center),
@@ -3480,8 +3480,8 @@ struct RollCovOnlineVecXY {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollCovBatchVecXX : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollCovOfflineVecXX : public Worker {
   
   const RVector<double> x;       // source
   const int n;
@@ -3495,11 +3495,11 @@ struct RollCovBatchVecXX : public Worker {
   arma::vec& arma_cov;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollCovBatchVecXX(const NumericVector x, const int n,
-                    const int n_rows_xy, const int width,
-                    const arma::vec arma_weights, const bool center,
-                    const bool scale, const int min_obs,
-                    const bool na_restore, arma::vec& arma_cov)
+  RollCovOfflineVecXX(const NumericVector x, const int n,
+                      const int n_rows_xy, const int width,
+                      const arma::vec arma_weights, const bool center,
+                      const bool scale, const int min_obs,
+                      const bool na_restore, arma::vec& arma_cov)
     : x(x), n(n),
       n_rows_xy(n_rows_xy), width(width),
       arma_weights(arma_weights), center(center),
@@ -3643,8 +3643,8 @@ struct RollCovBatchVecXX : public Worker {
   
 };
 
-// 'Worker' function for computing the rolling statistic using a standard algorithm
-struct RollCovBatchVecXY : public Worker {
+// 'Worker' function for computing the rolling statistic using an offline algorithm
+struct RollCovOfflineVecXY : public Worker {
   
   const RVector<double> x;       // source
   const RVector<double> y;       // source
@@ -3659,12 +3659,12 @@ struct RollCovBatchVecXY : public Worker {
   arma::vec& arma_cov;          // destination (pass by reference)
   
   // initialize with source and destination
-  RollCovBatchVecXY(const NumericVector x, const NumericVector y,
-                    const int n, const int n_rows_xy,
-                    const int width, const arma::vec arma_weights,
-                    const bool center, const bool scale,
-                    const int min_obs, const bool na_restore,
-                    arma::vec& arma_cov)
+  RollCovOfflineVecXY(const NumericVector x, const NumericVector y,
+                      const int n, const int n_rows_xy,
+                      const int width, const arma::vec arma_weights,
+                      const bool center, const bool scale,
+                      const int min_obs, const bool na_restore,
+                      arma::vec& arma_cov)
     : x(x), y(y),
       n(n), n_rows_xy(n_rows_xy),
       width(width), arma_weights(arma_weights),
