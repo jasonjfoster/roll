@@ -4,8 +4,14 @@
 \alias{roll_all}
 \title{Rolling All}
 \usage{
-roll_all(x, width, min_obs = width, complete_obs = FALSE,
-  na_restore = FALSE, online = TRUE)
+roll_all(
+  x,
+  width,
+  min_obs = width,
+  complete_obs = FALSE,
+  na_restore = FALSE,
+  online = TRUE
+)
 }
 \arguments{
 \item{x}{logical vector or matrix. Rows are observations and columns are variables.}

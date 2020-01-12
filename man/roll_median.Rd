@@ -4,8 +4,15 @@
 \alias{roll_median}
 \title{Rolling Medians}
 \usage{
-roll_median(x, width, weights = rep(1, width), min_obs = width,
-  complete_obs = FALSE, na_restore = FALSE, online = FALSE)
+roll_median(
+  x,
+  width,
+  weights = rep(1, width),
+  min_obs = width,
+  complete_obs = FALSE,
+  na_restore = FALSE,
+  online = FALSE
+)
 }
 \arguments{
 \item{x}{vector or matrix. Rows are observations and columns are variables.}

@@ -4,9 +4,16 @@
 \alias{roll_sd}
 \title{Rolling Standard Deviations}
 \usage{
-roll_sd(x, width, weights = rep(1, width), center = TRUE,
-  min_obs = width, complete_obs = FALSE, na_restore = FALSE,
-  online = TRUE)
+roll_sd(
+  x,
+  width,
+  weights = rep(1, width),
+  center = TRUE,
+  min_obs = width,
+  complete_obs = FALSE,
+  na_restore = FALSE,
+  online = TRUE
+)
 }
 \arguments{
 \item{x}{vector or matrix. Rows are observations and columns are variables.}

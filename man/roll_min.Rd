@@ -4,8 +4,15 @@
 \alias{roll_min}
 \title{Rolling Minimums}
 \usage{
-roll_min(x, width, weights = rep(1, width), min_obs = width,
-  complete_obs = FALSE, na_restore = FALSE, online = TRUE)
+roll_min(
+  x,
+  width,
+  weights = rep(1, width),
+  min_obs = width,
+  complete_obs = FALSE,
+  na_restore = FALSE,
+  online = TRUE
+)
 }
 \arguments{
 \item{x}{vector or matrix. Rows are observations and columns are variables.}

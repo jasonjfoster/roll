@@ -4,9 +4,17 @@
 \alias{roll_scale}
 \title{Rolling Scaling and Centering}
 \usage{
-roll_scale(x, width, weights = rep(1, width), center = TRUE,
-  scale = TRUE, min_obs = width, complete_obs = FALSE,
-  na_restore = FALSE, online = TRUE)
+roll_scale(
+  x,
+  width,
+  weights = rep(1, width),
+  center = TRUE,
+  scale = TRUE,
+  min_obs = width,
+  complete_obs = FALSE,
+  na_restore = FALSE,
+  online = TRUE
+)
 }
 \arguments{
 \item{x}{vector or matrix. Rows are observations and columns are variables.}

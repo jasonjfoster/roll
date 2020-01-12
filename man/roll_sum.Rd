@@ -4,8 +4,15 @@
 \alias{roll_sum}
 \title{Rolling Sums}
 \usage{
-roll_sum(x, width, weights = rep(1, width), min_obs = width,
-  complete_obs = FALSE, na_restore = FALSE, online = TRUE)
+roll_sum(
+  x,
+  width,
+  weights = rep(1, width),
+  min_obs = width,
+  complete_obs = FALSE,
+  na_restore = FALSE,
+  online = TRUE
+)
 }
 \arguments{
 \item{x}{vector or matrix. Rows are observations and columns are variables.}
