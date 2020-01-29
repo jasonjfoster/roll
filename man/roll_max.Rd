@@ -4,15 +4,8 @@
 \alias{roll_max}
 \title{Rolling Maximums}
 \usage{
-roll_max(
-  x,
-  width,
-  weights = rep(1, width),
-  min_obs = width,
-  complete_obs = FALSE,
-  na_restore = FALSE,
-  online = TRUE
-)
+roll_max(x, width, weights = rep(1, width), min_obs = width,
+  complete_obs = FALSE, na_restore = FALSE, online = TRUE)
 }
 \arguments{
 \item{x}{vector or matrix. Rows are observations and columns are variables.}

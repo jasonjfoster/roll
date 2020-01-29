@@ -4,17 +4,9 @@
 \alias{roll_lm}
 \title{Rolling Linear Models}
 \usage{
-roll_lm(
-  x,
-  y,
-  width,
-  weights = rep(1, width),
-  intercept = TRUE,
-  min_obs = width,
-  complete_obs = TRUE,
-  na_restore = FALSE,
-  online = TRUE
-)
+roll_lm(x, y, width, weights = rep(1, width), intercept = TRUE,
+  min_obs = width, complete_obs = TRUE, na_restore = FALSE,
+  online = TRUE)
 }
 \arguments{
 \item{x}{vector or matrix. Rows are observations and columns are the independent variables.}

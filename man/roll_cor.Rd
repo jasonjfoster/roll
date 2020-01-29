@@ -4,18 +4,9 @@
 \alias{roll_cor}
 \title{Rolling Correlation Matrices}
 \usage{
-roll_cor(
-  x,
-  y = NULL,
-  width,
-  weights = rep(1, width),
-  center = TRUE,
-  scale = TRUE,
-  min_obs = width,
-  complete_obs = TRUE,
-  na_restore = FALSE,
-  online = TRUE
-)
+roll_cor(x, y = NULL, width, weights = rep(1, width), center = TRUE,
+  scale = TRUE, min_obs = width, complete_obs = TRUE,
+  na_restore = FALSE, online = TRUE)
 }
 \arguments{
 \item{x}{vector or matrix. Rows are observations and columns are variables.}

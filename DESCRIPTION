@@ -14,6 +14,7 @@ Imports:
     RcppParallel
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
 SystemRequirements: GNU make, C++11
+Roxygen: list(old_usage = TRUE)
 RoxygenNote: 7.0.2
 Encoding: UTF-8
 Suggests: 
