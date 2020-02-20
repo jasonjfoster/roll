@@ -620,6 +620,7 @@ struct RollProdOnlineVec {
     long double x_old = 0;
     long double prod_w = 1;
     long double prod_x = 1;
+    long double prod_z = 1;
     
     if (width > 1) {
       lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
@@ -715,7 +716,18 @@ struct RollProdOnlineVec {
         
         n_old = n_new;
         prod_w *= w_new * n_exp / w_old;
-        prod_x *= x_new / x_old;
+        
+        if (x_old != 0) {
+          
+          prod_z *= x_new / x_old;
+          prod_x *= x_new / x_old;
+          
+        } else {
+          
+          prod_z *= x_new;
+          prod_x = prod_z;
+          
+        }
         
       }
       

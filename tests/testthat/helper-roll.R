@@ -85,9 +85,7 @@ rollapplyr_cube <- function(f, x, y, width) {
       temp <- f(x[max(1, i - width + 1):i, , drop = FALSE],
                 y[max(1, i - width + 1):i, , drop = FALSE])
       
-      if (!anyNA(temp)) {
-        result[ , , i] <- temp
-      }
+      result[ , , i] <- temp
       
     }
     
@@ -101,9 +99,7 @@ rollapplyr_cube <- function(f, x, y, width) {
       temp <- f(x[max(1, i - width + 1):i],
                 y[max(1, i - width + 1):i])
       
-      if (!anyNA(temp)) {
-        result[i] <- temp
-      }
+      result[i] <- temp
       
     }
     

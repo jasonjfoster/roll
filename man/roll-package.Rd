@@ -21,7 +21,7 @@ threads, then set the number of threads in the RcppParallel package with the
 \packageAuthor{roll}
 }
 \references{
-Welford, B.P. (1962). "Note on a method for calculating corrected sums of squares and products". \emph{Technometrics}, 4(3), 419–420.
+Welford, B.P. (1962). "Note on a Method for Calculating Corrected Sums of Squares and Products." \emph{Technometrics}, 4(3), 419–420.
 
-West, D.H.D. (1979). "Updating Mean and Variance Estimates: An Improved Method". \emph{Communications of the ACM}, 22(9), 532-535.
+West, D.H.D. (1979). "Updating Mean and Variance Estimates: An Improved Method." \emph{Communications of the ACM}, 22(9), 532-535.
 }
