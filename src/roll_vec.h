@@ -610,6 +610,7 @@ struct RollProdOnlineVec {
   void operator()() {
     
     int n_obs = 0;
+    int n_zero = 0;
     long double lambda = 0;
     long double n_new = 0;
     long double n_old = 0;
@@ -620,7 +621,6 @@ struct RollProdOnlineVec {
     long double x_old = 0;
     long double prod_w = 1;
     long double prod_x = 1;
-    long double prod_z = 1;
     
     if (width > 1) {
       lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
@@ -649,6 +649,13 @@ struct RollProdOnlineVec {
           n_new = n_obs - 1;
           w_new = arma_weights[n - 1];
           x_new = x[i];
+          
+        }
+        
+        if (x[i] == 0) {
+          
+          x_new = 1;
+          n_zero += 1;
           
         }
         
@@ -706,6 +713,20 @@ struct RollProdOnlineVec {
           
         }
         
+        if (x[i] == 0) {
+          
+          x_new = 1;
+          n_zero += 1;
+          
+        }
+        
+        if (x[i - width] == 0) {
+          
+          x_old = 1;
+          n_zero -= 1;
+          
+        }
+        
         if (n_new == 0) {
           n_exp = 1;
         } else if (n_new > n_old) {
@@ -716,18 +737,7 @@ struct RollProdOnlineVec {
         
         n_old = n_new;
         prod_w *= w_new * n_exp / w_old;
-        
-        if (x_old != 0) {
-          
-          prod_z *= x_new / x_old;
-          prod_x *= x_new / x_old;
-          
-        } else {
-          
-          prod_z *= x_new;
-          prod_x = prod_z;
-          
-        }
+        prod_x *= x_new / x_old;
         
       }
       
@@ -735,7 +745,13 @@ struct RollProdOnlineVec {
       if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
         
         if (n_obs >= min_obs) {
-          arma_prod[i] = prod_w * prod_x;
+          
+          if (n_zero == 0) {
+            arma_prod[i] = prod_w * prod_x;
+          } else {
+            arma_prod[i]= 0;
+          }
+          
         } else {
           arma_prod[i] = NA_REAL;
         }

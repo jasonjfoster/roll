@@ -9,13 +9,13 @@ dates <- seq(Sys.Date(), length.out = n_obs, by = "-1 day")
 if (requireNamespace("zoo", quietly = TRUE)) {
   
   test_data <- list(zoo::zoo(matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars), dates),
-                    zoo::zoo(matrix(rev(rep(1:n_vars, times = n_vars, each = n_obs / n_vars)) / 1000,
+                    zoo::zoo(matrix(rev(rep(0:(n_vars - 1), times = n_vars, each = n_obs / n_vars)) / 1000,
                                     nrow = n_obs, ncol = n_vars), dates))
   
 } else {
   
   test_data <- list(matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars),
-                    matrix(rev(rep(1:n_vars, times = n_vars, each = n_obs / n_vars)) / 1000,
+                    matrix(rev(rep(0:(n_vars - 1), times = n_vars, each = n_obs / n_vars)) / 1000,
                            nrow = n_obs, ncol = n_vars))
   
 }
