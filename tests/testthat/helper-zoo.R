@@ -1,57 +1,3 @@
-n_vars <- 4
-n_obs <- 20 # 2000
-lambda <- 0.9 # 1 / 0.9
-
-# test data
-set.seed(5640)
-dates <- seq(Sys.Date(), length.out = n_obs, by = "-1 day")
-
-if (requireNamespace("zoo", quietly = TRUE)) {
-  
-  test_data <- list(zoo::zoo(matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars), dates),
-                    zoo::zoo(matrix(rev(rep(0:(n_vars - 1), times = n_vars, each = n_obs / n_vars)) / 1000,
-                                    nrow = n_obs, ncol = n_vars), dates))
-  
-} else {
-  
-  test_data <- list(matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars),
-                    matrix(rev(rep(0:(n_vars - 1), times = n_vars, each = n_obs / n_vars)) / 1000,
-                           nrow = n_obs, ncol = n_vars))
-  
-}
-
-test_data <- lapply(test_data, setNames, paste0("x", rep(1:n_vars)))
-test_data <- c(test_data, list(matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)))
-
-set.seed(5640)
-idx <- sample(1:(n_obs * n_vars), n_obs / 2)
-test_data[[3]][idx] <- as.numeric(NA)
-
-test_roll_x <- lapply(test_data, function(x){x[ , 1:2]})
-test_roll_y <- lapply(test_data, function(x){x[ , 3:4, drop = FALSE]})
-test_roll_x <- c(test_roll_x, list(test_roll_x[[3]][ , 1]))
-test_roll_y <- c(test_roll_y, list(test_roll_y[[3]][ , 1]))
-test_roll_null <- c(test_roll_x, list(NULL))
-names(test_roll_x[[4]]) <- zoo::index(test_roll_x[[1]])
-names(test_roll_y[[4]]) <- zoo::index(test_roll_y[[1]])
-
-test_zoo_x <- lapply(test_data, function(x){x[ , 1:2]})[-3]
-test_zoo_y <- lapply(test_data, function(x){x[ , 3:4, drop = FALSE]})[-3]
-test_zoo_yy <- lapply(test_data, function(x){x[ , 3, drop = FALSE]})[-3]
-test_zoo_x <- c(test_zoo_x, list(rnorm(n_obs)))
-test_zoo_y <- c(test_zoo_y, list(rnorm(n_obs)))
-test_zoo_yy <- c(test_zoo_yy, list(rnorm(n_obs)))
-
-# test arguments
-test_width <- c(1, 2, 10, 20)
-test_intercept <- c(TRUE, FALSE)
-test_center <- c(TRUE, FALSE)
-test_scale <- c(TRUE, FALSE)
-test_min_obs <- c(1, 2, 10, 20)
-test_complete_obs <- c(TRUE, FALSE)
-test_na_restore <- c(TRUE, FALSE)
-test_online <- c(TRUE, FALSE)
-
 # test functions
 scale_z <- function(x, center = TRUE, scale = TRUE) {
   
@@ -171,7 +117,7 @@ rollapplyr_lm <- function(x, y, width, intercept) {
       summary_fit <- summary(fit)
       summary_fit_coef <- coef(summary_fit)[ , "Estimate"]
       
-      if ((nrow(coef(summary_fit)) == n_cols_x)) {
+      if (nrow(coef(summary_fit)) == n_cols_x) {
         
         result[["coefficients"]][i, ] <- summary_fit_coef
         
@@ -244,7 +190,7 @@ rollapplyr_lm <- function(x, y, width, intercept) {
       summary_fit <- summary(fit)
       summary_fit_coef <- coef(summary_fit)[ , "Estimate"]
       
-      if ((nrow(coef(summary_fit)) == n_cols_x)) {
+      if (nrow(coef(summary_fit)) == n_cols_x) {
         
         result[["coefficients"]][i] <- summary_fit_coef
         

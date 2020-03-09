@@ -704,14 +704,15 @@ struct RollProdOnlineMat : public Worker {
             
             n_new = n_obs - 1;
             w_new = arma_weights[n - 1];
-            x_new = x(i, j);
             
-          }
-          
-          if (x(i, j) == 0) {
-            
-            x_new = 1;
-            n_zero += 1;
+            if (x(i, j) == 0) {
+              
+              x_new = 1;
+              n_zero += 1;
+              
+            } else {
+              x_new = x(i, j);
+            }
             
           }
           
@@ -756,7 +757,15 @@ struct RollProdOnlineMat : public Worker {
             
             n_new = n_obs - 1;
             w_new = arma_weights[n - 1];
-            x_new = x(i, j);
+            
+            if (x(i, j) == 0) {
+              
+              x_new = 1;
+              n_zero += 1;
+              
+            } else {
+              x_new = x(i, j);
+            }
             
           }
           
@@ -768,21 +777,15 @@ struct RollProdOnlineMat : public Worker {
           } else {
             
             w_old = arma_weights[n - width];
-            x_old = x(i - width, j);
             
-          }
-          
-          if (x(i, j) == 0) {
-            
-            x_new = 1;
-            n_zero += 1;
-            
-          }
-          
-          if (x(i - width, j) == 0) {
-            
-            x_old = 1;
-            n_zero -= 1;
+            if (x(i - width, j) == 0) {
+              
+              x_old = 1;
+              n_zero -= 1;
+              
+            } else {
+              x_old = x(i - width, j);
+            }
             
           }
           
@@ -4748,7 +4751,15 @@ struct RollLmMatInterceptTRUE : public Worker {
           if ((var_y < 0) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {      
             arma_rsq[i] = NA_REAL;
           } else {
-            arma_rsq[i] = as_scalar(trans_coef * A * coef) / var_y;
+            
+            long double rsq = as_scalar(trans_coef * A * coef) / var_y;
+            
+            if (std::abs(rsq - 1) <= sqrt(arma::datum::eps)) {
+              arma_rsq[i] = 1;
+            } else {
+              arma_rsq[i] = rsq;
+            }
+            
           }
           
           // check if matrix is singular
@@ -4758,7 +4769,7 @@ struct RollLmMatInterceptTRUE : public Worker {
           
           if (status_inv && (df_resid > 0)) {
             
-            // residual variance
+            // standard errors
             long double var_resid = (1 - arma_rsq[i]) * var_y / df_resid;
             arma_se(i, 0) = sqrt(var_resid * (1 / arma_sum_w[i] +
               as_scalar(mean_x * A_inv * trans(mean_x))));
@@ -4856,7 +4867,19 @@ struct RollLmMatInterceptFALSE : public Worker {
           
           // r-squared
           long double var_y = sigma(n_cols_x - 1, n_cols_x - 1);
-          arma_rsq[i] = as_scalar(trans_coef * A * coef) / var_y;
+          if ((var_y < 0) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {      
+            arma_rsq[i] = NA_REAL;
+          } else {
+            
+            long double rsq = as_scalar(trans_coef * A * coef) / var_y;
+            
+            if (std::abs(rsq - 1) <= sqrt(arma::datum::eps)) {
+              arma_rsq[i] = 1;
+            } else {
+              arma_rsq[i] = rsq;
+            }
+            
+          }
           
           // check if matrix is singular
           arma::mat A_inv(n_cols_x, n_cols_x);
@@ -4865,7 +4888,7 @@ struct RollLmMatInterceptFALSE : public Worker {
           
           if (status_inv && (df_resid > 0)) {
             
-            // residual variance
+            // standard errors
             long double var_resid = (1 - arma_rsq[i]) * var_y / df_resid;
             arma_se.row(i) = sqrt(var_resid * trans(diagvec(A_inv)));
             
