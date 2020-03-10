@@ -3915,15 +3915,7 @@ struct RollLmVecInterceptFALSE : public Worker {
           if ((var_y < 0) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {      
             arma_rsq[i] = NA_REAL;
           } else {
-            
-            long double rsq = as_scalar(trans_coef * A * coef) / var_y;
-            
-            if (std::abs(rsq - 1) <= sqrt(arma::datum::eps)) {
-              arma_rsq[i] = 1;
-            } else {
-              arma_rsq[i] = rsq;
-            }
-            
+            arma_rsq[i] = as_scalar(trans_coef * A * coef) / var_y;
           }
           
           // check if matrix is singular
