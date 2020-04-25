@@ -25,20 +25,26 @@ if \code{FALSE} then each value is used.}
 \item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
-An object of the same class and dimension as \code{x} with the rolling medians.
+An object of the same class and dimension as \code{x} with the rolling and expanding
+medians.
 }
 \description{
-A function for computing the rolling medians of time-series data.
+A function for computing the rolling and expanding medians of time-series data.
 }
 \examples{
-n_vars <- 3
-n_obs <- 15
-x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+n <- 15
+x <- rnorm(n)
+weights <- 0.9 ^ (n:1)
 
-# rolling medians
-result <- roll_median(x, 5)
+# rolling medians with complete windows
+roll_median(x, width = 5)
 
-# rolling medians with exponential decay
-weights <- 0.9 ^ (5:1)
-result <- roll_median(x, 5, weights)
+# rolling medians with partial windows
+roll_median(x, width = 5, min_obs = 1)
+
+# expanding medians with partial windows
+roll_median(x, width = n, min_obs = 1)
+
+# expanding medians with partial windows and weights
+roll_median(x, width = n, min_obs = 1, weights = weights)
 }

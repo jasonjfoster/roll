@@ -29,24 +29,30 @@ if \code{FALSE} then each value is used.}
 \item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
-An object of the same class and dimension as \code{x} with the rolling variances.
+An object of the same class and dimension as \code{x} with the rolling and expanding
+variances.
 }
 \description{
-A function for computing the rolling variances of time-series data.
+A function for computing the rolling and expanding variances of time-series data.
 }
 \details{
-The denominator used gives an unbiased estimate of the variance, so if the weights are the 
-default then the divisor \code{n - 1} is obtained.
+The denominator used gives an unbiased estimate of the variance,
+so if the weights are the default then the divisor \code{n - 1} is obtained.
 }
 \examples{
-n_vars <- 3
-n_obs <- 15
-x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+n <- 15
+x <- rnorm(n)
+weights <- 0.9 ^ (n:1)
 
-# rolling variances
-result <- roll_var(x, 5)
+# rolling variances with complete windows
+roll_var(x, width = 5)
 
-# rolling variances with exponential decay
-weights <- 0.9 ^ (5:1)
-result <- roll_var(x, 5, weights)
+# rolling variances with partial windows
+roll_var(x, width = 5, min_obs = 1)
+
+# expanding variances with partial windows
+roll_var(x, width = n, min_obs = 1)
+
+# expanding variances with partial windows and weights
+roll_var(x, width = n, min_obs = 1, weights = weights)
 }

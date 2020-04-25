@@ -9,19 +9,17 @@
 \packageDescription{roll}
 }
 \details{
-Based on the speed requirements and sequential nature of many problems in practice, \bold{online algorithms} are a natural fit for computing rolling statistics of time-series data. That is, as observations are added and removed from a rolling window, online algorithms update statistics and discard observations from memory. The default algorithm in the \code{roll} package, and suitable for most applications, is an online algorithm; however, in some cases it is impossible to recover the information needed to update each statistic. Specifically, if the \code{weights} vector is an arbitrarily changing sequence then an offline algorithm is used instead to calculate the rolling statistic. In the former case, the algorithm is parallelized across columns via RcppParallel and across windows in the latter case. Note that online algorithms are prone to loss of precision due to round-off error; hence, users can trade speed for accuracy and select the offline algorithm by setting the \code{online} argument to \code{FALSE}.
+\code{roll} is a package that provides fast and efficient computation of rolling and expanding statistics for time-series data.
 
-As mentioned above, the numerical calculations use RcppParallel to parallelize rolling statistics of time-series data. RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel 
-algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries. By default, all the available cores on a machine are used for parallel algorithms. If users are 
-either already taking advantage of parallelism or instead want to use a fixed number or proportion of 
-threads, then set the number of threads in the RcppParallel package with the 
-\code{\link[RcppParallel]{setThreadOptions}} function.
+The default algorithm in the \code{roll} package, and suitable for most applications, is an \bold{online algorithm}. Based on the speed requirements and sequential nature of many problems in practice, online algorithms are a natural fit for computing rolling and expanding statistics of time-series data. That is, as observations are added and removed from a window, online algorithms update statistics and discard observations from memory; however, in some cases it is impossible to recover the information needed to update each statistic. Specifically, if the \code{weights} vector is an arbitrarily changing sequence then an offline algorithm is used instead to calculate the statistic. Also, in the former case, the algorithm is parallelized across columns via RcppParallel and across windows in the latter case. Note that online algorithms are prone to loss of precision due to round-off error; hence, users can trade speed for accuracy and select the offline algorithm by setting the \code{online} argument to \code{FALSE}.
+
+As mentioned above, the numerical calculations use RcppParallel to parallelize rolling and expanding statistics of time-series data. RcppParallel provides a complete toolkit for creating safe, portable, high-performance parallel  algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries. By default, all the available cores on a machine are used for parallel algorithms. If users are  either already taking advantage of parallelism or instead want to use a fixed number or proportion of threads, then set the number of threads in the RcppParallel package with the \code{RcppParallel::setThreadOptions} function.
 }
 \author{
 \packageAuthor{roll}
 }
 \references{
-Welford, B.P. (1962). "Note on a Method for Calculating Corrected Sums of Squares and Products." \emph{Technometrics}, 4(3), 419–420.
+Welford, B.P. (1962). "Note on a Method for Calculating Corrected Sums of Squares and Products." \emph{Technometrics}, 4(3), 419-420.
 
 West, D.H.D. (1979). "Updating Mean and Variance Estimates: An Improved Method." \emph{Communications of the ACM}, 22(9), 532-535.
 }

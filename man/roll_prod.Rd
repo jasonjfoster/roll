@@ -25,20 +25,26 @@ if \code{FALSE} then each value is used.}
 \item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
-An object of the same class and dimension as \code{x} with the rolling products.
+An object of the same class and dimension as \code{x} with the rolling and expanding
+products.
 }
 \description{
-A function for computing the rolling products of time-series data.
+A function for computing the rolling and expanding products of time-series data.
 }
 \examples{
-n_vars <- 3
-n_obs <- 15
-x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+n <- 15
+x <- rnorm(n)
+weights <- 0.9 ^ (n:1)
 
-# rolling products
-result <- roll_prod(x, 5)
+# rolling products with complete windows
+roll_prod(x, width = 5)
 
-# rolling products with exponential decay
-weights <- 0.9 ^ (5:1)
-result <- roll_prod(x, 5, weights)
+# rolling products with partial windows
+roll_prod(x, width = 5, min_obs = 1)
+
+# expanding products with partial windows
+roll_prod(x, width = n, min_obs = 1)
+
+# expanding products with partial windows and weights
+roll_prod(x, width = n, min_obs = 1, weights = weights)
 }

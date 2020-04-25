@@ -31,26 +31,31 @@ if \code{FALSE} then pairwise is used.}
 }
 \value{
 A list containing the following components:
-\item{coefficients}{A list of objects with the rolling coefficients for each \code{y}.
+\item{coefficients}{A list of objects with the rolling and expanding coefficients for each \code{y}.
 An object is the same class and dimension (with an added column for the intercept) as \code{x}.}
-\item{r.squared}{A list of objects with the rolling r-squareds for each \code{y}.
+\item{r.squared}{A list of objects with the rolling and expanding r-squareds for each \code{y}.
 An object is the same class as \code{x}.}
-\item{std.error}{A list of objects with the rolling standard errors for each \code{y}.
+\item{std.error}{A list of objects with the rolling and expanding standard errors for each \code{y}.
 An object is the same class and dimension (with an added column for the intercept) as \code{x}.}
 }
 \description{
-A function for computing the rolling linear models of time-series data.
+A function for computing the rolling and expanding linear models of time-series data.
 }
 \examples{
-n_vars <- 3
-n_obs <- 15
-x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
-y <- matrix(rnorm(n_obs), nrow = n_obs, ncol = 1)
+n <- 15
+x <- rnorm(n)
+y <- rnorm(n)
+weights <- 0.9 ^ (n:1)
 
-# rolling regressions
-result <- roll_lm(x, y, 5)
+# rolling regressions with complete windows
+roll_lm(x, y, width = 5)
 
-# rolling regressions with exponential decay
-weights <- 0.9 ^ (5:1)
-result <- roll_lm(x, y, 5, weights)
+# rolling regressions with partial windows
+roll_lm(x, y, width = 5, min_obs = 1)
+
+# expanding regressions with partial windows
+roll_lm(x, y, width = n, min_obs = 1)
+
+# expanding regressions with partial windows and weights
+roll_lm(x, y, width = n, min_obs = 1, weights = weights)
 }

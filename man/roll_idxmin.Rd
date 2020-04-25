@@ -25,20 +25,26 @@ if \code{FALSE} then each value is used.}
 \item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
-An object of the same class and dimension as \code{x} with the rolling index of minimums.
+An object of the same class and dimension as \code{x} with the rolling and expanding
+index of minimums.
 }
 \description{
-A function for computing the rolling index of minimums of time-series data.
+A function for computing the rolling and expanding index of minimums of time-series data.
 }
 \examples{
-n_vars <- 3
-n_obs <- 15
-x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+n <- 15
+x <- rnorm(n)
+weights <- 0.9 ^ (n:1)
 
-# rolling index of minimums
-result <- roll_idxmin(x, 5)
+# rolling index of minimums with complete windows
+roll_idxmin(x, width = 5)
 
-# rolling index of minimums with exponential decay
-weights <- 0.9 ^ (5:1)
-result <- roll_idxmin(x, 5, weights)
+# rolling index of minimums with partial windows
+roll_idxmin(x, width = 5, min_obs = 1)
+
+# expanding index of minimums with partial windows
+roll_idxmin(x, width = n, min_obs = 1)
+
+# expanding index of minimums with partial windows and weights
+roll_idxmin(x, width = n, min_obs = 1, weights = weights)
 }

@@ -4,9 +4,9 @@
 \alias{roll_scale}
 \title{Rolling Scaling and Centering}
 \usage{
-roll_scale(x, width, weights = rep(1, width), center = TRUE, scale = TRUE,
-  min_obs = width, complete_obs = FALSE, na_restore = FALSE,
-  online = TRUE)
+roll_scale(x, width, weights = rep(1, width), center = TRUE,
+  scale = TRUE, min_obs = width, complete_obs = FALSE,
+  na_restore = FALSE, online = TRUE)
 }
 \arguments{
 \item{x}{vector or matrix. Rows are observations and columns are variables.}
@@ -32,10 +32,11 @@ if \code{FALSE} then each value is used.}
 \item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
-An object of the same class and dimension as \code{x} with the rolling scaling and centering.
+An object of the same class and dimension as \code{x} with the rolling and expanding
+scaling and centering.
 }
 \description{
-A function for computing the rolling scaling and centering of time-series data.
+A function for computing the rolling and expanding scaling and centering of time-series data.
 }
 \details{
 If \code{center} is \code{TRUE} then centering is done by subtracting the weighted mean from 
@@ -44,18 +45,23 @@ scaling is done by dividing by the weighted standard deviation for each variable
 \code{TRUE}, and the root mean square otherwise. If \code{scale} is \code{FALSE} then no scaling is 
 done.
 
-The denominator used gives an unbiased estimate of the standard deviation, so if the weights are the 
-default then the divisor \code{n - 1} is obtained.
+The denominator used gives an unbiased estimate of the standard deviation,
+so if the weights are the default then the divisor \code{n - 1} is obtained.
 }
 \examples{
-n_vars <- 3
-n_obs <- 15
-x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+n <- 15
+x <- rnorm(n)
+weights <- 0.9 ^ (n:1)
 
-# rolling z-scores
-result <- roll_scale(x, 5)
+# rolling z-scores with complete windows
+roll_scale(x, width = 5)
 
-# rolling z-scores with exponential decay
-weights <- 0.9 ^ (5:1)
-result <- roll_scale(x, 5, weights)
+# rolling z-scores with partial windows
+roll_scale(x, width = 5, min_obs = 1)
+
+# expanding z-scores with partial windows
+roll_scale(x, width = n, min_obs = 1)
+
+# expanding z-scores with partial windows and weights
+roll_scale(x, width = n, min_obs = 1, weights = weights)
 }

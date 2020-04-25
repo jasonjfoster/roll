@@ -4,8 +4,9 @@
 \alias{roll_sd}
 \title{Rolling Standard Deviations}
 \usage{
-roll_sd(x, width, weights = rep(1, width), center = TRUE, min_obs = width,
-  complete_obs = FALSE, na_restore = FALSE, online = TRUE)
+roll_sd(x, width, weights = rep(1, width), center = TRUE,
+  min_obs = width, complete_obs = FALSE, na_restore = FALSE,
+  online = TRUE)
 }
 \arguments{
 \item{x}{vector or matrix. Rows are observations and columns are variables.}
@@ -28,24 +29,30 @@ if \code{FALSE} then each value is used.}
 \item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
-An object of the same class and dimension as \code{x} with the rolling standard deviations.
+An object of the same class and dimension as \code{x} with the rolling and expanding
+standard deviations.
 }
 \description{
-A function for computing the rolling standard deviations of time-series data.
+A function for computing the rolling and expanding standard deviations of time-series data.
 }
 \details{
-The denominator used gives an unbiased estimate of the standard deviation, so if the weights are the 
-default then the divisor \code{n - 1} is obtained.
+The denominator used gives an unbiased estimate of the standard deviation,
+so if the weights are the default then the divisor \code{n - 1} is obtained.
 }
 \examples{
-n_vars <- 3
-n_obs <- 15
-x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+n <- 15
+x <- rnorm(n)
+weights <- 0.9 ^ (n:1)
 
-# rolling standard deviations
-result <- roll_sd(x, 5)
+# rolling standard deviations with complete windows
+roll_sd(x, width = 5)
 
-# rolling standard deviations with exponential decay
-weights <- 0.9 ^ (5:1)
-result <- roll_sd(x, 5, weights)
+# rolling standard deviations with partial windows
+roll_sd(x, width = 5, min_obs = 1)
+
+# expanding standard deviations with partial windows
+roll_sd(x, width = n, min_obs = 1)
+
+# expanding standard deviations with partial windows and weights
+roll_sd(x, width = n, min_obs = 1, weights = weights)
 }

@@ -2,8 +2,17 @@ test_that("equivalent to zoo::rollapply", {
   
   # skip("long-running test")
   
-  if (!requireNamespace("zoo", quietly = TRUE))
+  if (!requireNamespace("zoo", quietly = TRUE)) {
     skip("zoo package required for this test")
+  }
+  
+  # test data
+  test_zoo_x <- c(lapply(test_ls[-3], function(x){x[ , 1:3]}),
+                  list("random vector with 0's" = test_ls[[2]][ , 1]))
+  test_zoo_y <- c(lapply(test_ls[-3], function(x){x[ , 4:5]}),
+                  list("random vector with 0's" = test_ls[[2]][ , 4]))
+  test_zoo_yy <- c(lapply(test_ls[-3], function(x){x[ , 4, drop = FALSE]}), # univariate 'y' for base::lm
+                   list("random vector with 0's" = test_ls[[2]][ , 4]))
   
   for (ax in 1:(length(test_zoo_x))) {
     for (b in 1:length(test_width)) {

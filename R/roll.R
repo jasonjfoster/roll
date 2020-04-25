@@ -1,6 +1,6 @@
 ##' Rolling Any
 ##'
-##' A function for computing the rolling any of time-series data.
+##' A function for computing the rolling and expanding any of time-series data.
 ##'
 ##' @param x logical vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -10,15 +10,20 @@
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling any.
+##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
+##' any.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
 ##' 
-##' # rolling any
-##' result <- roll_any(x < 0, 5)
+##' # rolling any with complete windows
+##' result <- roll_any(x < 0, width = 5)
 ##' 
+##' # rolling any with partial windows
+##' result <- roll_any(x < 0, width = 5)
+##' 
+##' # expanding any with partial windows
+##' result <- roll_any(x < 0, width = n)
 ##' @export
 roll_any <- function(x, width, min_obs = width,
                      complete_obs = FALSE, na_restore = FALSE,
@@ -35,7 +40,7 @@ roll_any <- function(x, width, min_obs = width,
 
 ##' Rolling All
 ##'
-##' A function for computing the rolling all of time-series data.
+##' A function for computing the rolling and expanding all of time-series data.
 ##'
 ##' @param x logical vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -45,15 +50,20 @@ roll_any <- function(x, width, min_obs = width,
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling all.
+##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
+##' all.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
 ##' 
-##' # rolling all
-##' result <- roll_all(x < 0, 5)
+##' # rolling all with complete windows
+##' result <- roll_all(x < 0, width = 5)
 ##' 
+##' # rolling all with partial windows
+##' result <- roll_all(x < 0, width = 5)
+##' 
+##' # expanding all with partial windows
+##' result <- roll_all(x < 0, width = n)
 ##' @export
 roll_all <- function(x, width, min_obs = width,
                      complete_obs = FALSE, na_restore = FALSE,
@@ -70,7 +80,7 @@ roll_all <- function(x, width, min_obs = width,
 
 ##' Rolling Sums
 ##'
-##' A function for computing the rolling sums of time-series data.
+##' A function for computing the rolling and expanding sums of time-series data.
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -81,18 +91,24 @@ roll_all <- function(x, width, min_obs = width,
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling sums.
+##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
+##' sums.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling sums
-##' result <- roll_sum(x, 5)
+##' # rolling sums with complete windows
+##' roll_sum(x, width = 5)
 ##' 
-##' # rolling sums with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_sum(x, 5, weights)
+##' # rolling sums with partial windows
+##' roll_sum(x, width = 5, min_obs = 1)
+##' 
+##' # expanding sums with partial windows
+##' roll_sum(x, width = n, min_obs = 1)
+##' 
+##' # expanding sums with partial windows and weights
+##' roll_sum(x, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_sum <- function(x, width, weights = rep(1, width),
                      min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -110,7 +126,7 @@ roll_sum <- function(x, width, weights = rep(1, width),
 
 ##' Rolling Products
 ##'
-##' A function for computing the rolling products of time-series data.
+##' A function for computing the rolling and expanding products of time-series data.
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -121,18 +137,24 @@ roll_sum <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling products.
+##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
+##' products.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling products
-##' result <- roll_prod(x, 5)
+##' # rolling products with complete windows
+##' roll_prod(x, width = 5)
 ##' 
-##' # rolling products with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_prod(x, 5, weights)
+##' # rolling products with partial windows
+##' roll_prod(x, width = 5, min_obs = 1)
+##' 
+##' # expanding products with partial windows
+##' roll_prod(x, width = n, min_obs = 1)
+##' 
+##' # expanding products with partial windows and weights
+##' roll_prod(x, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_prod <- function(x, width, weights = rep(1, width),
                       min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -150,7 +172,7 @@ roll_prod <- function(x, width, weights = rep(1, width),
 
 ##' Rolling Means
 ##'
-##' A function for computing the rolling means of time-series data.
+##' A function for computing the rolling and expanding means of time-series data.
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -161,18 +183,24 @@ roll_prod <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling means.
+##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
+##' means.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling means
-##' result <- roll_mean(x, 5)
+##' # rolling means with complete windows
+##' roll_mean(x, width = 5)
 ##' 
-##' # rolling means with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_mean(x, 5, weights)
+##' # rolling means with partial windows
+##' roll_mean(x, width = 5, min_obs = 1)
+##' 
+##' # expanding means with partial windows
+##' roll_mean(x, width = n, min_obs = 1)
+##' 
+##' # expanding means with partial windows and weights
+##' roll_mean(x, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_mean <- function(x, width, weights = rep(1, width),
                       min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -190,7 +218,7 @@ roll_mean <- function(x, width, weights = rep(1, width),
 
 ##' Rolling Minimums
 ##'
-##' A function for computing the rolling minimums of time-series data.
+##' A function for computing the rolling and expanding minimums of time-series data.
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -201,18 +229,24 @@ roll_mean <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling minimums.
+##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
+##' minimums.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling minimums
-##' result <- roll_min(x, 5)
+##' # rolling minimums with complete windows
+##' roll_min(x, width = 5)
 ##' 
-##' # rolling minimums with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_min(x, 5, weights)
+##' # rolling minimums with partial windows
+##' roll_min(x, width = 5, min_obs = 1)
+##' 
+##' # expanding minimums with partial windows
+##' roll_min(x, width = n, min_obs = 1)
+##' 
+##' # expanding minimums with partial windows and weights
+##' roll_min(x, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_min <- function(x, width, weights = rep(1, width),
                      min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -230,7 +264,7 @@ roll_min <- function(x, width, weights = rep(1, width),
 
 ##' Rolling Maximums
 ##'
-##' A function for computing the rolling maximums of time-series data.
+##' A function for computing the rolling and expanding maximums of time-series data.
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -241,18 +275,24 @@ roll_min <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling maximums.
+##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
+##' maximums.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling maximums
-##' result <- roll_max(x, 5)
+##' # rolling maximums with complete windows
+##' roll_max(x, width = 5)
 ##' 
-##' # rolling maximums with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_max(x, 5, weights)
+##' # rolling maximums with partial windows
+##' roll_max(x, width = 5, min_obs = 1)
+##' 
+##' # expanding maximums with partial windows
+##' roll_max(x, width = n, min_obs = 1)
+##' 
+##' # expanding maximums with partial windows and weights
+##' roll_max(x, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_max <- function(x, width, weights = rep(1, width),
                      min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -270,7 +310,7 @@ roll_max <- function(x, width, weights = rep(1, width),
 
 ##' Rolling Index of Minimums
 ##'
-##' A function for computing the rolling index of minimums of time-series data.
+##' A function for computing the rolling and expanding index of minimums of time-series data.
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -281,18 +321,24 @@ roll_max <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling index of minimums.
+##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
+##' index of minimums.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling index of minimums
-##' result <- roll_idxmin(x, 5)
+##' # rolling index of minimums with complete windows
+##' roll_idxmin(x, width = 5)
 ##' 
-##' # rolling index of minimums with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_idxmin(x, 5, weights)
+##' # rolling index of minimums with partial windows
+##' roll_idxmin(x, width = 5, min_obs = 1)
+##' 
+##' # expanding index of minimums with partial windows
+##' roll_idxmin(x, width = n, min_obs = 1)
+##' 
+##' # expanding index of minimums with partial windows and weights
+##' roll_idxmin(x, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_idxmin <- function(x, width, weights = rep(1, width),
                      min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -310,7 +356,7 @@ roll_idxmin <- function(x, width, weights = rep(1, width),
 
 ##' Rolling Index of Maximums
 ##'
-##' A function for computing the rolling index of maximums of time-series data.
+##' A function for computing the rolling and expanding index of maximums of time-series data.
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -321,18 +367,24 @@ roll_idxmin <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling index of maximums.
+##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
+##' index of maximums.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling index of maximums
-##' result <- roll_idxmax(x, 5)
+##' # rolling index of maximums with complete windows
+##' roll_idxmax(x, width = 5)
 ##' 
-##' # rolling index of maximums with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_idxmax(x, 5, weights)
+##' # rolling index of maximums with partial windows
+##' roll_idxmax(x, width = 5, min_obs = 1)
+##' 
+##' # expanding index of maximums with partial windows
+##' roll_idxmax(x, width = n, min_obs = 1)
+##' 
+##' # expanding index of maximums with partial windows and weights
+##' roll_idxmax(x, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_idxmax <- function(x, width, weights = rep(1, width),
                         min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -350,7 +402,7 @@ roll_idxmax <- function(x, width, weights = rep(1, width),
 
 ##' Rolling Medians
 ##'
-##' A function for computing the rolling medians of time-series data.
+##' A function for computing the rolling and expanding medians of time-series data.
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -361,18 +413,24 @@ roll_idxmax <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @return An object of the same class and dimension as \code{x} with the rolling medians.
+##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
+##' medians.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling medians
-##' result <- roll_median(x, 5)
+##' # rolling medians with complete windows
+##' roll_median(x, width = 5)
 ##' 
-##' # rolling medians with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_median(x, 5, weights)
+##' # rolling medians with partial windows
+##' roll_median(x, width = 5, min_obs = 1)
+##' 
+##' # expanding medians with partial windows
+##' roll_median(x, width = n, min_obs = 1)
+##' 
+##' # expanding medians with partial windows and weights
+##' roll_median(x, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_median <- function(x, width, weights = rep(1, width),
                       min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -390,7 +448,7 @@ roll_median <- function(x, width, weights = rep(1, width),
 
 ##' Rolling Variances
 ##'
-##' A function for computing the rolling variances of time-series data.
+##' A function for computing the rolling and expanding variances of time-series data.
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -403,20 +461,26 @@ roll_median <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @details The denominator used gives an unbiased estimate of the variance, so if the weights are the 
-##' default then the divisor \code{n - 1} is obtained.
-##' @return An object of the same class and dimension as \code{x} with the rolling variances.
+##' @details The denominator used gives an unbiased estimate of the variance,
+##' so if the weights are the default then the divisor \code{n - 1} is obtained.
+##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
+##' variances.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling variances
-##' result <- roll_var(x, 5)
+##' # rolling variances with complete windows
+##' roll_var(x, width = 5)
 ##' 
-##' # rolling variances with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_var(x, 5, weights)
+##' # rolling variances with partial windows
+##' roll_var(x, width = 5, min_obs = 1)
+##' 
+##' # expanding variances with partial windows
+##' roll_var(x, width = n, min_obs = 1)
+##' 
+##' # expanding variances with partial windows and weights
+##' roll_var(x, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_var <- function(x, width, weights = rep(1, width), center = TRUE,
                      min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -435,7 +499,7 @@ roll_var <- function(x, width, weights = rep(1, width), center = TRUE,
 
 ##' Rolling Standard Deviations
 ##'
-##' A function for computing the rolling standard deviations of time-series data.
+##' A function for computing the rolling and expanding standard deviations of time-series data.
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -448,20 +512,26 @@ roll_var <- function(x, width, weights = rep(1, width), center = TRUE,
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @details The denominator used gives an unbiased estimate of the standard deviation, so if the weights are the 
-##' default then the divisor \code{n - 1} is obtained.
-##' @return An object of the same class and dimension as \code{x} with the rolling standard deviations.
+##' @details The denominator used gives an unbiased estimate of the standard deviation,
+##' so if the weights are the default then the divisor \code{n - 1} is obtained.
+##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
+##' standard deviations.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling standard deviations
-##' result <- roll_sd(x, 5)
+##' # rolling standard deviations with complete windows
+##' roll_sd(x, width = 5)
 ##' 
-##' # rolling standard deviations with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_sd(x, 5, weights)
+##' # rolling standard deviations with partial windows
+##' roll_sd(x, width = 5, min_obs = 1)
+##' 
+##' # expanding standard deviations with partial windows
+##' roll_sd(x, width = n, min_obs = 1)
+##' 
+##' # expanding standard deviations with partial windows and weights
+##' roll_sd(x, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_sd <- function(x, width, weights = rep(1, width), center = TRUE,
                     min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -480,7 +550,7 @@ roll_sd <- function(x, width, weights = rep(1, width), center = TRUE,
 
 ##' Rolling Scaling and Centering
 ##'
-##' A function for computing the rolling scaling and centering of time-series data.
+##' A function for computing the rolling and expanding scaling and centering of time-series data.
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
@@ -501,20 +571,26 @@ roll_sd <- function(x, width, weights = rep(1, width), center = TRUE,
 ##' \code{TRUE}, and the root mean square otherwise. If \code{scale} is \code{FALSE} then no scaling is 
 ##' done.
 ##' 
-##' The denominator used gives an unbiased estimate of the standard deviation, so if the weights are the 
-##' default then the divisor \code{n - 1} is obtained.
-##' @return An object of the same class and dimension as \code{x} with the rolling scaling and centering.
+##' The denominator used gives an unbiased estimate of the standard deviation,
+##' so if the weights are the default then the divisor \code{n - 1} is obtained.
+##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
+##' scaling and centering.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling z-scores
-##' result <- roll_scale(x, 5)
-##'
-##' # rolling z-scores with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_scale(x, 5, weights)
+##' # rolling z-scores with complete windows
+##' roll_scale(x, width = 5)
+##' 
+##' # rolling z-scores with partial windows
+##' roll_scale(x, width = 5, min_obs = 1)
+##' 
+##' # expanding z-scores with partial windows
+##' roll_scale(x, width = n, min_obs = 1)
+##' 
+##' # expanding z-scores with partial windows and weights
+##' roll_scale(x, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_scale <- function(x, width, weights = rep(1, width), center = TRUE, scale = TRUE,
                        min_obs = width, complete_obs = FALSE, na_restore = FALSE,
@@ -532,9 +608,9 @@ roll_scale <- function(x, width, weights = rep(1, width), center = TRUE, scale =
   ))
 }
 
-##' Rolling Covariance Matrices
+##' Rolling Covariances
 ##'
-##' A function for computing the rolling covariance matrices of time-series data.
+##' A function for computing the rolling and expanding covariances of time-series data.
 ##' 
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param y vector or matrix. Rows are observations and columns are variables.
@@ -550,20 +626,26 @@ roll_scale <- function(x, width, weights = rep(1, width), center = TRUE, scale =
 ##' if \code{FALSE} then pairwise is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @details The denominator used gives an unbiased estimate of the covariance, so if the weights are the 
-##' default then the divisor \code{n - 1} is obtained.
-##' @return A cube with each slice the rolling covariance matrix.
+##' @details The denominator used gives an unbiased estimate of the covariance,
+##' so if the weights are the default then the divisor \code{n - 1} is obtained.
+##' @return A cube with each slice the rolling and expanding covariances.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
+##' y <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling covariance matrices
-##' result <- roll_cov(x, width = 5)
+##' # rolling covariances with complete windows
+##' roll_cov(x, y, width = 5)
 ##' 
-##' # rolling covariance matrices with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_cov(x, width = 5, weights = weights)
+##' # rolling covariances with partial windows
+##' roll_cov(x, y, width = 5, min_obs = 1)
+##' 
+##' # expanding covariances with partial windows
+##' roll_cov(x, y, width = n, min_obs = 1)
+##' 
+##' # expanding covariances with partial windows and weights
+##' roll_cov(x, y, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_cov <- function(x, y = NULL, width, weights = rep(1, width), center = TRUE, scale = FALSE,
                      min_obs = width, complete_obs = TRUE, na_restore = FALSE,
@@ -581,9 +663,9 @@ roll_cov <- function(x, y = NULL, width, weights = rep(1, width), center = TRUE,
   ))
 }
 
-##' Rolling Correlation Matrices
+##' Rolling Correlations
 ##'
-##' A function for computing the rolling correlation matrices of time-series data.
+##' A function for computing the rolling and expanding correlations of time-series data.
 ##' 
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param y vector or matrix. Rows are observations and columns are variables.
@@ -599,20 +681,26 @@ roll_cov <- function(x, y = NULL, width, weights = rep(1, width), center = TRUE,
 ##' if \code{FALSE} then pairwise is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @details The denominator used gives an unbiased estimate of the covariance, so if the weights are the 
-##' default then the divisor \code{n - 1} is obtained.
-##' @return A cube with each slice the rolling correlation matrix.
+##' @details The denominator used gives an unbiased estimate of the covariance,  
+##' so if the weights are the default then the divisor \code{n - 1} is obtained.
+##' @return A cube with each slice the rolling and expanding correlations.
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+##' n <- 15
+##' x <- rnorm(n)
+##' y <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling correlation matrices
-##' result <- roll_cor(x, width = 5)
+##' # rolling correlations with complete windows
+##' roll_cor(x, y, width = 5)
 ##' 
-##' # rolling correlation matrices with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_cor(x, width = 5, weights = weights)
+##' # rolling correlations with partial windows
+##' roll_cor(x, y, width = 5, min_obs = 1)
+##' 
+##' # expanding correlations with partial windows
+##' roll_cor(x, y, width = n, min_obs = 1)
+##' 
+##' # expanding correlations with partial windows and weights
+##' roll_cor(x, y, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_cor <- function(x, y = NULL, width, weights = rep(1, width), center = TRUE, scale = TRUE,
                      min_obs = width, complete_obs = TRUE, na_restore = FALSE,
@@ -632,7 +720,7 @@ roll_cor <- function(x, y = NULL, width, weights = rep(1, width), center = TRUE,
 
 ##' Rolling Linear Models
 ##'
-##' A function for computing the rolling linear models of time-series data.
+##' A function for computing the rolling and expanding linear models of time-series data.
 ##' 
 ##' @param x vector or matrix. Rows are observations and columns are the independent variables.
 ##' @param y vector or matrix. Rows are observations and columns are the dependent variables.
@@ -646,24 +734,29 @@ roll_cor <- function(x, y = NULL, width, weights = rep(1, width), center = TRUE,
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
 ##' @return A list containing the following components:
-##' \item{coefficients}{A list of objects with the rolling coefficients for each \code{y}.
+##' \item{coefficients}{A list of objects with the rolling and expanding coefficients for each \code{y}.
 ##' An object is the same class and dimension (with an added column for the intercept) as \code{x}.}
-##' \item{r.squared}{A list of objects with the rolling r-squareds for each \code{y}.
+##' \item{r.squared}{A list of objects with the rolling and expanding r-squareds for each \code{y}.
 ##' An object is the same class as \code{x}.}
-##' \item{std.error}{A list of objects with the rolling standard errors for each \code{y}.
+##' \item{std.error}{A list of objects with the rolling and expanding standard errors for each \code{y}.
 ##' An object is the same class and dimension (with an added column for the intercept) as \code{x}.}
 ##' @examples
-##' n_vars <- 3
-##' n_obs <- 15
-##' x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
-##' y <- matrix(rnorm(n_obs), nrow = n_obs, ncol = 1)
+##' n <- 15
+##' x <- rnorm(n)
+##' y <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
 ##' 
-##' # rolling regressions
-##' result <- roll_lm(x, y, 5)
+##' # rolling regressions with complete windows
+##' roll_lm(x, y, width = 5)
 ##' 
-##' # rolling regressions with exponential decay
-##' weights <- 0.9 ^ (5:1)
-##' result <- roll_lm(x, y, 5, weights)
+##' # rolling regressions with partial windows
+##' roll_lm(x, y, width = 5, min_obs = 1)
+##' 
+##' # expanding regressions with partial windows
+##' roll_lm(x, y, width = n, min_obs = 1)
+##' 
+##' # expanding regressions with partial windows and weights
+##' roll_lm(x, y, width = n, min_obs = 1, weights = weights)
 ##' @export
 roll_lm <- function(x, y, width, weights = rep(1, width), intercept = TRUE,
                     min_obs = width, complete_obs = TRUE, na_restore = FALSE,

@@ -25,20 +25,26 @@ if \code{FALSE} then each value is used.}
 \item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
-An object of the same class and dimension as \code{x} with the rolling maximums.
+An object of the same class and dimension as \code{x} with the rolling and expanding
+maximums.
 }
 \description{
-A function for computing the rolling maximums of time-series data.
+A function for computing the rolling and expanding maximums of time-series data.
 }
 \examples{
-n_vars <- 3
-n_obs <- 15
-x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+n <- 15
+x <- rnorm(n)
+weights <- 0.9 ^ (n:1)
 
-# rolling maximums
-result <- roll_max(x, 5)
+# rolling maximums with complete windows
+roll_max(x, width = 5)
 
-# rolling maximums with exponential decay
-weights <- 0.9 ^ (5:1)
-result <- roll_max(x, 5, weights)
+# rolling maximums with partial windows
+roll_max(x, width = 5, min_obs = 1)
+
+# expanding maximums with partial windows
+roll_max(x, width = n, min_obs = 1)
+
+# expanding maximums with partial windows and weights
+roll_max(x, width = n, min_obs = 1, weights = weights)
 }

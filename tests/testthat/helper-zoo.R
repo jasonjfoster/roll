@@ -57,6 +57,10 @@ rollapplyr_cube <- function(f, x, y, width) {
 
 rollapplyr_lm <- function(x, y, width, intercept) {
   
+  if (!requireNamespace("zoo", quietly = TRUE)) {
+    stop("zoo package required for this function")
+  }
+  
   if (is.matrix(x) || is.matrix(y) || intercept) {
     
     if (!is.matrix(x)) {

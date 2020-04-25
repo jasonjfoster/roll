@@ -2,6 +2,18 @@ test_that("equal to online algorithm", {
   
   # skip("long-running test")
   
+  # test data
+  test_roll_x <- c(lapply(test_ls, function(x){x[ , 1:3]}),
+                   list("random vector with 0's and NA's" = test_ls[[3]][ , 1]))
+  test_roll_y <- c(lapply(test_ls, function(x){x[ , 4:5]}),
+                   list("random vector with 0's and NA's" = test_ls[[3]][ , 4]))
+  test_roll_null <- c(test_roll_x, "null object" = list(NULL))
+  
+  if (requireNamespace("zoo", quietly = TRUE)) {
+    names(test_roll_x[[4]]) <- zoo::index(test_roll_x[[1]])
+    names(test_roll_y[[4]]) <- zoo::index(test_roll_y[[1]])
+  }
+  
   for (ax in 1:length(test_roll_x)) {
     for (b in 1:length(test_width)) {
       

@@ -2,7 +2,7 @@
 % Please edit documentation in R/roll.R
 \name{roll_cov}
 \alias{roll_cov}
-\title{Rolling Covariance Matrices}
+\title{Rolling Covariances}
 \usage{
 roll_cov(x, y = NULL, width, weights = rep(1, width), center = TRUE,
   scale = FALSE, min_obs = width, complete_obs = TRUE,
@@ -34,24 +34,30 @@ if \code{FALSE} then pairwise is used.}
 \item{online}{logical. Process observations using an online algorithm.}
 }
 \value{
-A cube with each slice the rolling covariance matrix.
+A cube with each slice the rolling and expanding covariances.
 }
 \description{
-A function for computing the rolling covariance matrices of time-series data.
+A function for computing the rolling and expanding covariances of time-series data.
 }
 \details{
-The denominator used gives an unbiased estimate of the covariance, so if the weights are the 
-default then the divisor \code{n - 1} is obtained.
+The denominator used gives an unbiased estimate of the covariance,
+so if the weights are the default then the divisor \code{n - 1} is obtained.
 }
 \examples{
-n_vars <- 3
-n_obs <- 15
-x <- matrix(rnorm(n_obs * n_vars), nrow = n_obs, ncol = n_vars)
+n <- 15
+x <- rnorm(n)
+y <- rnorm(n)
+weights <- 0.9 ^ (n:1)
 
-# rolling covariance matrices
-result <- roll_cov(x, width = 5)
+# rolling covariances with complete windows
+roll_cov(x, y, width = 5)
 
-# rolling covariance matrices with exponential decay
-weights <- 0.9 ^ (5:1)
-result <- roll_cov(x, width = 5, weights = weights)
+# rolling covariances with partial windows
+roll_cov(x, y, width = 5, min_obs = 1)
+
+# expanding covariances with partial windows
+roll_cov(x, y, width = n, min_obs = 1)
+
+# expanding covariances with partial windows and weights
+roll_cov(x, y, width = n, min_obs = 1, weights = weights)
 }
