@@ -17,13 +17,13 @@
 ##' x <- rnorm(n)
 ##' 
 ##' # rolling any with complete windows
-##' result <- roll_any(x < 0, width = 5)
+##' roll_any(x < 0, width = 5)
 ##' 
 ##' # rolling any with partial windows
-##' result <- roll_any(x < 0, width = 5)
+##' roll_any(x < 0, width = 5)
 ##' 
 ##' # expanding any with partial windows
-##' result <- roll_any(x < 0, width = n)
+##' roll_any(x < 0, width = n)
 ##' @export
 roll_any <- function(x, width, min_obs = width,
                      complete_obs = FALSE, na_restore = FALSE,
@@ -57,13 +57,13 @@ roll_any <- function(x, width, min_obs = width,
 ##' x <- rnorm(n)
 ##' 
 ##' # rolling all with complete windows
-##' result <- roll_all(x < 0, width = 5)
+##' roll_all(x < 0, width = 5)
 ##' 
 ##' # rolling all with partial windows
-##' result <- roll_all(x < 0, width = 5)
+##' roll_all(x < 0, width = 5)
 ##' 
 ##' # expanding all with partial windows
-##' result <- roll_all(x < 0, width = n)
+##' roll_all(x < 0, width = n)
 ##' @export
 roll_all <- function(x, width, min_obs = width,
                      complete_obs = FALSE, na_restore = FALSE,

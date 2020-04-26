@@ -21,6 +21,8 @@ test_that("equal to online algorithm", {
       test_weights <- list(lambda ^ ((2 * width):1))
       # test_weights <- list(rep(1, width), lambda ^ (width:1), 1:width,
       #                      rep(1, 2 * width), lambda ^ ((2 * width):1), 1:(width * 2))
+      # test_weights <- lapply(test_weights, "-")
+      # test_weights <- list(rep(0, width))
       
       for (c in 1:length(test_min_obs)) {
         for (d in 1:length(test_complete_obs)) {
@@ -50,7 +52,7 @@ test_that("equal to online algorithm", {
                                     test_weights[[f]], test_min_obs[c],
                                     test_complete_obs[d], test_na_restore[e],
                                     test_online[2]))
-              
+
               expect_equal(roll_prod(test_roll_x[[ax]], width,
                                      test_weights[[f]], test_min_obs[c],
                                      test_complete_obs[d], test_na_restore[e],
@@ -77,7 +79,7 @@ test_that("equal to online algorithm", {
                                     test_weights[[f]], test_min_obs[c],
                                     test_complete_obs[d], test_na_restore[e],
                                     test_online[2]))
-              
+
               expect_equal(roll_max(test_roll_x[[ax]], width,
                                     test_weights[[f]], test_min_obs[c],
                                     test_complete_obs[d], test_na_restore[e],
@@ -86,7 +88,7 @@ test_that("equal to online algorithm", {
                                     test_weights[[f]], test_min_obs[c],
                                     test_complete_obs[d], test_na_restore[e],
                                     test_online[2]))
-              
+
               expect_equal(roll_idxmin(test_roll_x[[ax]], width,
                                        test_weights[[f]], test_min_obs[c],
                                        test_complete_obs[d], test_na_restore[e],
@@ -95,7 +97,7 @@ test_that("equal to online algorithm", {
                                        test_weights[[f]], test_min_obs[c],
                                        test_complete_obs[d], test_na_restore[e],
                                        test_online[2]))
-              
+
               expect_equal(roll_idxmax(test_roll_x[[ax]], width,
                                        test_weights[[f]], test_min_obs[c],
                                        test_complete_obs[d], test_na_restore[e],
@@ -104,7 +106,7 @@ test_that("equal to online algorithm", {
                                        test_weights[[f]], test_min_obs[c],
                                        test_complete_obs[d], test_na_restore[e],
                                        test_online[2]))
-              
+
               # "'online' is not supported"
               expect_equal(roll_median(test_roll_x[[ax]], width,
                                        test_weights[[f]], test_min_obs[c],

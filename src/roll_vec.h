@@ -421,7 +421,9 @@ struct RollSumOnlineVec {
     long double x_old = 0;
     long double sum_x = 0;
     
-    if (width > 1) {
+    if (arma_weights[n - 1] == 0) {
+      lambda = 1;
+    } else if (width > 1) {
       lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
     } else {
       lambda = arma_weights[n - 1];
@@ -622,7 +624,9 @@ struct RollProdOnlineVec {
     long double prod_w = 1;
     long double prod_x = 1;
     
-    if (width > 1) {
+    if (arma_weights[n - 1] == 0) {
+      lambda = 1;
+    } else if (width > 1) {
       lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
     } else {
       lambda = arma_weights[n - 1];
@@ -717,8 +721,6 @@ struct RollProdOnlineVec {
           
         } else {
           
-          w_old = arma_weights[n - width];
-          
           if (x[i - width] == 0) {
             
             x_old = 1;
@@ -726,6 +728,12 @@ struct RollProdOnlineVec {
             
           } else {
             x_old = x[i - width];
+          }
+          
+          if (arma_weights[n - width] == 0) {
+            w_old = 1;
+          } else {
+            w_old = arma_weights[n - width];
           }
           
         }
