@@ -47,8 +47,8 @@ roll_mean(x, width = 5, min_obs = 1)
 # expanding means with partial windows
 roll_mean(x, width = n, min_obs = 1)
 
-# expanding means with weights and partial windows
-roll_mean(x, width = n, weights = weights, min_obs = 1)
+# expanding means with partial windows and weights
+roll_mean(x, width = n, min_obs = 1, weights = weights)
 
 # -----------------------------------------------------------------------------
 
@@ -61,8 +61,8 @@ roll_lm(x, y, width = 5, min_obs = 1)
 # expanding regressions with partial windows
 roll_lm(x, y, width = n, min_obs = 1)
 
-# expanding regressions with weights and partial windows 
-roll_lm(x, y, width = n, weights = weights, min_obs = 1)
+# expanding regressions with partial windows and weights
+roll_lm(x, y, width = n, min_obs = 1, weights = weights)
 ```
 
 Note that handling of missing values is also supported (see `min_obs`, `complete_obs`, and `na_restore` arguments).
