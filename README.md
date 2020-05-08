@@ -28,6 +28,8 @@ devtools::install_github("jjf234/roll")
 
 ## Usage
 
+Load the package and supply a dataset:
+
 ``` r
 library(roll)
 
@@ -35,9 +37,11 @@ n <- 15
 x <- rnorm(n)
 y <- rnorm(n)
 weights <- 0.9 ^ (n:1)
+```
 
-# -----------------------------------------------------------------------------
+Then, to compute rolling and expanding means, use the `roll_mean` function:
 
+``` r
 # rolling means with complete windows
 roll_mean(x, width = 5)
 
@@ -47,11 +51,13 @@ roll_mean(x, width = 5, min_obs = 1)
 # expanding means with partial windows
 roll_mean(x, width = n, min_obs = 1)
 
-# expanding means with partial windows and weights
-roll_mean(x, width = n, min_obs = 1, weights = weights)
+# expanding means with weights and partial windows
+roll_mean(x, width = n, weights = weights, min_obs = 1)
+```
 
-# -----------------------------------------------------------------------------
+Also, the `roll_lm` function computes rolling and expanding regressions:
 
+``` r
 # rolling regressions with complete windows
 roll_lm(x, y, width = 5)
 
@@ -61,8 +67,8 @@ roll_lm(x, y, width = 5, min_obs = 1)
 # expanding regressions with partial windows
 roll_lm(x, y, width = n, min_obs = 1)
 
-# expanding regressions with partial windows and weights
-roll_lm(x, y, width = n, min_obs = 1, weights = weights)
+# expanding regressions with weights and partial windows 
+roll_lm(x, y, width = n, weights = weights, min_obs = 1)
 ```
 
-Note that handling of missing values is also supported (see `min_obs`, `complete_obs`, and `na_restore` arguments).
+Note that, as a result of using online algorithms, the amount of time to evaluate each function is independent of window size too (see the microbenchmark package to measure performance). Also, the handling of missing values is supported as well (see the `min_obs`, `complete_obs`, and `na_restore` arguments).
