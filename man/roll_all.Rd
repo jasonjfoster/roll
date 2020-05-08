@@ -34,11 +34,11 @@ n <- 15
 x <- rnorm(n)
 
 # rolling all with complete windows
-result <- roll_all(x < 0, width = 5)
+roll_all(x < 0, width = 5)
 
 # rolling all with partial windows
-result <- roll_all(x < 0, width = 5)
+roll_all(x < 0, width = 5)
 
 # expanding all with partial windows
-result <- roll_all(x < 0, width = n)
+roll_all(x < 0, width = n)
 }
