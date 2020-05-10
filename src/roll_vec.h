@@ -1902,9 +1902,9 @@ struct RollMedianOfflineVec : public Worker {
         
         count = 0;
         int n_obs = 0;
-        int temp_ix = 0;
+        int idxmedian_x = 0;
+        bool status = false;
         long double sum_upper_w = 0;
-        long double sum_upper_x = 0;
         long double sum_upper_w_temp = 0;
         
         // number of observations is either the window size or,
@@ -1916,16 +1916,15 @@ struct RollMedianOfflineVec : public Worker {
           // don't include if missing value
           if (!std::isnan(x_subset[k])) {
             
+            sum_upper_w += arma_weights_subset[k];
+            
             // last element of sorted array that is half of 'weights'
             // note: 'weights' must be greater than 0
-            if (sum_upper_w / sum_w <= 0.5) {
+            if (!status && (sum_upper_w / sum_w >= 0.5)) {
               
-              temp_ix = n_size_x - count - 1;
+              status = true;
+              idxmedian_x = n_size_x - count - 1;
               sum_upper_w_temp = sum_upper_w;
-              
-              // compute the sum
-              sum_upper_w += arma_weights_subset[k];
-              sum_upper_x = x_subset[k];
               
             }
             
@@ -1939,14 +1938,16 @@ struct RollMedianOfflineVec : public Worker {
         
         if ((n_obs >= min_obs)) {
           
+          k = sort_ix[idxmedian_x];
+          
           // average if upper and lower weight is equal
           if (std::abs(sum_upper_w_temp / sum_w - 0.5) <= sqrt(arma::datum::eps)) {
             
-            k = sort_ix[temp_ix + 1];
-            arma_median[i] = (x_subset[k] + sum_upper_x) / 2;
+            int k_lower = sort_ix[idxmedian_x - 1];
+            arma_median[i] = (x_subset[k] + x_subset[k_lower]) / 2;
             
           } else {
-            arma_median[i] = sum_upper_x;
+            arma_median[i] = x_subset[k];
           }
           
         } else {
