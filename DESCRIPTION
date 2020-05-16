@@ -1,8 +1,8 @@
 Package: roll
 Type: Package
 Title: Rolling Statistics
-Version: 1.1.4
-Date: 2020-01-16
+Version: 1.1.5
+Date: 2020-MM-DD
 Author: Jason Foster
 Maintainer: Jason Foster <jason.j.foster@gmail.com>
 Description: Fast and efficient computation of rolling statistics for time-series data.

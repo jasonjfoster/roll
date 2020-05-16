@@ -413,6 +413,10 @@ roll_idxmax <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
+##' @details The sum of weights above and below the median are as equal as possible
+##' otherwise, if equal, the mean of observations that border the center of weights.
+##' 
+##' If the weights are the default, then the weighted median simplifies to the median.
 ##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
 ##' medians.
 ##' @examples

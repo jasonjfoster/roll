@@ -31,6 +31,12 @@ medians.
 \description{
 A function for computing the rolling and expanding medians of time-series data.
 }
+\details{
+The sum of weights above and below the median are as equal as possible
+otherwise, if equal, the mean of observations that border the center of weights.
+
+If the weights are the default, then the weighted median simplifies to the median.
+}
 \examples{
 n <- 15
 x <- rnorm(n)
