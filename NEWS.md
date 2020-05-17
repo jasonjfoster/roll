@@ -4,6 +4,10 @@
 
 * Added hex sticker and improved documentation ([#27](https://github.com/jjf234/roll/issues/27), [#28](https://github.com/jjf234/roll/issues/28))
 
+* New `roll_quantile` function for computing rolling and expanding quantiles of time-series data
+
+    * Note: `roll_quantile` function is not calculated using an online algorithm
+
 ## Version 1.1.4
 
 * Fixed issues related to floating point arithmetic ([#23](https://github.com/jjf234/roll/issues/23), [#24](https://github.com/jjf234/roll/issues/24))

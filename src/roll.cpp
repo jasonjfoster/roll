@@ -1,6 +1,14 @@
 #include "roll_mat.h"
 #include "roll_vec.h"
 
+void check_p(const double& p) {
+  
+  if ((p < 0) || (p > 1)) {
+    stop("value of 'p' must be between zero and one");
+  }
+  
+}
+
 void check_width(const int& width) {
   
   if (width < 1) {
@@ -1342,11 +1350,11 @@ SEXP roll_idxmax(const SEXP& x, const int& width,
   
 }
 
-// [[Rcpp::export(.roll_median)]]
-SEXP roll_median(const SEXP& x, const int& width,
-                 const arma::vec& weights, const int& min_obs,
-                 const bool& complete_obs, const bool& na_restore,
-                 const bool& online) {
+// [[Rcpp::export(.roll_quantile)]]
+SEXP roll_quantile(const SEXP& x, const double& p, 
+                   const int& width, const arma::vec& weights,
+                   const int& min_obs, const bool& complete_obs,
+                   const bool& na_restore, const bool& online) {
   
   if (Rf_isMatrix(x)) {
     
@@ -1355,7 +1363,10 @@ SEXP roll_median(const SEXP& x, const int& width,
     int n_rows_x = xx.nrow();
     int n_cols_x = xx.ncol();
     arma::uvec arma_any_na(n_rows_x);
-    arma::mat arma_median(n_rows_x, n_cols_x);
+    arma::mat arma_quantile(n_rows_x, n_cols_x);
+    
+    // check 'p' argument for errors
+    check_p(p);
     
     // check 'width' argument for errors
     check_width(width);
@@ -1376,28 +1387,68 @@ SEXP roll_median(const SEXP& x, const int& width,
       arma_any_na.fill(0);
     }
     
-    // compute rolling median
+    // compute rolling quantile
     if (online) {
       
-      warning("'online' is not supported");
-      RollMedianOfflineMat roll_median_offline(xx, n, n_rows_x, n_cols_x, width,
-                                               weights, min_obs,
-                                               arma_any_na, na_restore,
-                                               arma_median);
-      parallelFor(0, n_rows_x * n_cols_x, roll_median_offline);
+      if (p == 0) {
+        
+        RollMinOnlineMat roll_min_online(xx, n, n_rows_x, n_cols_x, width,
+                                         weights, min_obs,
+                                         arma_any_na, na_restore,
+                                         arma_quantile);
+        parallelFor(0, n_cols_x, roll_min_online);
+        
+      } else if (p == 1) {
+        
+        RollMaxOnlineMat roll_max_online(xx, n, n_rows_x, n_cols_x, width,
+                                         weights, min_obs,
+                                         arma_any_na, na_restore,
+                                         arma_quantile);
+        parallelFor(0, n_cols_x, roll_max_online);
+        
+      } else {
+        
+        warning("'online' is not supported");
+        RollQuantileOfflineMat roll_quantile_offline(xx, 1 - p, n, n_rows_x, n_cols_x, width,
+                                                     weights, min_obs,
+                                                     arma_any_na, na_restore,
+                                                     arma_quantile);
+        parallelFor(0, n_rows_x * n_cols_x, roll_quantile_offline);
+        
+      }
       
     } else {
       
-      RollMedianOfflineMat roll_median_offline(xx, n, n_rows_x, n_cols_x, width,
-                                               weights, min_obs,
-                                               arma_any_na, na_restore,
-                                               arma_median);
-      parallelFor(0, n_rows_x * n_cols_x, roll_median_offline);
+      if (p == 0) {
+        
+        RollMinOfflineMat roll_min_offline(xx, n, n_rows_x, n_cols_x, width,
+                                           weights, min_obs,
+                                           arma_any_na, na_restore,
+                                           arma_quantile);
+        parallelFor(0, n_rows_x * n_cols_x, roll_min_offline);
+        
+      } else if (p == 1) {
+        
+        RollMaxOfflineMat roll_max_offline(xx, n, n_rows_x, n_cols_x, width,
+                                           weights, min_obs,
+                                           arma_any_na, na_restore,
+                                           arma_quantile);
+        parallelFor(0, n_rows_x * n_cols_x, roll_max_offline);
+        
+      } else {
+        
+        RollQuantileOfflineMat roll_quantile_offline(xx, 1 - p, n, n_rows_x, n_cols_x, width,
+                                                     weights, min_obs,
+                                                     arma_any_na, na_restore,
+                                                     arma_quantile);
+        parallelFor(0, n_rows_x * n_cols_x, roll_quantile_offline);
+        
+      }
       
     }
     
     // create and return a matrix or xts object
-    NumericMatrix result(wrap(arma_median));
+    NumericMatrix result(wrap(arma_quantile));
     List dimnames = xx.attr("dimnames");
     result.attr("dimnames") = dimnames;
     result.attr("index") = xx.attr("index");
@@ -1414,7 +1465,10 @@ SEXP roll_median(const SEXP& x, const int& width,
     NumericVector xx(x);
     int n = weights.size();
     int n_rows_x = xx.size();
-    arma::vec arma_median(n_rows_x);
+    arma::vec arma_quantile(n_rows_x);
+    
+    // check 'p' argument for errors
+    check_p(p);
     
     // check 'width' argument for errors
     check_width(width);
@@ -1427,28 +1481,68 @@ SEXP roll_median(const SEXP& x, const int& width,
     // otherwise check argument for errors
     check_min_obs(min_obs);
     
-    // compute rolling median
+    // compute rolling quantile
     if (online) {
       
-      warning("'online' is not supported"); 
-      RollMedianOfflineVec roll_median_offline(xx, n, n_rows_x, width,
-                                               weights, min_obs,
-                                               na_restore,
-                                               arma_median);
-      parallelFor(0, n_rows_x, roll_median_offline);
+      if (p == 0) {
+        
+        RollMinOnlineVec roll_min_online(xx, n, n_rows_x, width,
+                                         weights, min_obs,
+                                         na_restore,
+                                         arma_quantile);
+        roll_min_online();
+        
+      } else if (p == 1) {
+        
+        RollMaxOnlineVec roll_max_online(xx, n, n_rows_x, width,
+                                         weights, min_obs,
+                                         na_restore,
+                                         arma_quantile);
+        roll_max_online();
+        
+      } else {
+        
+        warning("'online' is not supported"); 
+        RollQuantileOfflineVec roll_quantile_offline(xx, 1 - p, n, n_rows_x, width,
+                                                     weights, min_obs,
+                                                     na_restore,
+                                                     arma_quantile);
+        parallelFor(0, n_rows_x, roll_quantile_offline);
+        
+      }
       
     } else {
       
-      RollMedianOfflineVec roll_median_offline(xx, n, n_rows_x, width,
-                                               weights, min_obs,
-                                               na_restore,
-                                               arma_median);
-      parallelFor(0, n_rows_x, roll_median_offline);
+      if (p == 0) {
+        
+        RollMinOfflineVec roll_min_offline(xx, n, n_rows_x, width,
+                                           weights, min_obs,
+                                           na_restore,
+                                           arma_quantile);
+        parallelFor(0, n_rows_x, roll_min_offline);
+        
+      } else if (p == 1) {
+        
+        RollMaxOfflineVec roll_max_offline(xx, n, n_rows_x, width,
+                                           weights, min_obs,
+                                           na_restore,
+                                           arma_quantile);
+        parallelFor(0, n_rows_x, roll_max_offline);
+        
+      } else {
+        
+        RollQuantileOfflineVec roll_quantile_offline(xx, 1 - p, n, n_rows_x, width,
+                                                     weights, min_obs,
+                                                     na_restore,
+                                                     arma_quantile);
+        parallelFor(0, n_rows_x, roll_quantile_offline);
+        
+      }
       
     }
     
     // create and return a vector object
-    NumericVector result(wrap(arma_median));
+    NumericVector result(wrap(arma_quantile));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
     if (names.size() > 0) {

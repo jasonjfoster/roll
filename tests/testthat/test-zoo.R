@@ -91,6 +91,19 @@ test_that("equivalent to zoo::rollapply", {
                           zoo::rollapplyr(test_zoo_x[[ax]], width = width,
                                           median, partial = TRUE))
         
+        for (ap in 1:length(test_p)) {
+          
+          # "'online' is not supported"
+          expect_equivalent(roll_quantile(test_zoo_x[[ax]], test_p[[ap]],
+                                          width, test_weights[[1]],
+                                          test_min_obs[1], test_complete_obs[2],
+                                          test_na_restore[2], test_online[j]),
+                            zoo::rollapplyr(test_zoo_x[[ax]], width = width,
+                                            quantile, probs = test_p[[ap]],
+                                            type = 2, partial = TRUE))
+          
+        }
+        
         expect_equivalent(roll_var(test_zoo_x[[ax]], width,
                                    test_weights[[1]], test_center[1],
                                    test_min_obs[1], test_complete_obs[2],
@@ -127,8 +140,8 @@ test_that("equivalent to zoo::rollapply", {
                                      test_center[1], test_scale[2],
                                      test_min_obs[1], test_complete_obs[2],
                                      test_na_restore[2], test_online[j]),
-                            rollapplyr_cube(cov, test_zoo_x[[ax]], test_zoo_y[[ay]],
-                                            width))
+                            rollapplyr_cube(cov, test_zoo_x[[ax]],
+                                            test_zoo_y[[ay]], width))
           
           # "the standard deviation is zero"
           expect_equivalent(roll_cor(test_zoo_x[[ax]], test_zoo_y[[ay]],
@@ -136,8 +149,8 @@ test_that("equivalent to zoo::rollapply", {
                                      test_center[1], test_scale[1],
                                      test_min_obs[1], test_complete_obs[2],
                                      test_na_restore[2], test_online[j]),
-                            rollapplyr_cube(cor, test_zoo_x[[ax]], test_zoo_y[[ay]],
-                                            width))
+                            rollapplyr_cube(cor, test_zoo_x[[ax]],
+                                            test_zoo_y[[ay]], width))
           
         }
         

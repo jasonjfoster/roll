@@ -16,30 +16,30 @@ extern SEXP _roll_roll_idxmin(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_lm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_max(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_mean(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP _roll_roll_median(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_min(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_prod(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _roll_roll_quantile(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_scale(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_sd(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_sum(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _roll_roll_var(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-  {"_roll_roll_all",    (DL_FUNC) &_roll_roll_all,     6},
-  {"_roll_roll_any",    (DL_FUNC) &_roll_roll_any,     6},
-  {"_roll_roll_cov",    (DL_FUNC) &_roll_roll_cov,    10},
-  {"_roll_roll_idxmax", (DL_FUNC) &_roll_roll_idxmax,  7},
-  {"_roll_roll_idxmin", (DL_FUNC) &_roll_roll_idxmin,  7},
-  {"_roll_roll_lm",     (DL_FUNC) &_roll_roll_lm,      9},
-  {"_roll_roll_max",    (DL_FUNC) &_roll_roll_max,     7},
-  {"_roll_roll_mean",   (DL_FUNC) &_roll_roll_mean,    7},
-  {"_roll_roll_median", (DL_FUNC) &_roll_roll_median,  7},
-  {"_roll_roll_min",    (DL_FUNC) &_roll_roll_min,     7},
-  {"_roll_roll_prod",   (DL_FUNC) &_roll_roll_prod,    7},
-  {"_roll_roll_scale",  (DL_FUNC) &_roll_roll_scale,   9},
-  {"_roll_roll_sd",     (DL_FUNC) &_roll_roll_sd,      8},
-  {"_roll_roll_sum",    (DL_FUNC) &_roll_roll_sum,     7},
-  {"_roll_roll_var",    (DL_FUNC) &_roll_roll_var,     8},
+  {"_roll_roll_all",      (DL_FUNC) &_roll_roll_all,       6},
+  {"_roll_roll_any",      (DL_FUNC) &_roll_roll_any,       6},
+  {"_roll_roll_cov",      (DL_FUNC) &_roll_roll_cov,      10},
+  {"_roll_roll_idxmax",   (DL_FUNC) &_roll_roll_idxmax,    7},
+  {"_roll_roll_idxmin",   (DL_FUNC) &_roll_roll_idxmin,    7},
+  {"_roll_roll_lm",       (DL_FUNC) &_roll_roll_lm,        9},
+  {"_roll_roll_max",      (DL_FUNC) &_roll_roll_max,       7},
+  {"_roll_roll_mean",     (DL_FUNC) &_roll_roll_mean,      7},
+  {"_roll_roll_min",      (DL_FUNC) &_roll_roll_min,       7},
+  {"_roll_roll_prod",     (DL_FUNC) &_roll_roll_prod,      7},
+  {"_roll_roll_quantile", (DL_FUNC) &_roll_roll_quantile,  8},
+  {"_roll_roll_scale",    (DL_FUNC) &_roll_roll_scale,     9},
+  {"_roll_roll_sd",       (DL_FUNC) &_roll_roll_sd,        8},
+  {"_roll_roll_sum",      (DL_FUNC) &_roll_roll_sum,       7},
+  {"_roll_roll_var",      (DL_FUNC) &_roll_roll_var,       8},
   {NULL, NULL, 0}
 };
 

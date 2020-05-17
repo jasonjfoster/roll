@@ -1,4 +1,4 @@
 useDynLib(roll, .registration = TRUE)
-export(roll_all, roll_any, roll_sum, roll_prod, roll_mean, roll_min, roll_max, roll_idxmin, roll_idxmax, roll_median, roll_var, roll_sd, roll_scale, roll_cov, roll_cor, roll_lm)
+export(roll_all, roll_any, roll_sum, roll_prod, roll_mean, roll_min, roll_max, roll_idxmin, roll_idxmax, roll_median, roll_quantile, roll_var, roll_sd, roll_scale, roll_cov, roll_cor, roll_lm)
 importFrom(Rcpp, evalCpp)
 importFrom(RcppParallel, RcppParallelLibs)

@@ -117,6 +117,20 @@ test_that("equal to online algorithm", {
                                        test_complete_obs[d], test_na_restore[e],
                                        test_online[2]))
               
+              for (ap in 1:length(test_p)) {
+                
+                # "'online' is not supported"
+                expect_equal(roll_quantile(test_roll_x[[ax]], test_p[[ap]],
+                                           width, test_weights[[f]],
+                                           test_min_obs[c], test_complete_obs[d],
+                                           test_na_restore[e], test_online[1]),
+                             roll_quantile(test_roll_x[[ax]], test_p[[ap]],
+                                           width, test_weights[[f]],
+                                           test_min_obs[c], test_complete_obs[d],
+                                           test_na_restore[e], test_online[2]))
+                
+              }
+              
               for (g in 1:length(test_center)) {
                 
                 expect_equal(roll_var(test_roll_x[[ax]], width,

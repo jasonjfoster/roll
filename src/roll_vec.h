@@ -1834,26 +1834,29 @@ struct RollIdxMaxOfflineVec : public Worker {
 };
 
 // 'Worker' function for computing the rolling statistic using an offline algorithm
-struct RollMedianOfflineVec : public Worker {
+struct RollQuantileOfflineVec : public Worker {
   
   const RVector<double> x;      // source
+  const double p;
   const int n;
   const int n_rows_x;
   const int width;
   const arma::vec arma_weights;
   const int min_obs;
   const bool na_restore;
-  arma::vec& arma_median;       // destination (pass by reference)
+  arma::vec& arma_quantile;     // destination (pass by reference)
   
   // initialize with source and destination
-  RollMedianOfflineVec(const NumericVector x, const int n,
-                       const int n_rows_x, const int width,
-                       const arma::vec arma_weights, const int min_obs,
-                       const bool na_restore, arma::vec& arma_median)
-    : x(x), n(n),
-      n_rows_x(n_rows_x), width(width),
-      arma_weights(arma_weights), min_obs(min_obs),
-      na_restore(na_restore), arma_median(arma_median) { }
+  RollQuantileOfflineVec(const NumericVector x, const double p, 
+                         const int n, const int n_rows_x,
+                         const int width, const arma::vec arma_weights,
+                         const int min_obs, const bool na_restore,
+                         arma::vec& arma_quantile)
+    : x(x), p(p),
+      n(n), n_rows_x(n_rows_x),
+      width(width), arma_weights(arma_weights),
+      min_obs(min_obs), na_restore(na_restore),
+      arma_quantile(arma_quantile) { }
   
   // function call operator that iterates by index
   void operator()(std::size_t begin_index, std::size_t end_index) {
@@ -1902,7 +1905,7 @@ struct RollMedianOfflineVec : public Worker {
         
         count = 0;
         int n_obs = 0;
-        int idxmedian_x = 0;
+        int idxquantile_x = 0;
         bool status = false;
         long double sum_upper_w = 0;
         long double sum_upper_w_temp = 0;
@@ -1918,12 +1921,12 @@ struct RollMedianOfflineVec : public Worker {
             
             sum_upper_w += arma_weights_subset[k];
             
-            // last element of sorted array that is half of 'weights'
+            // last element of sorted array that is 'p' of 'weights'
             // note: 'weights' must be greater than 0
-            if (!status && (sum_upper_w / sum_w >= 0.5)) {
+            if (!status && (sum_upper_w / sum_w >= p)) {
               
               status = true;
-              idxmedian_x = n_size_x - count - 1;
+              idxquantile_x = n_size_x - count - 1;
               sum_upper_w_temp = sum_upper_w;
               
             }
@@ -1938,26 +1941,26 @@ struct RollMedianOfflineVec : public Worker {
         
         if ((n_obs >= min_obs)) {
           
-          k = sort_ix[idxmedian_x];
+          k = sort_ix[idxquantile_x];
           
           // average if upper and lower weight is equal
-          if (std::abs(sum_upper_w_temp / sum_w - 0.5) <= sqrt(arma::datum::eps)) {
+          if (std::abs(sum_upper_w_temp / sum_w - p) <= sqrt(arma::datum::eps)) {
             
-            int k_lower = sort_ix[idxmedian_x - 1];
-            arma_median[i] = (x_subset[k] + x_subset[k_lower]) / 2;
+            int k_lower = sort_ix[idxquantile_x - 1];
+            arma_quantile[i] = (x_subset[k] + x_subset[k_lower]) / 2;
             
           } else {
-            arma_median[i] = x_subset[k];
+            arma_quantile[i] = x_subset[k];
           }
           
         } else {
-          arma_median[i] = NA_REAL;
+          arma_quantile[i] = NA_REAL;
         }
         
       } else {
         
         // can be either NA or NaN
-        arma_median[i] = x[i];
+        arma_quantile[i] = x[i];
         
       }
       
