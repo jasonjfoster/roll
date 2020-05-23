@@ -117,15 +117,15 @@ test_that("equal to online algorithm", {
                                        test_complete_obs[d], test_na_restore[e],
                                        test_online[2]))
               
-              for (ap in 1:length(test_p)) {
+              for (g in 1:length(test_p)) {
                 
                 # "'online' is not supported"
-                expect_equal(roll_quantile(test_roll_x[[ax]], test_p[[ap]],
-                                           width, test_weights[[f]],
+                expect_equal(roll_quantile(test_roll_x[[ax]],  width,
+                                           test_weights[[f]], test_p[[g]],
                                            test_min_obs[c], test_complete_obs[d],
                                            test_na_restore[e], test_online[1]),
-                             roll_quantile(test_roll_x[[ax]], test_p[[ap]],
-                                           width, test_weights[[f]],
+                             roll_quantile(test_roll_x[[ax]], width,
+                                           test_weights[[f]], test_p[[g]],
                                            test_min_obs[c], test_complete_obs[d],
                                            test_na_restore[e], test_online[2]))
                 
@@ -195,17 +195,17 @@ test_that("equal to online algorithm", {
               }
               
               for (ay in 1:length(test_roll_y)) {
-                for (i in 1:length(test_intercept)) {
+                for (g in 1:length(test_intercept)) {
                   
                   # "'complete_obs = FALSE' is not supported"
                   expect_equal(roll_lm(test_roll_x[[ax]], test_roll_y[[ay]],
                                        test_width[b], test_weights[[f]],
-                                       test_intercept[i], test_min_obs[c],
+                                       test_intercept[g], test_min_obs[c],
                                        test_complete_obs[d], test_na_restore[e],
                                        test_online[1]),
                                roll_lm(test_roll_x[[ax]], test_roll_y[[ay]],
                                        test_width[b], test_weights[[f]],
-                                       test_intercept[i], test_min_obs[c],
+                                       test_intercept[g], test_min_obs[c],
                                        test_complete_obs[d], test_na_restore[e],
                                        test_online[2]))
                   

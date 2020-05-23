@@ -1351,8 +1351,8 @@ SEXP roll_idxmax(const SEXP& x, const int& width,
 }
 
 // [[Rcpp::export(.roll_quantile)]]
-SEXP roll_quantile(const SEXP& x, const double& p, 
-                   const int& width, const arma::vec& weights,
+SEXP roll_quantile(const SEXP& x, const int& width,
+                   const arma::vec& weights, const double& p,
                    const int& min_obs, const bool& complete_obs,
                    const bool& na_restore, const bool& online) {
   
@@ -1409,8 +1409,8 @@ SEXP roll_quantile(const SEXP& x, const double& p,
       } else {
         
         warning("'online' is not supported");
-        RollQuantileOfflineMat roll_quantile_offline(xx, 1 - p, n, n_rows_x, n_cols_x, width,
-                                                     weights, min_obs,
+        RollQuantileOfflineMat roll_quantile_offline(xx, n, n_rows_x, n_cols_x, width,
+                                                     weights, 1 - p, min_obs,
                                                      arma_any_na, na_restore,
                                                      arma_quantile);
         parallelFor(0, n_rows_x * n_cols_x, roll_quantile_offline);
@@ -1437,8 +1437,8 @@ SEXP roll_quantile(const SEXP& x, const double& p,
         
       } else {
         
-        RollQuantileOfflineMat roll_quantile_offline(xx, 1 - p, n, n_rows_x, n_cols_x, width,
-                                                     weights, min_obs,
+        RollQuantileOfflineMat roll_quantile_offline(xx, n, n_rows_x, n_cols_x, width,
+                                                     weights, 1 - p, min_obs,
                                                      arma_any_na, na_restore,
                                                      arma_quantile);
         parallelFor(0, n_rows_x * n_cols_x, roll_quantile_offline);
@@ -1503,8 +1503,8 @@ SEXP roll_quantile(const SEXP& x, const double& p,
       } else {
         
         warning("'online' is not supported"); 
-        RollQuantileOfflineVec roll_quantile_offline(xx, 1 - p, n, n_rows_x, width,
-                                                     weights, min_obs,
+        RollQuantileOfflineVec roll_quantile_offline(xx, n, n_rows_x, width,
+                                                     weights, 1 - p, min_obs,
                                                      na_restore,
                                                      arma_quantile);
         parallelFor(0, n_rows_x, roll_quantile_offline);
@@ -1531,8 +1531,8 @@ SEXP roll_quantile(const SEXP& x, const double& p,
         
       } else {
         
-        RollQuantileOfflineVec roll_quantile_offline(xx, 1 - p, n, n_rows_x, width,
-                                                     weights, min_obs,
+        RollQuantileOfflineVec roll_quantile_offline(xx, n, n_rows_x, width,
+                                                     weights, 1 - p, min_obs,
                                                      na_restore,
                                                      arma_quantile);
         parallelFor(0, n_rows_x, roll_quantile_offline);

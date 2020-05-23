@@ -2020,28 +2020,28 @@ struct RollIdxMaxOfflineMat : public Worker {
 struct RollQuantileOfflineMat : public Worker {
   
   const RMatrix<double> x;      // source
-  const double p;
   const int n;
   const int n_rows_x;
   const int n_cols_x;
   const int width;
   const arma::vec arma_weights;
+  const double p;
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
   arma::mat& arma_quantile;     // destination (pass by reference)
   
   // initialize with source and destination
-  RollQuantileOfflineMat(const NumericMatrix x, const double p,
-                         const int n, const int n_rows_x,
-                         const int n_cols_x, const int width, 
-                         const arma::vec arma_weights, const int min_obs,
+  RollQuantileOfflineMat(const NumericMatrix x, const int n,
+                         const int n_rows_x, const int n_cols_x,
+                         const int width,  const arma::vec arma_weights,
+                         const double p, const int min_obs,
                          const arma::uvec arma_any_na, const bool na_restore,
                          arma::mat& arma_quantile)
-    : x(x), p(p),
-      n(n), n_rows_x(n_rows_x),
-      n_cols_x(n_cols_x), width(width), 
-      arma_weights(arma_weights), min_obs(min_obs),
+    : x(x), n(n),
+      n_rows_x(n_rows_x), n_cols_x(n_cols_x),
+      width(width), arma_weights(arma_weights),
+      p(p), min_obs(min_obs),
       arma_any_na(arma_any_na), na_restore(na_restore),
       arma_quantile(arma_quantile) { }
   

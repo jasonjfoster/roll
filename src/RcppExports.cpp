@@ -158,20 +158,20 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_quantile
-SEXP roll_quantile(const SEXP& x, const double& p, const int& width, const arma::vec& weights, const int& min_obs, const bool& complete_obs, const bool& na_restore, const bool& online);
-RcppExport SEXP _roll_roll_quantile(SEXP xSEXP, SEXP pSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP onlineSEXP) {
+SEXP roll_quantile(const SEXP& x, const int& width, const arma::vec& weights, const double& p, const int& min_obs, const bool& complete_obs, const bool& na_restore, const bool& online);
+RcppExport SEXP _roll_roll_quantile(SEXP xSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP pSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP onlineSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const SEXP& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const double& >::type p(pSEXP);
     Rcpp::traits::input_parameter< const int& >::type width(widthSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< const double& >::type p(pSEXP);
     Rcpp::traits::input_parameter< const int& >::type min_obs(min_obsSEXP);
     Rcpp::traits::input_parameter< const bool& >::type complete_obs(complete_obsSEXP);
     Rcpp::traits::input_parameter< const bool& >::type na_restore(na_restoreSEXP);
     Rcpp::traits::input_parameter< const bool& >::type online(onlineSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_quantile(x, p, width, weights, min_obs, complete_obs, na_restore, online));
+    rcpp_result_gen = Rcpp::wrap(roll_quantile(x, width, weights, p, min_obs, complete_obs, na_restore, online));
     return rcpp_result_gen;
 END_RCPP
 }

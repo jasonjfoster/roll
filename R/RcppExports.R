@@ -37,8 +37,8 @@
     .Call(`_roll_roll_idxmax`, x, width, weights, min_obs, complete_obs, na_restore, online)
 }
 
-.roll_quantile <- function(x, p, width, weights, min_obs, complete_obs, na_restore, online) {
-    .Call(`_roll_roll_quantile`, x, p, width, weights, min_obs, complete_obs, na_restore, online)
+.roll_quantile <- function(x, width, weights, p, min_obs, complete_obs, na_restore, online) {
+    .Call(`_roll_roll_quantile`, x, width, weights, p, min_obs, complete_obs, na_restore, online)
 }
 
 .roll_var <- function(x, width, weights, center, min_obs, complete_obs, na_restore, online) {

@@ -1837,24 +1837,24 @@ struct RollIdxMaxOfflineVec : public Worker {
 struct RollQuantileOfflineVec : public Worker {
   
   const RVector<double> x;      // source
-  const double p;
   const int n;
   const int n_rows_x;
   const int width;
   const arma::vec arma_weights;
+  const double p;
   const int min_obs;
   const bool na_restore;
   arma::vec& arma_quantile;     // destination (pass by reference)
   
   // initialize with source and destination
-  RollQuantileOfflineVec(const NumericVector x, const double p, 
-                         const int n, const int n_rows_x,
-                         const int width, const arma::vec arma_weights,
+  RollQuantileOfflineVec(const NumericVector x, const int n,
+                         const int n_rows_x, const int width,
+                         const arma::vec arma_weights, const double p, 
                          const int min_obs, const bool na_restore,
                          arma::vec& arma_quantile)
-    : x(x), p(p),
-      n(n), n_rows_x(n_rows_x),
-      width(width), arma_weights(arma_weights),
+    : x(x), n(n),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), p(p),
       min_obs(min_obs), na_restore(na_restore),
       arma_quantile(arma_quantile) { }
   

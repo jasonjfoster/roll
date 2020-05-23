@@ -32,7 +32,7 @@ medians.
 A function for computing the rolling and expanding medians of time-series data.
 }
 \details{
-Inverse of the empirical distribution function, but with averaging at discontinuities.
+Inverse of the empirical distribution function with averaging at discontinuities.
 }
 \examples{
 n <- 15

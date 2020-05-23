@@ -4,18 +4,18 @@
 \alias{roll_quantile}
 \title{Rolling Quantiles}
 \usage{
-roll_quantile(x, p = 0.5, width, weights = rep(1, width),
+roll_quantile(x, width, weights = rep(1, width), p = 0.5,
   min_obs = width, complete_obs = FALSE, na_restore = FALSE,
   online = FALSE)
 }
 \arguments{
 \item{x}{vector or matrix. Rows are observations and columns are variables.}
 
-\item{p}{numeric. Probability between zero and one.}
-
 \item{width}{integer. Window size.}
 
 \item{weights}{vector. Weights for each observation within a window.}
+
+\item{p}{numeric. Probability between zero and one.}
 
 \item{min_obs}{integer. Minimum number of observations required to have a value within a window,
 otherwise result is \code{NA}.}
@@ -35,7 +35,7 @@ quantiles.
 A function for computing the rolling and expanding quantiles of time-series data.
 }
 \details{
-Inverse of the empirical distribution function, but with averaging at discontinuities.
+Inverse of the empirical distribution function with averaging at discontinuities.
 }
 \examples{
 n <- 15
@@ -43,14 +43,14 @@ x <- rnorm(n)
 weights <- 0.9 ^ (n:1)
 
 # rolling quantiles with complete windows
-roll_quantile(x, p = 0.5, width = 5)
+roll_quantile(x, width = 5)
 
 # rolling quantiles with partial windows
-roll_quantile(x, p = 0.5, width = 5, min_obs = 1)
+roll_quantile(x, width = 5, min_obs = 1)
 
 # expanding quantiles with partial windows
-roll_quantile(x, p = 0.5, width = n, min_obs = 1)
+roll_quantile(x, width = n, min_obs = 1)
 
 # expanding quantiles with partial windows and weights
-roll_quantile(x, p = 0.5, width = n, min_obs = 1, weights = weights)
+roll_quantile(x, width = n, min_obs = 1, weights = weights)
 }

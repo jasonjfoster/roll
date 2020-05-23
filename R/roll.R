@@ -413,7 +413,7 @@ roll_idxmax <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @details Inverse of the empirical distribution function, but with averaging at discontinuities.
+##' @details Inverse of the empirical distribution function with averaging at discontinuities.
 ##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
 ##' medians.
 ##' @examples
@@ -438,9 +438,9 @@ roll_median <- function(x, width, weights = rep(1, width),
                         online = FALSE) {
   return(.Call(`_roll_roll_quantile`,
                x,
-               as.numeric(0.5),
                as.integer(width),
                as.numeric(weights),
+               as.numeric(0.5),
                as.integer(min_obs),
                as.logical(complete_obs),
                as.logical(na_restore),
@@ -454,15 +454,15 @@ roll_median <- function(x, width, weights = rep(1, width),
 ##'
 ##' @param x vector or matrix. Rows are observations and columns are variables.
 ##' @param width integer. Window size.
-##' @param p numeric. Probability between zero and one.
 ##' @param weights vector. Weights for each observation within a window.
+##' @param p numeric. Probability between zero and one.
 ##' @param min_obs integer. Minimum number of observations required to have a value within a window,
 ##' otherwise result is \code{NA}.
 ##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @details Inverse of the empirical distribution function, but with averaging at discontinuities.
+##' @details Inverse of the empirical distribution function with averaging at discontinuities.
 ##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
 ##' quantiles.
 ##' @examples
@@ -471,25 +471,25 @@ roll_median <- function(x, width, weights = rep(1, width),
 ##' weights <- 0.9 ^ (n:1)
 ##' 
 ##' # rolling quantiles with complete windows
-##' roll_quantile(x, p = 0.5, width = 5)
+##' roll_quantile(x, width = 5)
 ##' 
 ##' # rolling quantiles with partial windows
-##' roll_quantile(x, p = 0.5, width = 5, min_obs = 1)
+##' roll_quantile(x, width = 5, min_obs = 1)
 ##' 
 ##' # expanding quantiles with partial windows
-##' roll_quantile(x, p = 0.5, width = n, min_obs = 1)
+##' roll_quantile(x, width = n, min_obs = 1)
 ##' 
 ##' # expanding quantiles with partial windows and weights
-##' roll_quantile(x, p = 0.5, width = n, min_obs = 1, weights = weights)
+##' roll_quantile(x, width = n, min_obs = 1, weights = weights)
 ##' @export
-roll_quantile <- function(x, p = 0.5, width, weights = rep(1, width),
+roll_quantile <- function(x, width, weights = rep(1, width), p = 0.5,
                           min_obs = width, complete_obs = FALSE, na_restore = FALSE,
                           online = FALSE) {
   return(.Call(`_roll_roll_quantile`,
                x,
-               as.numeric(p),
                as.integer(width),
                as.numeric(weights),
+               as.numeric(p),
                as.integer(min_obs),
                as.logical(complete_obs),
                as.logical(na_restore),
