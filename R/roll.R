@@ -413,7 +413,6 @@ roll_idxmax <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @details Inverse of the empirical distribution function with averaging at discontinuities.
 ##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
 ##' medians.
 ##' @examples
@@ -462,9 +461,12 @@ roll_median <- function(x, width, weights = rep(1, width),
 ##' if \code{FALSE} then each value is used.
 ##' @param na_restore logical. Should missing values be restored?
 ##' @param online logical. Process observations using an online algorithm.
-##' @details Inverse of the empirical distribution function with averaging at discontinuities.
+##' @details The methodology for computing the quantiles is based on the inverse of the empirical
+##' distribution function with averaging at discontinuities (see "Definition 2" in Hyndman and Fan, 1996). 
 ##' @return An object of the same class and dimension as \code{x} with the rolling and expanding
 ##' quantiles.
+##' @references Hyndman, R.J. and Fan, Y. (1996). "Sample quantiles in statistical packages."
+##' \emph{American Statistician}, 50(4), 361-365.
 ##' @examples
 ##' n <- 15
 ##' x <- rnorm(n)

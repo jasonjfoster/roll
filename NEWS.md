@@ -2,7 +2,7 @@
 
 ## Version 1.1.5
 
-* Added hex sticker and improved documentation ([#27](https://github.com/jjf234/roll/issues/27), [#28](https://github.com/jjf234/roll/issues/28))
+* Added hex sticker and improved documentation ([#27](https://github.com/jjf234/roll/issues/27), [#28](https://github.com/jjf234/roll/issues/28), [#30](https://github.com/jjf234/roll/issues/30))
 
 * New `roll_quantile` function for computing rolling and expanding quantiles of time-series data
 

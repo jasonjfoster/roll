@@ -35,7 +35,8 @@ quantiles.
 A function for computing the rolling and expanding quantiles of time-series data.
 }
 \details{
-Inverse of the empirical distribution function with averaging at discontinuities.
+The methodology for computing the quantiles is based on the inverse of the empirical
+distribution function with averaging at discontinuities (see "Definition 2" in Hyndman and Fan, 1996).
 }
 \examples{
 n <- 15
@@ -53,4 +54,8 @@ roll_quantile(x, width = n, min_obs = 1)
 
 # expanding quantiles with partial windows and weights
 roll_quantile(x, width = n, min_obs = 1, weights = weights)
+}
+\references{
+Hyndman, R.J. and Fan, Y. (1996). "Sample quantiles in statistical packages."
+\emph{American Statistician}, 50(4), 361-365.
 }
