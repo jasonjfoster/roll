@@ -1820,9 +1820,7 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     
     // default 'complete_obs' argument is 'true',
     // otherwise check argument for errors
-    if (complete_obs && symmetric) {
-      arma_any_na = any_na_x(xx);
-    } else if (complete_obs && !symmetric) {
+    if (complete_obs) {
       arma_any_na = any_na_xy(xx, yyy);
     } else {
       arma_any_na.fill(0);
@@ -1831,47 +1829,19 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     // compute rolling covariances
     if (status && online) {
       
-      if (symmetric) {
-        
-        // y is null
-        RollCovOnlineMatXX roll_cov_online(xx, n, n_rows_xy, n_cols_x, width,
-                                           weights, center, scale, min_obs,
-                                           arma_any_na, na_restore,
-                                           arma_cov);
-        parallelFor(0, n_cols_x, roll_cov_online);
-        
-      } else if (!symmetric) {
-        
-        // y is not null
-        RollCovOnlineMatXY roll_cov_online(xx, yyy, n, n_rows_xy, n_cols_x, n_cols_y, width,
-                                           weights, center, scale, min_obs,
-                                           arma_any_na, na_restore,
-                                           arma_cov);
-        parallelFor(0, n_cols_x, roll_cov_online);
-        
-      }
+      RollCovOnlineMatXY roll_cov_online(xx, yyy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                         weights, center, scale, min_obs,
+                                         arma_any_na, na_restore,
+                                         arma_cov);
+      parallelFor(0, n_cols_x, roll_cov_online);
       
     } else {
       
-      if (symmetric) {
-        
-        // y is null
-        RollCovOfflineMatXX roll_cov_offline(xx, n, n_rows_xy, n_cols_x, width,
-                                             weights, center, scale, min_obs,
-                                             arma_any_na, na_restore,
-                                             arma_cov);
-        parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_offline);
-        
-      } else if (!symmetric) {
-        
-        // y is not null
-        RollCovOfflineMatXY roll_cov_offline(xx, yyy, n, n_rows_xy, n_cols_x, n_cols_y, width,
-                                             weights, center, scale, min_obs,
-                                             arma_any_na, na_restore,
-                                             arma_cov);
-        parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_cov_offline);
-        
-      }
+      RollCovOfflineMatXY roll_cov_offline(xx, yyy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                           weights, center, scale, min_obs,
+                                           arma_any_na, na_restore,
+                                           arma_cov);
+      parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_cov_offline);
       
     }
     
@@ -1922,9 +1892,7 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     
     // default 'complete_obs' argument is 'true',
     // otherwise check argument for errors
-    if (complete_obs && symmetric) {
-      arma_any_na = any_na_x(xxx);
-    } else if (complete_obs && !symmetric) {
+    if (complete_obs) {
       arma_any_na = any_na_xy(xxx, yy);
     } else {
       arma_any_na.fill(0);
@@ -1933,47 +1901,21 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     // compute rolling covariances
     if (status && online) {
       
-      if (symmetric) {
-        
-        // y is null
-        RollCovOnlineMatXX roll_cov_online(xxx, n, n_rows_xy, n_cols_x, width,
-                                           weights, center, scale, min_obs,
-                                           arma_any_na, na_restore,
-                                           arma_cov);
-        parallelFor(0, n_cols_x, roll_cov_online);
-        
-      } else if (!symmetric) {
-        
-        // y is not null
-        RollCovOnlineMatXY roll_cov_online(xxx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
-                                           weights, center, scale, min_obs,
-                                           arma_any_na, na_restore,
-                                           arma_cov);
-        parallelFor(0, n_cols_x, roll_cov_online);
-        
-      }
+      RollCovOnlineMatXY roll_cov_online(xxx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                         weights, center, scale, min_obs,
+                                         arma_any_na, na_restore,
+                                         arma_cov);
+      parallelFor(0, n_cols_x, roll_cov_online);
       
     } else {
       
-      if (symmetric) {
-        
-        // y is null
-        RollCovOfflineMatXX roll_cov_offline(xxx, n, n_rows_xy, n_cols_x, width,
-                                             weights, center, scale, min_obs,
-                                             arma_any_na, na_restore,
-                                             arma_cov);
-        parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_offline);
-        
-      } else if (!symmetric) {
-        
-        // y is not null
-        RollCovOfflineMatXY roll_cov_offline(xxx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
-                                             weights, center, scale, min_obs,
-                                             arma_any_na, na_restore,
-                                             arma_cov);
-        parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_cov_offline);
-        
-      }
+      // y is not null
+      RollCovOfflineMatXY roll_cov_offline(xxx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                           weights, center, scale, min_obs,
+                                           arma_any_na, na_restore,
+                                           arma_cov);
+      parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_cov_offline);
+      
       
     }
     
