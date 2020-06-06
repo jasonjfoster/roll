@@ -89,40 +89,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// roll_min
-SEXP roll_min(const SEXP& x, const int& width, const arma::vec& weights, const int& min_obs, const bool& complete_obs, const bool& na_restore, const bool& online);
-RcppExport SEXP _roll_roll_min(SEXP xSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP onlineSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const SEXP& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const int& >::type width(widthSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type weights(weightsSEXP);
-    Rcpp::traits::input_parameter< const int& >::type min_obs(min_obsSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type complete_obs(complete_obsSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type na_restore(na_restoreSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type online(onlineSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_min(x, width, weights, min_obs, complete_obs, na_restore, online));
-    return rcpp_result_gen;
-END_RCPP
-}
-// roll_max
-SEXP roll_max(const SEXP& x, const int& width, const arma::vec& weights, const int& min_obs, const bool& complete_obs, const bool& na_restore, const bool& online);
-RcppExport SEXP _roll_roll_max(SEXP xSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP onlineSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const SEXP& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const int& >::type width(widthSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type weights(weightsSEXP);
-    Rcpp::traits::input_parameter< const int& >::type min_obs(min_obsSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type complete_obs(complete_obsSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type na_restore(na_restoreSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type online(onlineSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_max(x, width, weights, min_obs, complete_obs, na_restore, online));
-    return rcpp_result_gen;
-END_RCPP
-}
 // roll_idxmin
 SEXP roll_idxmin(const SEXP& x, const int& width, const arma::vec& weights, const int& min_obs, const bool& complete_obs, const bool& na_restore, const bool& online);
 RcppExport SEXP _roll_roll_idxmin(SEXP xSEXP, SEXP widthSEXP, SEXP weightsSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP onlineSEXP) {

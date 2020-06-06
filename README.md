@@ -1,4 +1,4 @@
-# roll <img src = "logo.png" align = "right" width = "120">
+# roll <img src = "man/figures/logo.png" align = "right" width = "120">
 
 [![](https://api.travis-ci.org/jjf234/roll.svg)](https://travis-ci.org/jjf234/roll) [![](https://www.r-pkg.org/badges/version/roll)](https://cran.r-project.org/package=roll) [![](https://codecov.io/gh/jjf234/roll/graph/badge.svg)](https://codecov.io/github/jjf234/roll)
 [![](https://cranlogs.r-pkg.org/badges/roll?color=brightgreen)](https://www.r-pkg.org/pkg/roll)
@@ -71,3 +71,9 @@ roll_lm(x, y, width = n, min_obs = 1, weights = weights)
 ```
 
 Note that handling of missing values is supported as well (see the `min_obs`, `complete_obs`, and `na_restore` arguments).
+
+## References
+
+Welford, B.P. (1962). "Note on a Method for Calculating Corrected Sums of Squares and Products." *Technometrics*, 4(3), 419-420.
+
+West, D.H.D. (1979). "Updating Mean and Variance Estimates: An Improved Method." *Communications of the ACM*, 22(9), 532-535.
