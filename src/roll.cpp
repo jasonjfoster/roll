@@ -874,11 +874,11 @@ SEXP roll_mean(const SEXP& x, const int& width,
   
 }
 
-// [[Rcpp::export(.roll_idxmin)]]
-SEXP roll_idxmin(const SEXP& x, const int& width,
-                 const arma::vec& weights, const int& min_obs,
-                 const bool& complete_obs, const bool& na_restore,
-                 const bool& online) {
+// [[Rcpp::export(.roll_idxquantile)]]
+SEXP roll_idxquantile(const SEXP& x, const int& width,
+                      const arma::vec& weights, const double& p,
+                      const int& min_obs, const bool& complete_obs,
+                      const bool& na_restore, const bool& online) {
   
   if (Rf_isMatrix(x)) {
     
@@ -887,7 +887,7 @@ SEXP roll_idxmin(const SEXP& x, const int& width,
     int n_rows_x = xx.nrow();
     int n_cols_x = xx.ncol();
     IntegerVector rcpp_any_na(n_rows_x);
-    IntegerMatrix rcpp_idxmin(n_rows_x, n_cols_x);
+    IntegerMatrix rcpp_idxquantile(n_rows_x, n_cols_x);
     
     // check 'width' argument for errors
     check_width(width);
@@ -895,6 +895,9 @@ SEXP roll_idxmin(const SEXP& x, const int& width,
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_p(weights);
+    
+    // check 'p' argument for errors
+    check_p(p);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -908,27 +911,51 @@ SEXP roll_idxmin(const SEXP& x, const int& width,
       rcpp_any_na.fill(0);
     }
     
-    // compute rolling index of minimums
+    // compute rolling index of quantiles
     if (online) {
       
-      RollIdxMinOnlineMat roll_idxmin_online(xx, n, n_rows_x, n_cols_x, width,
-                                             weights, min_obs,
-                                             rcpp_any_na, na_restore,
-                                             rcpp_idxmin);
-      parallelFor(0, n_cols_x, roll_idxmin_online);
+      if (p == 0) {
+        
+        RollIdxMinOnlineMat roll_idxmin_online(xx, n, n_rows_x, n_cols_x, width,
+                                               weights, min_obs,
+                                               rcpp_any_na, na_restore,
+                                               rcpp_idxquantile);
+        parallelFor(0, n_cols_x, roll_idxmin_online);
+        
+      } else if (p == 1) {
+        
+        RollIdxMaxOnlineMat roll_idxmax_online(xx, n, n_rows_x, n_cols_x, width,
+                                               weights, min_obs,
+                                               rcpp_any_na, na_restore,
+                                               rcpp_idxquantile);
+        parallelFor(0, n_cols_x, roll_idxmax_online);
+        
+      }
       
     } else {
       
-      RollIdxMinOfflineMat roll_idxmin_offline(xx, n, n_rows_x, n_cols_x, width,
-                                               weights, min_obs,
-                                               rcpp_any_na, na_restore,
-                                               rcpp_idxmin);
-      parallelFor(0, n_rows_x * n_cols_x, roll_idxmin_offline);
+      if (p == 0) {
+        
+        RollIdxMinOfflineMat roll_idxmin_offline(xx, n, n_rows_x, n_cols_x, width,
+                                                 weights, min_obs,
+                                                 rcpp_any_na, na_restore,
+                                                 rcpp_idxquantile);
+        parallelFor(0, n_rows_x * n_cols_x, roll_idxmin_offline);
+        
+      } else if (p == 1) {
+        
+        RollIdxMaxOfflineMat roll_idxmax_offline(xx, n, n_rows_x, n_cols_x, width,
+                                                 weights, min_obs,
+                                                 rcpp_any_na, na_restore,
+                                                 rcpp_idxquantile);
+        parallelFor(0, n_rows_x * n_cols_x, roll_idxmax_offline);
+        
+      }
       
     }
     
     // create and return a matrix or xts object
-    IntegerMatrix result(rcpp_idxmin);
+    IntegerMatrix result(rcpp_idxquantile);
     List dimnames = xx.attr("dimnames");
     result.attr("dimnames") = dimnames;
     result.attr("index") = xx.attr("index");
@@ -945,7 +972,7 @@ SEXP roll_idxmin(const SEXP& x, const int& width,
     NumericVector xx(x);
     int n = weights.size();
     int n_rows_x = xx.size();
-    IntegerVector rcpp_idxmin(n_rows_x);
+    IntegerVector rcpp_idxquantile(n_rows_x);
     
     // check 'width' argument for errors
     check_width(width);
@@ -954,150 +981,58 @@ SEXP roll_idxmin(const SEXP& x, const int& width,
     // otherwise check argument for errors
     check_weights_p(weights);
     
+    // check 'p' argument for errors
+    check_p(p);
+    
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
     check_min_obs(min_obs);
     
-    // compute rolling index of minimums
+    // compute rolling index of quantiles
     if (online) {
       
-      RollIdxMinOnlineVec roll_idxmin_online(xx, n, n_rows_x, width,
-                                             weights, min_obs,
-                                             na_restore,
-                                             rcpp_idxmin);
-      roll_idxmin_online();
+      if (p == 0) {
+        
+        RollIdxMinOnlineVec roll_idxmin_online(xx, n, n_rows_x, width,
+                                               weights, min_obs,
+                                               na_restore,
+                                               rcpp_idxquantile);
+        roll_idxmin_online();
+        
+      } else if (p == 1) {
+        
+        RollIdxMaxOnlineVec roll_idxmax_online(xx, n, n_rows_x, width,
+                                               weights, min_obs,
+                                               na_restore,
+                                               rcpp_idxquantile);
+        roll_idxmax_online();
+        
+      }
       
     } else {
       
-      RollIdxMinOfflineVec roll_idxmin_offline(xx, n, n_rows_x, width,
-                                               weights, min_obs,
-                                               na_restore,
-                                               rcpp_idxmin);
-      parallelFor(0, n_rows_x, roll_idxmin_offline);
+      if (p == 0) {
+        
+        RollIdxMinOfflineVec roll_idxmin_offline(xx, n, n_rows_x, width,
+                                                 weights, min_obs,
+                                                 na_restore,
+                                                 rcpp_idxquantile);
+        parallelFor(0, n_rows_x, roll_idxmin_offline);
+        
+      } else if (p == 1) {
+        
+        RollIdxMaxOfflineVec roll_idxmax_offline(xx, n, n_rows_x, width,
+                                                 weights, min_obs,
+                                                 na_restore,
+                                                 rcpp_idxquantile);
+        parallelFor(0, n_rows_x, roll_idxmax_offline);
+        
+      }
       
     }
     
     // create and return a vector object
-    IntegerVector result(wrap(rcpp_idxmin));
-    result.attr("dim") = R_NilValue;
-    List names = xx.attr("names");
-    if (names.size() > 0) {
-      result.attr("names") = names;
-    }
-    result.attr("index") = xx.attr("index");
-    result.attr("class") = xx.attr("class");
-    
-    return result;
-    
-  }
-  
-}
-
-// [[Rcpp::export(.roll_idxmax)]]
-SEXP roll_idxmax(const SEXP& x, const int& width,
-                 const arma::vec& weights, const int& min_obs,
-                 const bool& complete_obs, const bool& na_restore,
-                 const bool& online) {
-  
-  if (Rf_isMatrix(x)) {
-    
-    NumericMatrix xx(x);
-    int n = weights.size();
-    int n_rows_x = xx.nrow();
-    int n_cols_x = xx.ncol();
-    IntegerVector rcpp_any_na(n_rows_x);
-    IntegerMatrix rcpp_idxmax(n_rows_x, n_cols_x);
-    
-    // check 'width' argument for errors
-    check_width(width);
-    
-    // default 'weights' argument is equal-weighted,
-    // otherwise check argument for errors
-    check_weights_p(weights);
-    
-    // default 'min_obs' argument is 'width',
-    // otherwise check argument for errors
-    check_min_obs(min_obs);
-    
-    // default 'complete_obs' argument is 'false',
-    // otherwise check argument for errors
-    if (complete_obs) {
-      rcpp_any_na = any_na_x(xx);
-    } else {
-      rcpp_any_na.fill(0);
-    }
-    
-    // compute rolling index of maximums
-    if (online) {
-      
-      RollIdxMaxOnlineMat roll_idxmax_online(xx, n, n_rows_x, n_cols_x, width,
-                                             weights, min_obs,
-                                             rcpp_any_na, na_restore,
-                                             rcpp_idxmax);
-      parallelFor(0, n_cols_x, roll_idxmax_online);
-      
-    } else {
-      
-      RollIdxMaxOfflineMat roll_idxmax_offline(xx, n, n_rows_x, n_cols_x, width,
-                                               weights, min_obs,
-                                               rcpp_any_na, na_restore,
-                                               rcpp_idxmax);
-      parallelFor(0, n_rows_x * n_cols_x, roll_idxmax_offline);
-      
-    }
-    
-    // create and return a matrix or xts object
-    IntegerMatrix result(rcpp_idxmax);
-    List dimnames = xx.attr("dimnames");
-    result.attr("dimnames") = dimnames;
-    result.attr("index") = xx.attr("index");
-    result.attr(".indexCLASS") = xx.attr(".indexCLASS");
-    result.attr(".indexTZ") = xx.attr(".indexTZ");
-    result.attr("tclass") = xx.attr("tclass");
-    result.attr("tzone") = xx.attr("tzone");
-    result.attr("class") = xx.attr("class");
-    
-    return result;
-    
-  } else {
-    
-    NumericVector xx(x);
-    int n = weights.size();
-    int n_rows_x = xx.size();
-    IntegerVector rcpp_idxmin(n_rows_x);
-    
-    // check 'width' argument for errors
-    check_width(width);
-    
-    // default 'weights' argument is equal-weighted,
-    // otherwise check argument for errors
-    check_weights_p(weights);
-    
-    // default 'min_obs' argument is 'width',
-    // otherwise check argument for errors
-    check_min_obs(min_obs);
-    
-    // compute rolling index of minimums
-    if (online) {
-      
-      RollIdxMaxOnlineVec roll_idxmax_online(xx, n, n_rows_x, width,
-                                             weights, min_obs,
-                                             na_restore,
-                                             rcpp_idxmin);
-      roll_idxmax_online();
-      
-    } else {
-      
-      RollIdxMaxOfflineVec roll_idxmax_offline(xx, n, n_rows_x, width,
-                                               weights, min_obs,
-                                               na_restore,
-                                               rcpp_idxmin);
-      parallelFor(0, n_rows_x, roll_idxmax_offline);
-      
-    }
-    
-    // create and return a vector object
-    IntegerVector result(wrap(rcpp_idxmin));
+    IntegerVector result(wrap(rcpp_idxquantile));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
     if (names.size() > 0) {
@@ -1127,15 +1062,15 @@ SEXP roll_quantile(const SEXP& x, const int& width,
     arma::uvec arma_any_na(n_rows_x);
     arma::mat arma_quantile(n_rows_x, n_cols_x);
     
-    // check 'p' argument for errors
-    check_p(p);
-    
     // check 'width' argument for errors
     check_width(width);
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_p(weights);
+    
+    // check 'p' argument for errors
+    check_p(p);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
@@ -1229,15 +1164,15 @@ SEXP roll_quantile(const SEXP& x, const int& width,
     int n_rows_x = xx.size();
     arma::vec arma_quantile(n_rows_x);
     
-    // check 'p' argument for errors
-    check_p(p);
-    
     // check 'width' argument for errors
     check_width(width);
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
     check_weights_p(weights);
+    
+    // check 'p' argument for errors
+    check_p(p);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
