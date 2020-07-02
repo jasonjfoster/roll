@@ -1156,26 +1156,26 @@ struct RollMinOnlineMat : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::mat& arma_min;          // destination (pass by reference)
+  RMatrix<double> rcpp_min;     // destination (pass by reference)
   
   // initialize with source and destination
   RollMinOnlineMat(const NumericMatrix x, const int n,
                    const int n_rows_x, const int n_cols_x,
                    const int width, const arma::vec arma_weights,
                    const int min_obs, const arma::uvec arma_any_na,
-                   const bool na_restore, arma::mat& arma_min)
+                   const bool na_restore, NumericMatrix rcpp_min)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
       min_obs(min_obs), arma_any_na(arma_any_na),
-      na_restore(na_restore), arma_min(arma_min) { }
+      na_restore(na_restore), rcpp_min(rcpp_min) { }
   
   // function call operator that iterates by column
   void operator()(std::size_t begin_col, std::size_t end_col) {
     for (std::size_t j = begin_col; j < end_col; j++) {
       
       int n_obs = 0;
-      long double min_x = 0;
+      int idxmin_x = 0;
       std::deque<int> deck(width);
       
       for (int i = 0; i < n_rows_x; i++) {
@@ -1192,7 +1192,7 @@ struct RollMinOnlineMat : public Worker {
           if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
             
             while (!deck.empty() && ((arma_any_na[deck.back()] != 0) ||
-                   std::isnan(x(deck.back(), j)) || (x(i, j) <= x(deck.back(), j)))) {
+                   std::isnan(x(deck.back(), j)) || (x(i, j) < x(deck.back(), j)))) {
               
               deck.pop_back();
               
@@ -1203,9 +1203,9 @@ struct RollMinOnlineMat : public Worker {
           }
           
           if (width > 1) {
-            min_x = x(deck.front(), j);
+            idxmin_x = deck.front();
           } else {
-            min_x = x(i, j);
+            idxmin_x = i;
           }
           
         }
@@ -1230,7 +1230,7 @@ struct RollMinOnlineMat : public Worker {
           if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
             
             while (!deck.empty() && ((arma_any_na[deck.back()] != 0) ||
-                   std::isnan(x(deck.back(), j)) || (x(i, j) <= x(deck.back(), j)))) {
+                   std::isnan(x(deck.back(), j)) || (x(i, j) < x(deck.back(), j)))) {
               
               deck.pop_back();
               
@@ -1245,9 +1245,9 @@ struct RollMinOnlineMat : public Worker {
           }
           
           if (width > 1) {
-            min_x = x(deck.front(), j);
+            idxmin_x = deck.front();
           } else {
-            min_x = x(i, j);
+            idxmin_x = i;
           }
           
         }
@@ -1256,15 +1256,15 @@ struct RollMinOnlineMat : public Worker {
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
           if (n_obs >= min_obs) {
-            arma_min(i, j) = min_x;
+            rcpp_min(i, j) = x(idxmin_x, j);
           } else {
-            arma_min(i, j) = NA_REAL;
+            rcpp_min(i, j) = NA_REAL;
           }
           
         } else {
           
           // can be either NA or NaN
-          arma_min(i, j) = x(i, j);
+          rcpp_min(i, j) = x(i, j);
           
         }
         
@@ -1287,19 +1287,19 @@ struct RollMinOfflineMat : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::mat& arma_min;          // destination (pass by reference)
+  RMatrix<double> rcpp_min;     // destination (pass by reference)
   
   // initialize with source and destination
   RollMinOfflineMat(const NumericMatrix x, const int n,
                     const int n_rows_x, const int n_cols_x,
                     const int width, const arma::vec arma_weights,
                     const int min_obs, const arma::uvec arma_any_na,
-                    const bool na_restore, arma::mat& arma_min)
+                    const bool na_restore, NumericMatrix rcpp_min)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
       min_obs(min_obs), arma_any_na(arma_any_na),
-      na_restore(na_restore), arma_min(arma_min) { }
+      na_restore(na_restore), rcpp_min(rcpp_min) { }
   
   // function call operator that iterates by index
   void operator()(std::size_t begin_index, std::size_t end_index) {
@@ -1342,15 +1342,15 @@ struct RollMinOfflineMat : public Worker {
         }
         
         if ((n_obs >= min_obs)) {
-          arma_min(i, j) = x(idxmin_x, j);
+          rcpp_min(i, j) = x(idxmin_x, j);
         } else {
-          arma_min(i, j) = NA_REAL;
+          rcpp_min(i, j) = NA_REAL;
         }
         
       } else {
         
         // can be either NA or NaN
-        arma_min(i, j) = x(i, j);
+        rcpp_min(i, j) = x(i, j);
         
       }
       
@@ -1371,26 +1371,26 @@ struct RollMaxOnlineMat : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::mat& arma_max;          // destination (pass by reference)
+  RMatrix<double> rcpp_max;     // destination (pass by reference)
   
   // initialize with source and destination
   RollMaxOnlineMat(const NumericMatrix x, const int n,
                    const int n_rows_x, const int n_cols_x,
                    const int width, const arma::vec arma_weights,
                    const int min_obs, const arma::uvec arma_any_na,
-                   const bool na_restore, arma::mat& arma_max)
+                   const bool na_restore, NumericMatrix rcpp_max)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
       min_obs(min_obs), arma_any_na(arma_any_na),
-      na_restore(na_restore), arma_max(arma_max) { }
+      na_restore(na_restore), rcpp_max(rcpp_max) { }
   
   // function call operator that iterates by column
   void operator()(std::size_t begin_col, std::size_t end_col) {
     for (std::size_t j = begin_col; j < end_col; j++) {
       
       int n_obs = 0;
-      long double max_x = 0;
+      int idxmax_x = 0;
       std::deque<int> deck(width);
       
       for (int i = 0; i < n_rows_x; i++) {
@@ -1407,7 +1407,7 @@ struct RollMaxOnlineMat : public Worker {
           if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
             
             while (!deck.empty() && ((arma_any_na[deck.back()] != 0) || 
-                   std::isnan(x(deck.back(), j)) || (x(i, j) >= x(deck.back(), j)))) {
+                   std::isnan(x(deck.back(), j)) || (x(i, j) > x(deck.back(), j)))) {
               
               deck.pop_back();
               
@@ -1418,9 +1418,9 @@ struct RollMaxOnlineMat : public Worker {
           }
           
           if (width > 1) {
-            max_x = x(deck.front(), j);
+            idxmax_x = deck.front();
           } else {
-            max_x = x(i, j);
+            idxmax_x = i;
           }
           
         }
@@ -1445,7 +1445,7 @@ struct RollMaxOnlineMat : public Worker {
           if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
             
             while (!deck.empty() && ((arma_any_na[deck.back()] != 0) ||
-                   std::isnan(x(deck.back(), j)) || (x(i, j) >= x(deck.back(), j)))) {
+                   std::isnan(x(deck.back(), j)) || (x(i, j) > x(deck.back(), j)))) {
               
               deck.pop_back();
               
@@ -1460,9 +1460,9 @@ struct RollMaxOnlineMat : public Worker {
           }
           
           if (width > 1) {
-            max_x = x(deck.front(), j);
+            idxmax_x = deck.front();
           } else {
-            max_x = x(i, j);
+            idxmax_x = i;
           }
           
         }
@@ -1471,15 +1471,15 @@ struct RollMaxOnlineMat : public Worker {
         if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
           
           if (n_obs >= min_obs) {
-            arma_max(i, j) = max_x;
+            rcpp_max(i, j) = x(idxmax_x, j);
           } else {
-            arma_max(i, j) = NA_REAL;
+            rcpp_max(i, j) = NA_REAL;
           }
           
         } else {
           
           // can be either NA or NaN
-          arma_max(i, j) = x(i, j);
+          rcpp_max(i, j) = x(i, j);
           
         }
         
@@ -1502,19 +1502,19 @@ struct RollMaxOfflineMat : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::mat& arma_max;          // destination (pass by reference)
+  RMatrix<double> rcpp_max;     // destination (pass by reference)
   
   // initialize with source and destination
   RollMaxOfflineMat(const NumericMatrix x, const int n,
                     const int n_rows_x, const int n_cols_x,
                     const int width, const arma::vec arma_weights,
                     const int min_obs, const arma::uvec arma_any_na,
-                    const bool na_restore, arma::mat& arma_max)
+                    const bool na_restore, NumericMatrix rcpp_max)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
       min_obs(min_obs), arma_any_na(arma_any_na),
-      na_restore(na_restore), arma_max(arma_max) { }
+      na_restore(na_restore), rcpp_max(rcpp_max) { }
   
   // function call operator that iterates by index
   void operator()(std::size_t begin_index, std::size_t end_index) {
@@ -1557,15 +1557,15 @@ struct RollMaxOfflineMat : public Worker {
         }
         
         if ((n_obs >= min_obs)) {
-          arma_max(i, j) = x(idxmax_x, j);
+          rcpp_max(i, j) = x(idxmax_x, j);
         } else {
-          arma_max(i, j) = NA_REAL;
+          rcpp_max(i, j) = NA_REAL;
         }
         
       } else {
         
         // can be either NA or NaN
-        arma_max(i, j) = x(i, j);
+        rcpp_max(i, j) = x(i, j);
         
       }
       
@@ -2029,7 +2029,7 @@ struct RollQuantileOfflineMat : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  arma::mat& arma_quantile;     // destination (pass by reference)
+  RMatrix<double> rcpp_quantile;// destination (pass by reference)
   
   // initialize with source and destination
   RollQuantileOfflineMat(const NumericMatrix x, const int n,
@@ -2037,13 +2037,13 @@ struct RollQuantileOfflineMat : public Worker {
                          const int width,  const arma::vec arma_weights,
                          const double p, const int min_obs,
                          const arma::uvec arma_any_na, const bool na_restore,
-                         arma::mat& arma_quantile)
+                         NumericMatrix rcpp_quantile)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
       p(p), min_obs(min_obs),
       arma_any_na(arma_any_na), na_restore(na_restore),
-      arma_quantile(arma_quantile) { }
+      rcpp_quantile(rcpp_quantile) { }
   
   // function call operator that iterates by index
   void operator()(std::size_t begin_index, std::size_t end_index) {
@@ -2140,20 +2140,20 @@ struct RollQuantileOfflineMat : public Worker {
           if (std::abs(sum_upper_w_temp / sum_w - p) <= sqrt(arma::datum::eps)) {
             
             int k_lower = sort_ix[idxquantile_x - 1];
-            arma_quantile(i, j) = (x_subset[k] + x_subset[k_lower]) / 2;
+            rcpp_quantile(i, j) = (x_subset[k] + x_subset[k_lower]) / 2;
             
           } else {
-            arma_quantile(i, j) = x_subset[k];
+            rcpp_quantile(i, j) = x_subset[k];
           }
           
         } else {
-          arma_quantile(i, j) = NA_REAL;
+          rcpp_quantile(i, j) = NA_REAL;
         }
         
       } else {
         
         // can be either NA or NaN
-        arma_quantile(i, j) = x(i, j);
+        rcpp_quantile(i, j) = x(i, j);
         
       }
       

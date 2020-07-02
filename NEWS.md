@@ -8,6 +8,8 @@
 
     * Note: `roll_quantile` function is not calculated using an online algorithm
 
+* Fixed an issue in the `roll_min` and `roll_max` functions ([#32](https://github.com/jjf234/roll/issues/32))
+
 ## Version 1.1.4
 
 * Fixed issues related to floating point arithmetic ([#23](https://github.com/jjf234/roll/issues/23), [#24](https://github.com/jjf234/roll/issues/24))
