@@ -50,8 +50,6 @@
 
 ## Version 1.0.5
 
-* Added section on examples to the `README` file
-
 * Fixed an issue in the `src/Makevars` and `src/Makevars.win` files ([#1](https://github.com/jjf234/roll/issues/1))
 
 ## Version 1.0.4
