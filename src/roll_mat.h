@@ -1694,7 +1694,7 @@ struct RollIdxMinOnlineMat : public Worker {
         } else {
           
           // can be either NA or NaN
-          rcpp_idxmin(i, j) = x(i, j);
+          rcpp_idxmin(i, j) = (int)x(i, j);
           
         }
         
@@ -1786,7 +1786,7 @@ struct RollIdxMinOfflineMat : public Worker {
       } else {
         
         // can be either NA or NaN
-        rcpp_idxmin(i, j) = x(i, j);
+        rcpp_idxmin(i, j) = (int)x(i, j);
         
       }
       
@@ -1915,7 +1915,7 @@ struct RollIdxMaxOnlineMat : public Worker {
         } else {
           
           // can be either NA or NaN
-          rcpp_idxmax(i, j) = x(i, j);
+          rcpp_idxmax(i, j) = (int)x(i, j);
           
         }
         
@@ -2007,7 +2007,7 @@ struct RollIdxMaxOfflineMat : public Worker {
       } else {
         
         // can be either NA or NaN
-        rcpp_idxmax(i, j) = x(i, j);
+        rcpp_idxmax(i, j) = (int)x(i, j);
         
       }
       

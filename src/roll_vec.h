@@ -1546,7 +1546,7 @@ struct RollIdxMinOnlineVec {
       } else {
         
         // can be either NA or NaN
-        rcpp_idxmin[i] = x[i];
+        rcpp_idxmin[i] = (int)x[i];
         
       }
       
@@ -1628,7 +1628,7 @@ struct RollIdxMinOfflineVec : public Worker {
       } else {
         
         // can be either NA or NaN
-        rcpp_idxmin[i] = x[i];
+        rcpp_idxmin[i] = (int)x[i];
         
       }
       
@@ -1742,7 +1742,7 @@ struct RollIdxMaxOnlineVec {
       } else {
         
         // can be either NA or NaN
-        rcpp_idxmax[i] = x[i];
+        rcpp_idxmax[i] = (int)x[i];
         
       }
       
@@ -1824,7 +1824,7 @@ struct RollIdxMaxOfflineVec : public Worker {
       } else {
         
         // can be either NA or NaN
-        rcpp_idxmax[i] = x[i];
+        rcpp_idxmax[i] = (int)x[i];
         
       }
       

@@ -1,23 +1,18 @@
 Package: roll
 Type: Package
-Title: Rolling Statistics
-Version: 1.1.5
-Date: 2020-07-05
+Title: Rolling and Expanding Statistics
+Version: 1.1.6
+Date: 2020-07-11
 Author: Jason Foster
 Maintainer: Jason Foster <jason.j.foster@gmail.com>
-Description: Fast and efficient computation of rolling statistics for time-series data.
+Description: Fast and efficient computation of rolling and expanding statistics for time-series data.
 License: GPL (>= 2)
 URL: https://github.com/jjf234/roll
 BugReports: https://github.com/jjf234/roll/issues
-Imports:
-    Rcpp,
-    RcppParallel
+Imports: Rcpp, RcppParallel
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
 SystemRequirements: GNU make, C++11
 Roxygen: list(old_usage = TRUE)
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Encoding: UTF-8
-Suggests: 
-    covr,
-    testthat,
-    zoo
+Suggests: covr, testthat, zoo
