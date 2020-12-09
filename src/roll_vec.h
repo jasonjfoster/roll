@@ -1944,7 +1944,7 @@ struct RollQuantileOfflineVec : public Worker {
           k = sort_ix[idxquantile_x];
           
           // average if upper and lower weight is equal
-          if (std::abs(sum_upper_w_temp / sum_w - p) <= sqrt(arma::datum::eps)) {
+          if (std::fabs(sum_upper_w_temp / sum_w - p) <= sqrt(arma::datum::eps)) {
             
             int k_lower = sort_ix[idxquantile_x - 1];
             rcpp_quantile[i] = (x_subset[k] + x_subset[k_lower]) / 2;
