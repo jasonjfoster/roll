@@ -2,7 +2,7 @@ language: r
 r: devel
 sudo: true
 cache: packages
-dist: trusty
+dist: bionic
 
 warnings_are_errors: true
 
