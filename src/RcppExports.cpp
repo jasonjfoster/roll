@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // roll_any
 SEXP roll_any(const SEXP& x, const int& width, const int& min_obs, const bool& complete_obs, const bool& na_restore, const bool& online);
 RcppExport SEXP _roll_roll_any(SEXP xSEXP, SEXP widthSEXP, SEXP min_obsSEXP, SEXP complete_obsSEXP, SEXP na_restoreSEXP, SEXP onlineSEXP) {
