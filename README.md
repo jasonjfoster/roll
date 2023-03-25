@@ -1,6 +1,6 @@
 # roll <img src = "man/figures/logo.png" align = "right" width = "120">
 
-[![](https://github.com/jjf234/roll/workflows/R-CMD-check/badge.svg)](https://github.com/jjf234/roll/actions)
+[![](https://github.com/jjf234/roll/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/jjf234/roll/actions/workflows/check-standard.yaml)
 [![](https://www.r-pkg.org/badges/version/roll)](https://cran.r-project.org/package=roll)
 [![](https://codecov.io/gh/jjf234/roll/graph/badge.svg)](https://codecov.io/github/jjf234/roll)
 [![](https://cranlogs.r-pkg.org/badges/roll?color=brightgreen)](https://www.r-pkg.org/pkg/roll)
