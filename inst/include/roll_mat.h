@@ -1,7 +1,7 @@
 #ifndef ROLL_MAT_H
 #define ROLL_MAT_H
 
-#define ARMA_DONT_PRINT_ERRORS
+#define ARMA_WARN_LEVEL 0
 
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
