@@ -10,6 +10,8 @@ using namespace RcppParallel;
 
 arma::ivec stl_sort_index(arma::vec& x);
 
+namespace roll {
+
 // 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollAnyOnlineVec {
   
@@ -3967,5 +3969,7 @@ struct RollLmVecInterceptFALSE : public Worker {
   }
   
 };
+
+}
 
 #endif

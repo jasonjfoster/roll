@@ -1,5 +1,4 @@
-#include "roll_mat.h"
-#include "roll_vec.h"
+#include "roll.h"
 
 void check_p(const double& p) {
   
@@ -333,16 +332,16 @@ SEXP roll_any(const SEXP& x, const int& width,
     // compute rolling any
     if (online) {
       
-      RollAnyOnlineMat roll_any_online(rcpp_x, n_rows_x, n_cols_x, width,
-                                       min_obs, rcpp_any_na, na_restore,
-                                       rcpp_any);
+      roll::RollAnyOnlineMat roll_any_online(rcpp_x, n_rows_x, n_cols_x, width,
+                                             min_obs, rcpp_any_na, na_restore,
+                                             rcpp_any);
       parallelFor(0, n_cols_x, roll_any_online);
       
     } else {
       
-      RollAnyOfflineMat roll_any_offline(rcpp_x, n_rows_x, n_cols_x, width,
-                                         min_obs, rcpp_any_na, na_restore,
-                                         rcpp_any);
+      roll::RollAnyOfflineMat roll_any_offline(rcpp_x, n_rows_x, n_cols_x, width,
+                                               min_obs, rcpp_any_na, na_restore,
+                                               rcpp_any);
       parallelFor(0, n_rows_x * n_cols_x, roll_any_offline);
       
     }
@@ -377,16 +376,16 @@ SEXP roll_any(const SEXP& x, const int& width,
     // compute rolling any
     if (online) {
       
-      RollAnyOnlineVec roll_any_online(rcpp_x, n_rows_x, width,
-                                       min_obs, na_restore,
-                                       rcpp_any);
+      roll::RollAnyOnlineVec roll_any_online(rcpp_x, n_rows_x, width,
+                                             min_obs, na_restore,
+                                             rcpp_any);
       roll_any_online();
       
     } else {
       
-      RollAnyOfflineVec roll_any_offline(rcpp_x, n_rows_x, width,
-                                         min_obs, na_restore,
-                                         rcpp_any);
+      roll::RollAnyOfflineVec roll_any_offline(rcpp_x, n_rows_x, width,
+                                               min_obs, na_restore,
+                                               rcpp_any);
       parallelFor(0, n_rows_x, roll_any_offline);
       
     }
@@ -437,16 +436,16 @@ SEXP roll_all(const SEXP& x, const int& width,
     // compute rolling all
     if (online) {
       
-      RollAllOnlineMat roll_all_online(rcpp_x, n_rows_x, n_cols_x, width,
-                                       min_obs, rcpp_any_na, na_restore,
-                                       rcpp_all);
+      roll::RollAllOnlineMat roll_all_online(rcpp_x, n_rows_x, n_cols_x, width,
+                                             min_obs, rcpp_any_na, na_restore,
+                                             rcpp_all);
       parallelFor(0, n_cols_x, roll_all_online);
       
     } else {
       
-      RollAllOfflineMat roll_all_offline(rcpp_x, n_rows_x, n_cols_x, width,
-                                         min_obs, rcpp_any_na, na_restore,
-                                         rcpp_all);
+      roll::RollAllOfflineMat roll_all_offline(rcpp_x, n_rows_x, n_cols_x, width,
+                                               min_obs, rcpp_any_na, na_restore,
+                                               rcpp_all);
       parallelFor(0, n_rows_x * n_cols_x, roll_all_offline);
       
     }
@@ -481,16 +480,16 @@ SEXP roll_all(const SEXP& x, const int& width,
     // compute rolling all
     if (online) {
       
-      RollAllOnlineVec roll_all_online(rcpp_x, n_rows_x, width,
-                                       min_obs, na_restore,
-                                       rcpp_all);
+      roll::RollAllOnlineVec roll_all_online(rcpp_x, n_rows_x, width,
+                                             min_obs, na_restore,
+                                             rcpp_all);
       roll_all_online();
       
     } else {
       
-      RollAllOfflineVec roll_all_offline(rcpp_x, n_rows_x, width,
-                                         min_obs, na_restore,
-                                         rcpp_all);
+      roll::RollAllOfflineVec roll_all_offline(rcpp_x, n_rows_x, width,
+                                               min_obs, na_restore,
+                                               rcpp_all);
       parallelFor(0, n_rows_x, roll_all_offline);
       
     }
@@ -549,18 +548,18 @@ SEXP roll_sum(const SEXP& x, const int& width,
     // compute rolling sums
     if (status && online) {
       
-      RollSumOnlineMat roll_sum_online(xx, n, n_rows_x, n_cols_x, width,
-                                       weights, min_obs,
-                                       arma_any_na, na_restore,
-                                       arma_sum);
+      roll::RollSumOnlineMat roll_sum_online(xx, n, n_rows_x, n_cols_x, width,
+                                             weights, min_obs,
+                                             arma_any_na, na_restore,
+                                             arma_sum);
       parallelFor(0, n_cols_x, roll_sum_online);
       
     } else {
       
-      RollSumOfflineMat roll_sum_offline(xx, n, n_rows_x, n_cols_x, width,
-                                         weights, min_obs,
-                                         arma_any_na, na_restore,
-                                         arma_sum);
+      roll::RollSumOfflineMat roll_sum_offline(xx, n, n_rows_x, n_cols_x, width,
+                                               weights, min_obs,
+                                               arma_any_na, na_restore,
+                                               arma_sum);
       parallelFor(0, n_rows_x * n_cols_x, roll_sum_offline);
       
     }
@@ -600,18 +599,18 @@ SEXP roll_sum(const SEXP& x, const int& width,
     // compute rolling sums
     if (status && online) {
       
-      RollSumOnlineVec roll_sum_online(xx, n, n_rows_x, width,
-                                       weights, min_obs,
-                                       na_restore,
-                                       arma_sum);
+      roll::RollSumOnlineVec roll_sum_online(xx, n, n_rows_x, width,
+                                             weights, min_obs,
+                                             na_restore,
+                                             arma_sum);
       roll_sum_online();
       
     } else {
       
-      RollSumOfflineVec roll_sum_offline(xx, n, n_rows_x, width,
-                                         weights, min_obs,
-                                         na_restore,
-                                         arma_sum);
+      roll::RollSumOfflineVec roll_sum_offline(xx, n, n_rows_x, width,
+                                               weights, min_obs,
+                                               na_restore,
+                                               arma_sum);
       parallelFor(0, n_rows_x, roll_sum_offline);
       
     }
@@ -670,18 +669,18 @@ SEXP roll_prod(const SEXP& x, const int& width,
     // compute rolling products
     if (status && online) {
       
-      RollProdOnlineMat roll_prod_online(xx, n, n_rows_x, n_cols_x, width,
-                                         weights, min_obs,
-                                         arma_any_na, na_restore, 
-                                         arma_prod);
+      roll::RollProdOnlineMat roll_prod_online(xx, n, n_rows_x, n_cols_x, width,
+                                               weights, min_obs,
+                                               arma_any_na, na_restore, 
+                                               arma_prod);
       parallelFor(0, n_cols_x, roll_prod_online);
       
     } else {
       
-      RollProdOfflineMat roll_prod_offline(xx, n, n_rows_x, n_cols_x, width,
-                                           weights, min_obs,
-                                           arma_any_na, na_restore,
-                                           arma_prod);
+      roll::RollProdOfflineMat roll_prod_offline(xx, n, n_rows_x, n_cols_x, width,
+                                                 weights, min_obs,
+                                                 arma_any_na, na_restore,
+                                                 arma_prod);
       parallelFor(0, n_rows_x * n_cols_x, roll_prod_offline);
       
     }
@@ -721,18 +720,18 @@ SEXP roll_prod(const SEXP& x, const int& width,
     // compute rolling products
     if (status && online) {
       
-      RollProdOnlineVec roll_prod_online(xx, n, n_rows_x, width,
-                                         weights, min_obs,
-                                         na_restore, 
-                                         arma_prod);
+      roll::RollProdOnlineVec roll_prod_online(xx, n, n_rows_x, width,
+                                               weights, min_obs,
+                                               na_restore, 
+                                               arma_prod);
       roll_prod_online();
       
     } else {
       
-      RollProdOfflineVec roll_prod_offline(xx, n, n_rows_x, width,
-                                           weights, min_obs,
-                                           na_restore,
-                                           arma_prod);
+      roll::RollProdOfflineVec roll_prod_offline(xx, n, n_rows_x, width,
+                                                 weights, min_obs,
+                                                 na_restore,
+                                                 arma_prod);
       parallelFor(0, n_rows_x, roll_prod_offline);
       
     }
@@ -791,18 +790,18 @@ SEXP roll_mean(const SEXP& x, const int& width,
     // compute rolling means
     if (status && online) {
       
-      RollMeanOnlineMat roll_mean_online(xx, n, n_rows_x, n_cols_x, width,
-                                         weights, min_obs,
-                                         arma_any_na, na_restore,
-                                         arma_mean);
+      roll::RollMeanOnlineMat roll_mean_online(xx, n, n_rows_x, n_cols_x, width,
+                                               weights, min_obs,
+                                               arma_any_na, na_restore,
+                                               arma_mean);
       parallelFor(0, n_cols_x, roll_mean_online);
       
     } else {
       
-      RollMeanOfflineMat roll_mean_offline(xx, n, n_rows_x, n_cols_x, width,
-                                           weights, min_obs,
-                                           arma_any_na, na_restore,
-                                           arma_mean);
+      roll::RollMeanOfflineMat roll_mean_offline(xx, n, n_rows_x, n_cols_x, width,
+                                                 weights, min_obs,
+                                                 arma_any_na, na_restore,
+                                                 arma_mean);
       parallelFor(0, n_rows_x * n_cols_x, roll_mean_offline);
       
     }
@@ -842,18 +841,18 @@ SEXP roll_mean(const SEXP& x, const int& width,
     // compute rolling means
     if (status && online) {
       
-      RollMeanOnlineVec roll_mean_online(xx, n, n_rows_x, width,
-                                         weights, min_obs,
-                                         na_restore,
-                                         arma_mean);
+      roll::RollMeanOnlineVec roll_mean_online(xx, n, n_rows_x, width,
+                                               weights, min_obs,
+                                               na_restore,
+                                               arma_mean);
       roll_mean_online();
       
     } else {
       
-      RollMeanOfflineVec roll_mean_offline(xx, n, n_rows_x, width,
-                                           weights, min_obs,
-                                           na_restore,
-                                           arma_mean);
+      roll::RollMeanOfflineVec roll_mean_offline(xx, n, n_rows_x, width,
+                                                 weights, min_obs,
+                                                 na_restore,
+                                                 arma_mean);
       parallelFor(0, n_rows_x, roll_mean_offline);
       
     }
@@ -916,18 +915,18 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
       
       if (p == 0) {
         
-        RollIdxMinOnlineMat roll_idxmin_online(xx, n, n_rows_x, n_cols_x, width,
-                                               weights, min_obs,
-                                               rcpp_any_na, na_restore,
-                                               rcpp_idxquantile);
+        roll::RollIdxMinOnlineMat roll_idxmin_online(xx, n, n_rows_x, n_cols_x, width,
+                                                     weights, min_obs,
+                                                     rcpp_any_na, na_restore,
+                                                     rcpp_idxquantile);
         parallelFor(0, n_cols_x, roll_idxmin_online);
         
       } else if (p == 1) {
         
-        RollIdxMaxOnlineMat roll_idxmax_online(xx, n, n_rows_x, n_cols_x, width,
-                                               weights, min_obs,
-                                               rcpp_any_na, na_restore,
-                                               rcpp_idxquantile);
+        roll::RollIdxMaxOnlineMat roll_idxmax_online(xx, n, n_rows_x, n_cols_x, width,
+                                                     weights, min_obs,
+                                                     rcpp_any_na, na_restore,
+                                                     rcpp_idxquantile);
         parallelFor(0, n_cols_x, roll_idxmax_online);
         
       }
@@ -936,18 +935,18 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
       
       if (p == 0) {
         
-        RollIdxMinOfflineMat roll_idxmin_offline(xx, n, n_rows_x, n_cols_x, width,
-                                                 weights, min_obs,
-                                                 rcpp_any_na, na_restore,
-                                                 rcpp_idxquantile);
+        roll::RollIdxMinOfflineMat roll_idxmin_offline(xx, n, n_rows_x, n_cols_x, width,
+                                                       weights, min_obs,
+                                                       rcpp_any_na, na_restore,
+                                                       rcpp_idxquantile);
         parallelFor(0, n_rows_x * n_cols_x, roll_idxmin_offline);
         
       } else if (p == 1) {
         
-        RollIdxMaxOfflineMat roll_idxmax_offline(xx, n, n_rows_x, n_cols_x, width,
-                                                 weights, min_obs,
-                                                 rcpp_any_na, na_restore,
-                                                 rcpp_idxquantile);
+        roll::RollIdxMaxOfflineMat roll_idxmax_offline(xx, n, n_rows_x, n_cols_x, width,
+                                                       weights, min_obs,
+                                                       rcpp_any_na, na_restore,
+                                                       rcpp_idxquantile);
         parallelFor(0, n_rows_x * n_cols_x, roll_idxmax_offline);
         
       }
@@ -993,18 +992,18 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
       
       if (p == 0) {
         
-        RollIdxMinOnlineVec roll_idxmin_online(xx, n, n_rows_x, width,
-                                               weights, min_obs,
-                                               na_restore,
-                                               rcpp_idxquantile);
+        roll::RollIdxMinOnlineVec roll_idxmin_online(xx, n, n_rows_x, width,
+                                                     weights, min_obs,
+                                                     na_restore,
+                                                     rcpp_idxquantile);
         roll_idxmin_online();
         
       } else if (p == 1) {
         
-        RollIdxMaxOnlineVec roll_idxmax_online(xx, n, n_rows_x, width,
-                                               weights, min_obs,
-                                               na_restore,
-                                               rcpp_idxquantile);
+        roll::RollIdxMaxOnlineVec roll_idxmax_online(xx, n, n_rows_x, width,
+                                                     weights, min_obs,
+                                                     na_restore,
+                                                     rcpp_idxquantile);
         roll_idxmax_online();
         
       }
@@ -1013,18 +1012,18 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
       
       if (p == 0) {
         
-        RollIdxMinOfflineVec roll_idxmin_offline(xx, n, n_rows_x, width,
-                                                 weights, min_obs,
-                                                 na_restore,
-                                                 rcpp_idxquantile);
+        roll::RollIdxMinOfflineVec roll_idxmin_offline(xx, n, n_rows_x, width,
+                                                       weights, min_obs,
+                                                       na_restore,
+                                                       rcpp_idxquantile);
         parallelFor(0, n_rows_x, roll_idxmin_offline);
         
       } else if (p == 1) {
         
-        RollIdxMaxOfflineVec roll_idxmax_offline(xx, n, n_rows_x, width,
-                                                 weights, min_obs,
-                                                 na_restore,
-                                                 rcpp_idxquantile);
+        roll::RollIdxMaxOfflineVec roll_idxmax_offline(xx, n, n_rows_x, width,
+                                                       weights, min_obs,
+                                                       na_restore,
+                                                       rcpp_idxquantile);
         parallelFor(0, n_rows_x, roll_idxmax_offline);
         
       }
@@ -1089,27 +1088,27 @@ SEXP roll_quantile(const SEXP& x, const int& width,
       
       if (p == 0) {
         
-        RollMinOnlineMat roll_min_online(xx, n, n_rows_x, n_cols_x, width,
-                                         weights, min_obs,
-                                         arma_any_na, na_restore,
-                                         rcpp_quantile);
+        roll::RollMinOnlineMat roll_min_online(xx, n, n_rows_x, n_cols_x, width,
+                                               weights, min_obs,
+                                               arma_any_na, na_restore,
+                                               rcpp_quantile);
         parallelFor(0, n_cols_x, roll_min_online);
         
       } else if (p == 1) {
         
-        RollMaxOnlineMat roll_max_online(xx, n, n_rows_x, n_cols_x, width,
-                                         weights, min_obs,
-                                         arma_any_na, na_restore,
-                                         rcpp_quantile);
+        roll::RollMaxOnlineMat roll_max_online(xx, n, n_rows_x, n_cols_x, width,
+                                               weights, min_obs,
+                                               arma_any_na, na_restore,
+                                               rcpp_quantile);
         parallelFor(0, n_cols_x, roll_max_online);
         
       } else {
         
         warning("'online' is not supported");
-        RollQuantileOfflineMat roll_quantile_offline(xx, n, n_rows_x, n_cols_x, width,
-                                                     weights, 1 - p, min_obs,
-                                                     arma_any_na, na_restore,
-                                                     rcpp_quantile);
+        roll::RollQuantileOfflineMat roll_quantile_offline(xx, n, n_rows_x, n_cols_x, width,
+                                                           weights, 1 - p, min_obs,
+                                                           arma_any_na, na_restore,
+                                                           rcpp_quantile);
         parallelFor(0, n_rows_x * n_cols_x, roll_quantile_offline);
         
       }
@@ -1118,26 +1117,26 @@ SEXP roll_quantile(const SEXP& x, const int& width,
       
       if (p == 0) {
         
-        RollMinOfflineMat roll_min_offline(xx, n, n_rows_x, n_cols_x, width,
-                                           weights, min_obs,
-                                           arma_any_na, na_restore,
-                                           rcpp_quantile);
+        roll::RollMinOfflineMat roll_min_offline(xx, n, n_rows_x, n_cols_x, width,
+                                                 weights, min_obs,
+                                                 arma_any_na, na_restore,
+                                                 rcpp_quantile);
         parallelFor(0, n_rows_x * n_cols_x, roll_min_offline);
         
       } else if (p == 1) {
         
-        RollMaxOfflineMat roll_max_offline(xx, n, n_rows_x, n_cols_x, width,
-                                           weights, min_obs,
-                                           arma_any_na, na_restore,
-                                           rcpp_quantile);
+        roll::RollMaxOfflineMat roll_max_offline(xx, n, n_rows_x, n_cols_x, width,
+                                                 weights, min_obs,
+                                                 arma_any_na, na_restore,
+                                                 rcpp_quantile);
         parallelFor(0, n_rows_x * n_cols_x, roll_max_offline);
         
       } else {
         
-        RollQuantileOfflineMat roll_quantile_offline(xx, n, n_rows_x, n_cols_x, width,
-                                                     weights, 1 - p, min_obs,
-                                                     arma_any_na, na_restore,
-                                                     rcpp_quantile);
+        roll::RollQuantileOfflineMat roll_quantile_offline(xx, n, n_rows_x, n_cols_x, width,
+                                                           weights, 1 - p, min_obs,
+                                                           arma_any_na, na_restore,
+                                                           rcpp_quantile);
         parallelFor(0, n_rows_x * n_cols_x, roll_quantile_offline);
         
       }
@@ -1183,27 +1182,27 @@ SEXP roll_quantile(const SEXP& x, const int& width,
       
       if (p == 0) {
         
-        RollMinOnlineVec roll_min_online(xx, n, n_rows_x, width,
-                                         weights, min_obs,
-                                         na_restore,
-                                         rcpp_quantile);
+        roll::RollMinOnlineVec roll_min_online(xx, n, n_rows_x, width,
+                                               weights, min_obs,
+                                               na_restore,
+                                               rcpp_quantile);
         roll_min_online();
         
       } else if (p == 1) {
         
-        RollMaxOnlineVec roll_max_online(xx, n, n_rows_x, width,
-                                         weights, min_obs,
-                                         na_restore,
-                                         rcpp_quantile);
+        roll::RollMaxOnlineVec roll_max_online(xx, n, n_rows_x, width,
+                                               weights, min_obs,
+                                               na_restore,
+                                               rcpp_quantile);
         roll_max_online();
         
       } else {
         
         warning("'online' is not supported"); 
-        RollQuantileOfflineVec roll_quantile_offline(xx, n, n_rows_x, width,
-                                                     weights, 1 - p, min_obs,
-                                                     na_restore,
-                                                     rcpp_quantile);
+        roll::RollQuantileOfflineVec roll_quantile_offline(xx, n, n_rows_x, width,
+                                                           weights, 1 - p, min_obs,
+                                                           na_restore,
+                                                           rcpp_quantile);
         parallelFor(0, n_rows_x, roll_quantile_offline);
         
       }
@@ -1212,26 +1211,26 @@ SEXP roll_quantile(const SEXP& x, const int& width,
       
       if (p == 0) {
         
-        RollMinOfflineVec roll_min_offline(xx, n, n_rows_x, width,
-                                           weights, min_obs,
-                                           na_restore,
-                                           rcpp_quantile);
+        roll::RollMinOfflineVec roll_min_offline(xx, n, n_rows_x, width,
+                                                 weights, min_obs,
+                                                 na_restore,
+                                                 rcpp_quantile);
         parallelFor(0, n_rows_x, roll_min_offline);
         
       } else if (p == 1) {
         
-        RollMaxOfflineVec roll_max_offline(xx, n, n_rows_x, width,
-                                           weights, min_obs,
-                                           na_restore,
-                                           rcpp_quantile);
+        roll::RollMaxOfflineVec roll_max_offline(xx, n, n_rows_x, width,
+                                                 weights, min_obs,
+                                                 na_restore,
+                                                 rcpp_quantile);
         parallelFor(0, n_rows_x, roll_max_offline);
         
       } else {
         
-        RollQuantileOfflineVec roll_quantile_offline(xx, n, n_rows_x, width,
-                                                     weights, 1 - p, min_obs,
-                                                     na_restore,
-                                                     rcpp_quantile);
+        roll::RollQuantileOfflineVec roll_quantile_offline(xx, n, n_rows_x, width,
+                                                           weights, 1 - p, min_obs,
+                                                           na_restore,
+                                                           rcpp_quantile);
         parallelFor(0, n_rows_x, roll_quantile_offline);
         
       }
@@ -1292,18 +1291,18 @@ SEXP roll_var(const SEXP& x, const int& width,
     // compute rolling variances
     if (status && online) {
       
-      RollVarOnlineMat roll_var_online(xx, n, n_rows_x, n_cols_x, width,
-                                       weights, center, min_obs,
-                                       arma_any_na, na_restore,
-                                       arma_var);
+      roll::RollVarOnlineMat roll_var_online(xx, n, n_rows_x, n_cols_x, width,
+                                             weights, center, min_obs,
+                                             arma_any_na, na_restore,
+                                             arma_var);
       parallelFor(0, n_cols_x, roll_var_online);
       
     } else {
       
-      RollVarOfflineMat roll_var_offline(xx, n, n_rows_x, n_cols_x, width,
-                                         weights, center, min_obs,
-                                         arma_any_na, na_restore,
-                                         arma_var);
+      roll::RollVarOfflineMat roll_var_offline(xx, n, n_rows_x, n_cols_x, width,
+                                               weights, center, min_obs,
+                                               arma_any_na, na_restore,
+                                               arma_var);
       parallelFor(0, n_rows_x * n_cols_x, roll_var_offline);
       
     }
@@ -1343,18 +1342,18 @@ SEXP roll_var(const SEXP& x, const int& width,
     // compute rolling variances
     if (status && online) {
       
-      RollVarOnlineVec roll_var_online(xx, n, n_rows_x, width,
-                                       weights, center, min_obs,
-                                       na_restore,
-                                       arma_var);
+      roll::RollVarOnlineVec roll_var_online(xx, n, n_rows_x, width,
+                                             weights, center, min_obs,
+                                             na_restore,
+                                             arma_var);
       roll_var_online();
       
     } else {
       
-      RollVarOfflineVec roll_var_offline(xx, n, n_rows_x, width,
-                                         weights, center, min_obs,
-                                         na_restore,
-                                         arma_var);
+      roll::RollVarOfflineVec roll_var_offline(xx, n, n_rows_x, width,
+                                               weights, center, min_obs,
+                                               na_restore,
+                                               arma_var);
       parallelFor(0, n_rows_x, roll_var_offline);
       
     }
@@ -1413,18 +1412,18 @@ SEXP roll_sd(const SEXP& x, const int& width,
     // compute rolling standard deviations
     if (status && online) {
       
-      RollSdOnlineMat roll_sd_online(xx, n, n_rows_x, n_cols_x, width,
-                                     weights, center, min_obs,
-                                     arma_any_na, na_restore,
-                                     arma_sd);
+      roll::RollSdOnlineMat roll_sd_online(xx, n, n_rows_x, n_cols_x, width,
+                                           weights, center, min_obs,
+                                           arma_any_na, na_restore,
+                                           arma_sd);
       parallelFor(0, n_cols_x, roll_sd_online);
       
     } else {
       
-      RollSdOfflineMat roll_sd_offline(xx, n, n_rows_x, n_cols_x, width,
-                                       weights, center, min_obs,
-                                       arma_any_na, na_restore,
-                                       arma_sd);
+      roll::RollSdOfflineMat roll_sd_offline(xx, n, n_rows_x, n_cols_x, width,
+                                             weights, center, min_obs,
+                                             arma_any_na, na_restore,
+                                             arma_sd);
       parallelFor(0, n_rows_x * n_cols_x, roll_sd_offline);
       
     }
@@ -1464,18 +1463,18 @@ SEXP roll_sd(const SEXP& x, const int& width,
     // compute rolling standard deviations
     if (status && online) {
       
-      RollSdOnlineVec roll_sd_online(xx, n, n_rows_x, width,
-                                     weights, center, min_obs,
-                                     na_restore,
-                                     arma_sd);
+      roll::RollSdOnlineVec roll_sd_online(xx, n, n_rows_x, width,
+                                           weights, center, min_obs,
+                                           na_restore,
+                                           arma_sd);
       roll_sd_online();
       
     } else {
       
-      RollSdOfflineVec roll_sd_offline(xx, n, n_rows_x, width,
-                                       weights, center, min_obs,
-                                       na_restore,
-                                       arma_sd);
+      roll::RollSdOfflineVec roll_sd_offline(xx, n, n_rows_x, width,
+                                             weights, center, min_obs,
+                                             na_restore,
+                                             arma_sd);
       parallelFor(0, n_rows_x, roll_sd_offline);
       
     }
@@ -1535,18 +1534,18 @@ SEXP roll_scale(const SEXP& x, const int& width,
     // compute rolling centering and scaling
     if (status && online) {
       
-      RollScaleOnlineMat roll_scale_online(xx, n, n_rows_x, n_cols_x, width,
-                                           weights, center, scale, min_obs,
-                                           arma_any_na, na_restore,
-                                           arma_scale);
+      roll::RollScaleOnlineMat roll_scale_online(xx, n, n_rows_x, n_cols_x, width,
+                                                 weights, center, scale, min_obs,
+                                                 arma_any_na, na_restore,
+                                                 arma_scale);
       parallelFor(0, n_cols_x, roll_scale_online);
       
     } else {
       
-      RollScaleOfflineMat roll_scale_offline(xx, n, n_rows_x, n_cols_x, width,
-                                             weights, center, scale, min_obs,
-                                             arma_any_na, na_restore,
-                                             arma_scale);
+      roll::RollScaleOfflineMat roll_scale_offline(xx, n, n_rows_x, n_cols_x, width,
+                                                   weights, center, scale, min_obs,
+                                                   arma_any_na, na_restore,
+                                                   arma_scale);
       parallelFor(0, n_rows_x * n_cols_x, roll_scale_offline);
       
     }
@@ -1586,18 +1585,18 @@ SEXP roll_scale(const SEXP& x, const int& width,
     // compute rolling centering and scaling
     if (status && online) {
       
-      RollScaleOnlineVec roll_scale_online(xx, n, n_rows_x, width,
-                                           weights, center, scale, min_obs,
-                                           na_restore,
-                                           arma_scale);
+      roll::RollScaleOnlineVec roll_scale_online(xx, n, n_rows_x, width,
+                                                 weights, center, scale, min_obs,
+                                                 na_restore,
+                                                 arma_scale);
       roll_scale_online();
       
     } else {
       
-      RollScaleOfflineVec roll_scale_offline(xx, n, n_rows_x, width,
-                                             weights, center, scale, min_obs,
-                                             na_restore,
-                                             arma_scale);
+      roll::RollScaleOfflineVec roll_scale_offline(xx, n, n_rows_x, width,
+                                                   weights, center, scale, min_obs,
+                                                   na_restore,
+                                                   arma_scale);
       parallelFor(0, n_rows_x, roll_scale_offline);
       
     }
@@ -1667,19 +1666,19 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
       if (symmetric) {
         
         // y is null
-        RollCovOnlineMatXX roll_cov_online(xx, n, n_rows_xy, n_cols_x, width,
-                                           weights, center, scale, min_obs,
-                                           arma_any_na, na_restore,
-                                           arma_cov);
+        roll::RollCovOnlineMatXX roll_cov_online(xx, n, n_rows_xy, n_cols_x, width,
+                                                 weights, center, scale, min_obs,
+                                                 arma_any_na, na_restore,
+                                                 arma_cov);
         parallelFor(0, n_cols_x, roll_cov_online);
         
       } else if (!symmetric) {
         
         // y is not null
-        RollCovOnlineMatXY roll_cov_online(xx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
-                                           weights, center, scale, min_obs,
-                                           arma_any_na, na_restore,
-                                           arma_cov);
+        roll::RollCovOnlineMatXY roll_cov_online(xx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                                 weights, center, scale, min_obs,
+                                                 arma_any_na, na_restore,
+                                                 arma_cov);
         parallelFor(0, n_cols_x, roll_cov_online);
         
       }
@@ -1689,19 +1688,19 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
       if (symmetric) {
         
         // y is null
-        RollCovOfflineMatXX roll_cov_offline(xx, n, n_rows_xy, n_cols_x, width,
-                                             weights, center, scale, min_obs,
-                                             arma_any_na, na_restore,
-                                             arma_cov);
+        roll::RollCovOfflineMatXX roll_cov_offline(xx, n, n_rows_xy, n_cols_x, width,
+                                                   weights, center, scale, min_obs,
+                                                   arma_any_na, na_restore,
+                                                   arma_cov);
         parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_offline);
         
       } else if (!symmetric) {
         
         // y is not null
-        RollCovOfflineMatXY roll_cov_offline(xx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
-                                             weights, center, scale, min_obs,
-                                             arma_any_na, na_restore,
-                                             arma_cov);
+        roll::RollCovOfflineMatXY roll_cov_offline(xx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                                   weights, center, scale, min_obs,
+                                                   arma_any_na, na_restore,
+                                                   arma_cov);
         parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_cov_offline);
         
       }
@@ -1764,18 +1763,18 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     // compute rolling covariances
     if (status && online) {
       
-      RollCovOnlineMatXY roll_cov_online(xx, yyy, n, n_rows_xy, n_cols_x, n_cols_y, width,
-                                         weights, center, scale, min_obs,
-                                         arma_any_na, na_restore,
-                                         arma_cov);
+      roll::RollCovOnlineMatXY roll_cov_online(xx, yyy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                               weights, center, scale, min_obs,
+                                               arma_any_na, na_restore,
+                                               arma_cov);
       parallelFor(0, n_cols_x, roll_cov_online);
       
     } else {
       
-      RollCovOfflineMatXY roll_cov_offline(xx, yyy, n, n_rows_xy, n_cols_x, n_cols_y, width,
-                                           weights, center, scale, min_obs,
-                                           arma_any_na, na_restore,
-                                           arma_cov);
+      roll::RollCovOfflineMatXY roll_cov_offline(xx, yyy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                                 weights, center, scale, min_obs,
+                                                 arma_any_na, na_restore,
+                                                 arma_cov);
       parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_cov_offline);
       
     }
@@ -1836,19 +1835,19 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     // compute rolling covariances
     if (status && online) {
       
-      RollCovOnlineMatXY roll_cov_online(xxx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
-                                         weights, center, scale, min_obs,
-                                         arma_any_na, na_restore,
-                                         arma_cov);
+      roll::RollCovOnlineMatXY roll_cov_online(xxx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                               weights, center, scale, min_obs,
+                                               arma_any_na, na_restore,
+                                               arma_cov);
       parallelFor(0, n_cols_x, roll_cov_online);
       
     } else {
       
       // y is not null
-      RollCovOfflineMatXY roll_cov_offline(xxx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
-                                           weights, center, scale, min_obs,
-                                           arma_any_na, na_restore,
-                                           arma_cov);
+      roll::RollCovOfflineMatXY roll_cov_offline(xxx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                                 weights, center, scale, min_obs,
+                                                 arma_any_na, na_restore,
+                                                 arma_cov);
       parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_cov_offline);
       
       
@@ -1898,19 +1897,19 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
       if (symmetric) {
         
         // y is null
-        RollCovOnlineVecXX roll_cov_online(xx, n, n_rows_xy, width,
-                                           weights, center, scale, min_obs,
-                                           na_restore,
-                                           arma_cov);
+        roll::RollCovOnlineVecXX roll_cov_online(xx, n, n_rows_xy, width,
+                                                 weights, center, scale, min_obs,
+                                                 na_restore,
+                                                 arma_cov);
         roll_cov_online();
         
       } else if (!symmetric) {
         
         // y is not null
-        RollCovOnlineVecXY roll_cov_online(xx, yy, n, n_rows_xy, width,
-                                           weights, center, scale, min_obs,
-                                           na_restore,
-                                           arma_cov);
+        roll::RollCovOnlineVecXY roll_cov_online(xx, yy, n, n_rows_xy, width,
+                                                 weights, center, scale, min_obs,
+                                                 na_restore,
+                                                 arma_cov);
         roll_cov_online();
         
       }
@@ -1920,19 +1919,19 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
       if (symmetric) {
         
         // y is null
-        RollCovOfflineVecXX roll_cov_offline(xx, n, n_rows_xy, width,
-                                             weights, center, scale, min_obs,
-                                             na_restore,
-                                             arma_cov);
+        roll::RollCovOfflineVecXX roll_cov_offline(xx, n, n_rows_xy, width,
+                                                   weights, center, scale, min_obs,
+                                                   na_restore,
+                                                   arma_cov);
         parallelFor(0, n_rows_xy, roll_cov_offline);
         
       } else if (!symmetric) {
         
         // y is not null
-        RollCovOfflineVecXY roll_cov_offline(xx, yy, n, n_rows_xy, width,
-                                             weights, center, scale, min_obs,
-                                             na_restore,
-                                             arma_cov);
+        roll::RollCovOfflineVecXY roll_cov_offline(xx, yy, n, n_rows_xy, width,
+                                                   weights, center, scale, min_obs,
+                                                   na_restore,
+                                                   arma_cov);
         parallelFor(0, n_rows_xy, roll_cov_offline);
         
       }
@@ -2024,20 +2023,20 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
     // compute rolling covariances
     if (status && online) {
       
-      RollCovOnlineMatLm roll_cov_online(data, n, n_rows_xy, n_cols_x, width,
-                                         weights, intercept, min_obs,
-                                         arma_any_na, na_restore,
-                                         arma_n_obs, arma_sum_w, arma_mean,
-                                         arma_cov);
+      roll::RollCovOnlineMatLm roll_cov_online(data, n, n_rows_xy, n_cols_x, width,
+                                               weights, intercept, min_obs,
+                                               arma_any_na, na_restore,
+                                               arma_n_obs, arma_sum_w, arma_mean,
+                                               arma_cov);
       parallelFor(0, n_cols_x, roll_cov_online);
       
     } else {
       
-      RollCovOfflineMatLm roll_cov_offline(data, n, n_rows_xy, n_cols_x, width,
-                                           weights, intercept, min_obs,
-                                           arma_any_na, na_restore,
-                                           arma_n_obs, arma_sum_w, arma_mean,
-                                           arma_cov);
+      roll::RollCovOfflineMatLm roll_cov_offline(data, n, n_rows_xy, n_cols_x, width,
+                                                 weights, intercept, min_obs,
+                                                 arma_any_na, na_restore,
+                                                 arma_n_obs, arma_sum_w, arma_mean,
+                                                 arma_cov);
       parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_offline);
       
     }
@@ -2047,9 +2046,9 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
       arma::mat arma_coef(n_rows_xy, n_cols_x);
       arma::mat arma_se(n_rows_xy, n_cols_x);
-      RollLmMatInterceptTRUE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
-                                            arma_n_obs, arma_sum_w, arma_mean,
-                                            arma_coef, arma_rsq, arma_se);
+      roll::RollLmMatInterceptTRUE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
+                                                  arma_n_obs, arma_sum_w, arma_mean,
+                                                  arma_coef, arma_rsq, arma_se);
       parallelFor(0, n_rows_xy, roll_lm_slices);
       
       result = List::create(Named("coefficients") = arma_coef,
@@ -2060,9 +2059,9 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
       arma::mat arma_coef(n_rows_xy, n_cols_x - 1);
       arma::mat arma_se(n_rows_xy, n_cols_x - 1);
-      RollLmMatInterceptFALSE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
-                                             arma_n_obs, arma_sum_w,
-                                             arma_coef, arma_rsq, arma_se);
+      roll::RollLmMatInterceptFALSE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
+                                                   arma_n_obs, arma_sum_w,
+                                                   arma_coef, arma_rsq, arma_se);
       parallelFor(0, n_rows_xy, roll_lm_slices);
       
       // create and return a list
@@ -2122,20 +2121,20 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
     // compute rolling covariances
     if (status && online) {
       
-      RollCovOnlineMatLm roll_cov_online(data, n, n_rows_xy, n_cols_x, width,
-                                         weights, intercept, min_obs,
-                                         arma_any_na, na_restore,
-                                         arma_n_obs, arma_sum_w, arma_mean,
-                                         arma_cov);
+      roll::RollCovOnlineMatLm roll_cov_online(data, n, n_rows_xy, n_cols_x, width,
+                                               weights, intercept, min_obs,
+                                               arma_any_na, na_restore,
+                                               arma_n_obs, arma_sum_w, arma_mean,
+                                               arma_cov);
       parallelFor(0, n_cols_x, roll_cov_online);
       
     } else {
       
-      RollCovOfflineMatLm roll_cov_offline(data, n, n_rows_xy, n_cols_x, width,
-                                           weights, intercept, min_obs,
-                                           arma_any_na, na_restore,
-                                           arma_n_obs, arma_sum_w, arma_mean,
-                                           arma_cov);
+      roll::RollCovOfflineMatLm roll_cov_offline(data, n, n_rows_xy, n_cols_x, width,
+                                                 weights, intercept, min_obs,
+                                                 arma_any_na, na_restore,
+                                                 arma_n_obs, arma_sum_w, arma_mean,
+                                                 arma_cov);
       parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_cov_offline);
       
     }
@@ -2145,9 +2144,9 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
       arma::mat arma_coef(n_rows_xy, n_cols_x);
       arma::mat arma_se(n_rows_xy, n_cols_x);
-      RollLmMatInterceptTRUE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
-                                            arma_n_obs, arma_sum_w, arma_mean,
-                                            arma_coef, arma_rsq, arma_se);
+      roll::RollLmMatInterceptTRUE roll_lm_slices(arma_cov, n, n_rows_xy, n_cols_x, width,
+                                                  arma_n_obs, arma_sum_w, arma_mean,
+                                                  arma_coef, arma_rsq, arma_se);
       parallelFor(0, n_rows_xy, roll_lm_slices);
       
       result = List::create(Named("coefficients") = arma_coef,
@@ -2158,9 +2157,9 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
       arma::vec arma_coef(n_rows_xy);
       arma::vec arma_se(n_rows_xy);
-      RollLmVecInterceptFALSE roll_lm_slices(arma_cov, n, n_rows_xy, width,
-                                             arma_n_obs, arma_sum_w,
-                                             arma_coef, arma_rsq, arma_se);
+      roll::RollLmVecInterceptFALSE roll_lm_slices(arma_cov, n, n_rows_xy, width,
+                                                   arma_n_obs, arma_sum_w,
+                                                   arma_coef, arma_rsq, arma_se);
       parallelFor(0, n_rows_xy, roll_lm_slices);
       
       // create and return a list
