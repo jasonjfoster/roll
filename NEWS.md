@@ -1,5 +1,9 @@
 # roll
 
+## Version 1.1.7
+
+* Restructured the C++ header files to be used by other packages
+
 ## Version 1.1.5
 
 * Added hex sticker and improved documentation ([#27](https://github.com/jjf234/roll/issues/27), [#28](https://github.com/jjf234/roll/issues/28), [#30](https://github.com/jjf234/roll/issues/30))

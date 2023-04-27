@@ -26,71 +26,62 @@ test_that("equivalent to zoo::rollapply", {
                               test_min_obs[1], test_complete_obs[2],
                               test_na_restore[2], test_online[i]),
                      zoo::rollapplyr(test_zoo_x[[ax]] < 0, width = width,
-                                     any, partial = TRUE),
-                     check.attributes = FALSE)
+                                     any, partial = TRUE))
         
         expect_equal(roll_all(test_zoo_x[[ax]] < 0, width,
                               test_min_obs[1], test_complete_obs[2],
                               test_na_restore[2], test_online[i]),
                      zoo::rollapplyr(test_zoo_x[[ax]] < 0, width = width,
-                                     all, partial = TRUE),
-                     check.attributes = FALSE)
+                                     all, partial = TRUE))
         
         expect_equal(roll_sum(test_zoo_x[[ax]], width,
                               test_weights[[1]], test_min_obs[1],
                               test_complete_obs[2], test_na_restore[2],
                               test_online[i]),
                      zoo::rollapplyr(test_zoo_x[[ax]], width = width,
-                                     sum, partial = TRUE),
-                     check.attributes = FALSE)
+                                     sum, partial = TRUE))
         
         expect_equal(roll_prod(test_zoo_x[[ax]], width,
                                test_weights[[1]], test_min_obs[1],
                                test_complete_obs[2], test_na_restore[2],
                                test_online[i]),
                      zoo::rollapplyr(test_zoo_x[[ax]], width = width,
-                                     prod, partial = TRUE),
-                     check.attributes = FALSE)
+                                     prod, partial = TRUE))
         
         expect_equal(roll_mean(test_zoo_x[[ax]], width,
                                test_weights[[1]], test_min_obs[1],
                                test_complete_obs[2], test_na_restore[2],
                                test_online[i]),
                      zoo::rollapplyr(test_zoo_x[[ax]], width = width,
-                                     mean, partial = TRUE),
-                     check.attributes = FALSE)
+                                     mean, partial = TRUE))
         
         expect_equal(roll_min(test_zoo_x[[ax]], width,
                               test_weights[[1]], test_min_obs[1],
                               test_complete_obs[2], test_na_restore[2],
                               test_online[i]),
                      zoo::rollapplyr(test_zoo_x[[ax]], width = width,
-                                     min, partial = TRUE),
-                     check.attributes = FALSE)
+                                     min, partial = TRUE))
         
         expect_equal(roll_max(test_zoo_x[[ax]], width,
                               test_weights[[1]], test_min_obs[1],
                               test_complete_obs[2], test_na_restore[2],
                               test_online[i]),
                      zoo::rollapplyr(test_zoo_x[[ax]], width = width,
-                                     max, partial = TRUE),
-                     check.attributes = FALSE)
+                                     max, partial = TRUE))
         
         expect_equal(roll_idxmin(test_zoo_x[[ax]], width,
                                  test_weights[[1]], test_min_obs[1],
                                  test_complete_obs[2], test_na_restore[2],
                                  test_online[i]),
                      zoo::rollapplyr(test_zoo_x[[ax]], width = width,
-                                     which.min, partial = TRUE),
-                     check.attributes = FALSE)
+                                     which.min, partial = TRUE))
         
         expect_equal(roll_idxmax(test_zoo_x[[ax]], width,
                                  test_weights[[1]], test_min_obs[1],
                                  test_complete_obs[2], test_na_restore[2],
                                  test_online[i]),
                      zoo::rollapplyr(test_zoo_x[[ax]], width = width,
-                                     which.max, partial = TRUE),
-                     check.attributes = FALSE)
+                                     which.max, partial = TRUE))
         
         # "'online' is not supported"
         expect_equal(roll_median(test_zoo_x[[ax]], width,
@@ -98,8 +89,7 @@ test_that("equivalent to zoo::rollapply", {
                                  test_complete_obs[2], test_na_restore[2],
                                  test_online[i]),
                      zoo::rollapplyr(test_zoo_x[[ax]], width = width,
-                                     median, partial = TRUE),
-                     check.attributes = FALSE)
+                                     median, partial = TRUE))
         
         for (g in 1:length(test_p)) {
           
@@ -110,8 +100,8 @@ test_that("equivalent to zoo::rollapply", {
                                      test_na_restore[2], test_online[i]),
                        zoo::rollapplyr(test_zoo_x[[ax]], width = width,
                                        quantile, probs = test_p[[g]],
-                                       type = 2, partial = TRUE),
-                       check.attributes = FALSE)
+                                       type = 2, names = FALSE,
+                                       partial = TRUE))
           
         }
         
@@ -120,16 +110,14 @@ test_that("equivalent to zoo::rollapply", {
                               test_min_obs[1], test_complete_obs[2],
                               test_na_restore[2], test_online[i]),
                      zoo::rollapplyr(test_zoo_x[[ax]], width = width,
-                                     var, partial = TRUE),
-                     check.attributes = FALSE)
+                                     var, partial = TRUE))
         
         expect_equal(roll_sd(test_zoo_x[[ax]], width,
                              test_weights[[1]], test_center[1],
                              test_min_obs[1], test_complete_obs[2],
                              test_na_restore[2], test_online[i]),
                      zoo::rollapplyr(test_zoo_x[[ax]], width = width,
-                                     sd, partial = TRUE),
-                     check.attributes = FALSE)
+                                     sd, partial = TRUE))
         
         for (g in 1:length(test_center)) {
           for (h in 1:length(test_scale)) {
@@ -141,8 +129,7 @@ test_that("equivalent to zoo::rollapply", {
                                     test_online[i]),
                          zoo::rollapplyr(test_zoo_x[[ax]], width = width,
                                          scale_z, center = test_center[g],
-                                         scale = test_scale[h], partial = TRUE),
-                         check.attributes = FALSE)
+                                         scale = test_scale[h], partial = TRUE))
             
           }
         }
@@ -155,8 +142,7 @@ test_that("equivalent to zoo::rollapply", {
                                 test_min_obs[1], test_complete_obs[2],
                                 test_na_restore[2], test_online[i]),
                        rollapplyr_cube(cov, test_zoo_x[[ax]],
-                                       test_zoo_y[[ay]], width),
-                       check.attributes = FALSE)
+                                       test_zoo_y[[ay]], width))
           
           # "the standard deviation is zero"
           expect_equal(roll_cor(test_zoo_x[[ax]], test_zoo_y[[ay]],
@@ -165,8 +151,7 @@ test_that("equivalent to zoo::rollapply", {
                                 test_min_obs[1], test_complete_obs[2],
                                 test_na_restore[2], test_online[i]),
                        rollapplyr_cube(cor, test_zoo_x[[ax]],
-                                       test_zoo_y[[ay]], width),
-                       check.attributes = FALSE)
+                                       test_zoo_y[[ay]], width))
           
         }
         
@@ -181,8 +166,7 @@ test_that("equivalent to zoo::rollapply", {
                                  test_complete_obs[2], test_na_restore[2],
                                  test_online[i]),
                          rollapplyr_lm(test_zoo_x[[ax]], test_zoo_yy[[ay]],
-                                       width, test_intercept[g]),
-                         check.attributes = FALSE)
+                                       width, test_intercept[g]))
             
           }
         }

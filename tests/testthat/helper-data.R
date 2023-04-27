@@ -36,3 +36,11 @@ if (requireNamespace("zoo", quietly = TRUE)) {
 }
 
 test_ls[1:2] <- lapply(test_ls[1:2], setNames, paste0("x", rep(1:n_vars)))
+
+# test_ls[1:2] <- lapply(test_ls[1:2], function(x) {
+#   
+#   colnames(x) <- paste0("x", rep(1:n_vars))
+#   
+#   return(x)
+#   
+# })
