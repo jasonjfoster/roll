@@ -159,9 +159,12 @@ rollapplyr_lm <- function(x, y, width, intercept) {
       data <- as.data.frame(cbind(y_subset, x_subset))
       
       if (intercept) {
-        fit <- lm(reformulate(termlabels = ".", response = names(data)[1]), data = data)
+        
+        # "Unparseable 'response'; use is deprecated.  Use as.name(.) or `..`!"
+        fit <- lm(reformulate(termlabels = ".", response = as.name(names(data)[1])), data = data)
+        
       } else {
-        fit <- lm(reformulate(termlabels = ".-1", response = names(data)[1]), data = data)
+        fit <- lm(reformulate(termlabels = ".-1", response = as.name(names(data)[1])), data = data)
       }
       
       summary_fit <- summary(fit)
