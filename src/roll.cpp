@@ -1083,7 +1083,7 @@ SEXP roll_quantile(const SEXP& x, const int& width,
       arma_any_na.fill(0);
     }
     
-    // compute rolling quantile
+    // compute rolling quantiles
     if (online) {
       
       if (p == 0) {
@@ -1177,7 +1177,7 @@ SEXP roll_quantile(const SEXP& x, const int& width,
     // otherwise check argument for errors
     check_min_obs(min_obs);
     
-    // compute rolling quantile
+    // compute rolling quantiles
     if (online) {
       
       if (p == 0) {
@@ -1710,14 +1710,14 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     // create and return a matrix
     NumericVector result(wrap(arma_cov));
     result.attr("dim") = IntegerVector::create(n_cols_x, n_cols_y, n_rows_xy);
-    List x_dimnames = xx.attr("dimnames");
-    List y_dimnames = yy.attr("dimnames");
-    if ((x_dimnames.size() > 1) && (y_dimnames.size() > 1)) {
-      result.attr("dimnames") = List::create(x_dimnames[1], y_dimnames[1]);
-    } else if (x_dimnames.size() > 1) {
-      result.attr("dimnames") = List::create(x_dimnames[1], R_NilValue);
-    } else if (y_dimnames.size() > 1) {
-      result.attr("dimnames") = List::create(R_NilValue, y_dimnames[1]);
+    List dimnames_x = xx.attr("dimnames");
+    List dimnames_y = yy.attr("dimnames");
+    if ((dimnames_x.size() > 1) && (dimnames_y.size() > 1)) {
+      result.attr("dimnames") = List::create(dimnames_x[1], dimnames_y[1]);
+    } else if (dimnames_x.size() > 1) {
+      result.attr("dimnames") = List::create(dimnames_x[1], R_NilValue);
+    } else if (dimnames_y.size() > 1) {
+      result.attr("dimnames") = List::create(R_NilValue, dimnames_y[1]);
     }
     
     return result;
@@ -1782,14 +1782,14 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     // create and return a matrix
     NumericVector result(wrap(arma_cov));
     result.attr("dim") = IntegerVector::create(n_cols_x, n_cols_y, n_rows_xy);
-    List x_dimnames = xx.attr("dimnames");
-    List y_dimnames = yyy.attr("dimnames");
-    if ((x_dimnames.size() > 1) && (y_dimnames.size() > 1)) {
-      result.attr("dimnames") = List::create(x_dimnames[1], y_dimnames[1]);
-    } else if (x_dimnames.size() > 1) {
-      result.attr("dimnames") = List::create(x_dimnames[1], R_NilValue);
-    } else if (y_dimnames.size() > 1) {
-      result.attr("dimnames") = List::create(R_NilValue, y_dimnames[1]);
+    List dimnames_x = xx.attr("dimnames");
+    List dimnames_y = yyy.attr("dimnames");
+    if ((dimnames_x.size() > 1) && (dimnames_y.size() > 1)) {
+      result.attr("dimnames") = List::create(dimnames_x[1], dimnames_y[1]);
+    } else if (dimnames_x.size() > 1) {
+      result.attr("dimnames") = List::create(dimnames_x[1], R_NilValue);
+    } else if (dimnames_y.size() > 1) {
+      result.attr("dimnames") = List::create(R_NilValue, dimnames_y[1]);
     }
     
     return result;
@@ -1856,14 +1856,14 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     // create and return a matrix
     NumericVector result(wrap(arma_cov));
     result.attr("dim") = IntegerVector::create(n_cols_x, n_cols_y, n_rows_xy);
-    List x_dimnames = xxx.attr("dimnames");
-    List y_dimnames = yy.attr("dimnames");
-    if ((x_dimnames.size() > 1) && (y_dimnames.size() > 1)) {
-      result.attr("dimnames") = List::create(x_dimnames[1], y_dimnames[1]);
-    } else if (x_dimnames.size() > 1) {
-      result.attr("dimnames") = List::create(x_dimnames[1], R_NilValue);
-    } else if (y_dimnames.size() > 1) {
-      result.attr("dimnames") = List::create(R_NilValue, y_dimnames[1]);
+    List dimnames_x = xxx.attr("dimnames");
+    List dimnames_y = yy.attr("dimnames");
+    if ((dimnames_x.size() > 1) && (dimnames_y.size() > 1)) {
+      result.attr("dimnames") = List::create(dimnames_x[1], dimnames_y[1]);
+    } else if (dimnames_x.size() > 1) {
+      result.attr("dimnames") = List::create(dimnames_x[1], R_NilValue);
+    } else if (dimnames_y.size() > 1) {
+      result.attr("dimnames") = List::create(R_NilValue, dimnames_y[1]);
     }
     
     return result;
