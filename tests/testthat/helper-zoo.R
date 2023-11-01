@@ -99,6 +99,13 @@ rollapplyr_cube <- function(f, x, y, width) {
   
 }
 
+crossprod_scale <- function(x, y, center = FALSE, scale = FALSE) {
+  
+  result <- crossprod(scale(x, center = center, scale = scale),
+                      scale(y, center = center, scale = scale))
+  
+}
+
 rollapplyr_lm <- function(x, y, width, intercept) {
   
   if (!requireNamespace("zoo", quietly = TRUE)) {

@@ -775,6 +775,59 @@ roll_cor <- function(x, y = NULL, width, weights = rep(1, width), center = TRUE,
   ))
 }
 
+##' Rolling Crossproducts
+##'
+##' A function for computing the rolling and expanding crossproducts of time-series data.
+##' 
+##' @param x vector or matrix. Rows are observations and columns are variables.
+##' @param y vector or matrix. Rows are observations and columns are variables.
+##' @param width integer. Window size.
+##' @param weights vector. Weights for each observation within a window.
+##' @param center logical. If \code{TRUE} then the weighted mean of each variable is used,
+##' if \code{FALSE} then zero is used.
+##' @param scale logical. If \code{TRUE} then the weighted standard deviation of each variable is used,
+##' if \code{FALSE} then no scaling is done.
+##' @param min_obs integer. Minimum number of observations required to have a value within a window,
+##' otherwise result is \code{NA}.
+##' @param complete_obs	logical. If \code{TRUE} then rows containing any missing values are removed,
+##' if \code{FALSE} then pairwise is used.
+##' @param na_restore logical. Should missing values be restored?
+##' @param online logical. Process observations using an online algorithm.
+##' @return A cube with each slice the rolling and expanding crossproducts.
+##' @examples
+##' n <- 15
+##' x <- rnorm(n)
+##' y <- rnorm(n)
+##' weights <- 0.9 ^ (n:1)
+##' 
+##' # rolling crossproducts with complete windows
+##' roll_crossprod(x, y, width = 5)
+##' 
+##' # rolling crossproducts with partial windows
+##' roll_crossprod(x, y, width = 5, min_obs = 1)
+##' 
+##' # expanding crossproducts with partial windows
+##' roll_crossprod(x, y, width = n, min_obs = 1)
+##' 
+##' # expanding crossproducts with partial windows and weights
+##' roll_crossprod(x, y, width = n, min_obs = 1, weights = weights)
+##' @export
+roll_crossprod <- function(x, y = NULL, width, weights = rep(1, width), center = FALSE, scale = FALSE,
+                           min_obs = width, complete_obs = TRUE, na_restore = FALSE,
+                           online = TRUE) {
+  return(.Call(`_roll_roll_crossprod`,
+               x, y,
+               as.integer(width),
+               as.numeric(weights),
+               as.logical(center),
+               as.logical(scale),
+               as.integer(min_obs),
+               as.logical(complete_obs),
+               as.logical(na_restore),
+               as.logical(online)
+  ))
+}
+
 ##' Rolling Linear Models
 ##'
 ##' A function for computing the rolling and expanding linear models of time-series data.

@@ -45,6 +45,10 @@
     .Call(`_roll_roll_cov`, x, y, width, weights, center, scale, min_obs, complete_obs, na_restore, online)
 }
 
+.roll_crossprod <- function(x, y, width, weights, center, scale, min_obs, complete_obs, na_restore, online) {
+    .Call(`_roll_roll_crossprod`, x, y, width, weights, center, scale, min_obs, complete_obs, na_restore, online)
+}
+
 .roll_lm <- function(x, y, width, weights, intercept, min_obs, complete_obs, na_restore, online) {
     .Call(`_roll_roll_lm`, x, y, width, weights, intercept, min_obs, complete_obs, na_restore, online)
 }

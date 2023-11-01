@@ -1969,6 +1969,358 @@ SEXP roll_cov(const SEXP& x, const SEXP& y,
   
 }
 
+SEXP roll_crossprod_z(const SEXP& x, const SEXP& y,
+                      const int& width, const arma::vec& weights,
+                      const bool& center, const bool& scale,
+                      const int& min_obs, const bool& complete_obs,
+                      const bool& na_restore, const bool& online,
+                      const bool& symmetric) {
+  
+  if (Rf_isMatrix(x) && Rf_isMatrix(y)) {
+    
+    NumericMatrix xx(x);
+    NumericMatrix yy(y);
+    int n = weights.size();
+    int n_rows_xy = xx.nrow();
+    int n_cols_x = xx.ncol();
+    int n_cols_y = yy.ncol();
+    arma::uvec arma_any_na(n_rows_xy);
+    arma::cube arma_crossprod(n_cols_x, n_cols_y, n_rows_xy);
+    
+    // check 'x' and 'y' arguments for errors
+    check_lm(n_rows_xy, yy.nrow());
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_xy(n_rows_xy, width, weights);
+    bool status = check_lambda(weights, n_rows_xy, width, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'true',
+    // otherwise check argument for errors
+    if (complete_obs && symmetric) {
+      arma_any_na = any_na_x(xx);
+    } else if (complete_obs && !symmetric) {
+      arma_any_na = any_na_xy(xx, yy);
+    } else {
+      arma_any_na.fill(0);
+    }
+    
+    // compute rolling crossproducts
+    if (status && online) {
+      
+      if (symmetric) {
+        
+        // y is null
+        roll::RollCrossProdOnlineMatXX roll_crossprod_online(xx, n, n_rows_xy, n_cols_x, width,
+                                                             weights, center, scale, min_obs,
+                                                             arma_any_na, na_restore,
+                                                             arma_crossprod);
+        parallelFor(0, n_cols_x, roll_crossprod_online);
+        
+      } else if (!symmetric) {
+        
+        // y is not null
+        roll::RollCrossProdOnlineMatXY roll_crossprod_online(xx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                                             weights, center, scale, min_obs,
+                                                             arma_any_na, na_restore,
+                                                             arma_crossprod);
+        parallelFor(0, n_cols_x, roll_crossprod_online);
+        
+      }
+      
+    } else {
+      
+      if (symmetric) {
+        
+        // y is null
+        roll::RollCrossProdOfflineMatXX roll_crossprd_offline(xx, n, n_rows_xy, n_cols_x, width,
+                                                              weights, center, scale, min_obs,
+                                                              arma_any_na, na_restore,
+                                                              arma_crossprod);
+        parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_crossprd_offline);
+        
+      } else if (!symmetric) {
+        
+        // y is not null
+        roll::RollCrossProdOfflineMatXY roll_crossprod_offline(xx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                                               weights, center, scale, min_obs,
+                                                               arma_any_na, na_restore,
+                                                               arma_crossprod);
+        parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_crossprod_offline);
+        
+      }
+      
+    }
+    
+    // create and return a matrix
+    NumericVector result(wrap(arma_crossprod));
+    result.attr("dim") = IntegerVector::create(n_cols_x, n_cols_y, n_rows_xy);
+    List dimnames_x = xx.attr("dimnames");
+    List dimnames_y = yy.attr("dimnames");
+    if ((dimnames_x.size() > 1) && (dimnames_y.size() > 1)) {
+      result.attr("dimnames") = List::create(dimnames_x[1], dimnames_y[1]);
+    } else if (dimnames_x.size() > 1) {
+      result.attr("dimnames") = List::create(dimnames_x[1], R_NilValue);
+    } else if (dimnames_y.size() > 1) {
+      result.attr("dimnames") = List::create(R_NilValue, dimnames_y[1]);
+    }
+    
+    return result;
+    
+  } else if (Rf_isMatrix(x)) {
+    
+    NumericMatrix xx(x);
+    NumericVector yy(y);
+    // yy.attr("dim") = IntegerVector::create(yy.size(), 1);
+    // NumericMatrix yyy(wrap(yy));
+    NumericMatrix yyy(yy.size(), 1, yy.begin());
+    
+    int n = weights.size();
+    int n_rows_xy = xx.nrow();
+    int n_cols_x = xx.ncol();
+    int n_cols_y = yyy.ncol();
+    arma::uvec arma_any_na(n_rows_xy);
+    arma::cube arma_crossprod(n_cols_x, n_cols_y, n_rows_xy);
+    
+    // check 'x' and 'y' arguments for errors
+    check_lm(n_rows_xy, yyy.nrow());
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_xy(n_rows_xy, width, weights);
+    bool status = check_lambda(weights, n_rows_xy, width, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'true',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      arma_any_na = any_na_xy(xx, yyy);
+    } else {
+      arma_any_na.fill(0);
+    }
+    
+    // compute rolling crossproducts
+    if (status && online) {
+      
+      roll::RollCrossProdOnlineMatXY roll_crossprod_online(xx, yyy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                                           weights, center, scale, min_obs,
+                                                           arma_any_na, na_restore,
+                                                           arma_crossprod);
+      parallelFor(0, n_cols_x, roll_crossprod_online);
+      
+    } else {
+      
+      roll::RollCrossProdOfflineMatXY roll_crossprod_offline(xx, yyy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                                             weights, center, scale, min_obs,
+                                                             arma_any_na, na_restore,
+                                                             arma_crossprod);
+      parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_crossprod_offline);
+      
+    }
+    
+    // create and return a matrix
+    NumericVector result(wrap(arma_crossprod));
+    result.attr("dim") = IntegerVector::create(n_cols_x, n_cols_y, n_rows_xy);
+    List dimnames_x = xx.attr("dimnames");
+    List dimnames_y = yyy.attr("dimnames");
+    if ((dimnames_x.size() > 1) && (dimnames_y.size() > 1)) {
+      result.attr("dimnames") = List::create(dimnames_x[1], dimnames_y[1]);
+    } else if (dimnames_x.size() > 1) {
+      result.attr("dimnames") = List::create(dimnames_x[1], R_NilValue);
+    } else if (dimnames_y.size() > 1) {
+      result.attr("dimnames") = List::create(R_NilValue, dimnames_y[1]);
+    }
+    
+    return result;
+    
+  } else if (Rf_isMatrix(y)) {
+    
+    NumericVector xx(x);
+    NumericMatrix yy(y);
+    // xx.attr("dim") = IntegerVector::create(xx.size(), 1);
+    // NumericMatrix xxx(wrap(xx));
+    NumericMatrix xxx(xx.size(), 1, xx.begin());
+    
+    int n = weights.size();
+    int n_rows_xy = xxx.nrow();
+    int n_cols_x = xxx.ncol();
+    int n_cols_y = yy.ncol();
+    arma::uvec arma_any_na(n_rows_xy);
+    arma::cube arma_crossprod(n_cols_x, n_cols_y, n_rows_xy);
+    
+    // check 'x' and 'y' arguments for errors
+    check_lm(n_rows_xy, yy.nrow());
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_xy(n_rows_xy, width, weights);
+    bool status = check_lambda(weights, n_rows_xy, width, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // default 'complete_obs' argument is 'true',
+    // otherwise check argument for errors
+    if (complete_obs) {
+      arma_any_na = any_na_xy(xxx, yy);
+    } else {
+      arma_any_na.fill(0);
+    }
+    
+    // compute rolling crossproducts
+    if (status && online) {
+      
+      roll::RollCrossProdOnlineMatXY roll_crossprod_online(xxx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                                           weights, center, scale, min_obs,
+                                                           arma_any_na, na_restore,
+                                                           arma_crossprod);
+      parallelFor(0, n_cols_x, roll_crossprod_online);
+      
+    } else {
+      
+      // y is not null
+      roll::RollCrossProdOfflineMatXY roll_crossprod_offline(xxx, yy, n, n_rows_xy, n_cols_x, n_cols_y, width,
+                                                             weights, center, scale, min_obs,
+                                                             arma_any_na, na_restore,
+                                                             arma_crossprod);
+      parallelFor(0, n_rows_xy * n_cols_x * n_cols_y, roll_crossprod_offline);
+      
+      
+    }
+    
+    // create and return a matrix
+    NumericVector result(wrap(arma_crossprod));
+    result.attr("dim") = IntegerVector::create(n_cols_x, n_cols_y, n_rows_xy);
+    List dimnames_x = xxx.attr("dimnames");
+    List dimnames_y = yy.attr("dimnames");
+    if ((dimnames_x.size() > 1) && (dimnames_y.size() > 1)) {
+      result.attr("dimnames") = List::create(dimnames_x[1], dimnames_y[1]);
+    } else if (dimnames_x.size() > 1) {
+      result.attr("dimnames") = List::create(dimnames_x[1], R_NilValue);
+    } else if (dimnames_y.size() > 1) {
+      result.attr("dimnames") = List::create(R_NilValue, dimnames_y[1]);
+    }
+    
+    return result;
+    
+  } else {
+    
+    NumericVector xx(x);
+    NumericVector yy(y);
+    int n = weights.size();
+    int n_rows_xy = xx.size();
+    arma::vec arma_crossprod(n_rows_xy);
+    
+    // check 'x' and 'y' arguments for errors
+    check_lm(n_rows_xy, yy.size());
+    
+    // check 'width' argument for errors
+    check_width(width);
+    
+    // default 'weights' argument is equal-weighted,
+    // otherwise check argument for errors
+    check_weights_xy(n_rows_xy, width, weights);
+    bool status = check_lambda(weights, n_rows_xy, width, online);
+    
+    // default 'min_obs' argument is 'width',
+    // otherwise check argument for errors
+    check_min_obs(min_obs);
+    
+    // compute rolling crossproducts
+    if (status && online) {
+      
+      if (symmetric) {
+        
+        // y is null
+        roll::RollCrossProdOnlineVecXX roll_crossprod_online(xx, n, n_rows_xy, width,
+                                                             weights, center, scale, min_obs,
+                                                             na_restore,
+                                                             arma_crossprod);
+        roll_crossprod_online();
+        
+      } else if (!symmetric) {
+        
+        // y is not null
+        roll::RollCrossProdOnlineVecXY roll_crossprod_online(xx, yy, n, n_rows_xy, width,
+                                                             weights, center, scale, min_obs,
+                                                             na_restore,
+                                                             arma_crossprod);
+        roll_crossprod_online();
+        
+      }
+      
+    } else {
+      
+      if (symmetric) {
+        
+        // y is null
+        roll::RollCrossProdOfflineVecXX roll_crossprod_offline(xx, n, n_rows_xy, width,
+                                                               weights, center, scale, min_obs,
+                                                               na_restore,
+                                                               arma_crossprod);
+        parallelFor(0, n_rows_xy, roll_crossprod_offline);
+        
+      } else if (!symmetric) {
+        
+        // y is not null
+        roll::RollCrossProdOfflineVecXY roll_crossprod_offline(xx, yy, n, n_rows_xy, width,
+                                                               weights, center, scale, min_obs,
+                                                               na_restore,
+                                                               arma_crossprod);
+        parallelFor(0, n_rows_xy, roll_crossprod_offline);
+        
+      }
+      
+    }
+    
+    // create and return a vector object
+    NumericVector result(wrap(arma_crossprod));
+    result.attr("dim") = R_NilValue;
+    
+    return result;
+    
+  }
+  
+}
+
+// [[Rcpp::export(.roll_crossprod)]]
+SEXP roll_crossprod(const SEXP& x, const SEXP& y,
+                    const int& width, const arma::vec& weights,
+                    const bool& center, const bool& scale,
+                    const int& min_obs, const bool& complete_obs,
+                    const bool& na_restore, const bool& online) {
+  
+  if (Rf_isNull(y)) {
+    
+    return roll_crossprod_z(x, x, width, weights, center, scale, min_obs, complete_obs, 
+                            na_restore, online, true);
+    
+  } else {
+    
+    return roll_crossprod_z(x, y, width, weights, center, scale, min_obs, complete_obs, 
+                            na_restore, online, false);
+    
+  }
+  
+}
+
 List roll_lm_z(const SEXP& x, const NumericVector& y,
                const int& width, const arma::vec& weights,
                const bool& intercept, const int& min_obs,

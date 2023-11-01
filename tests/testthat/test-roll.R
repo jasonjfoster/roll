@@ -188,6 +188,17 @@ test_that("equal to online algorithm", {
                                           test_min_obs[c], test_complete_obs[d],
                                           test_na_restore[e], test_online[2]))
                     
+                    expect_equal(roll_crossprod(test_roll_x[[ax]], test_roll_null[[ay]],
+                                                width, test_weights[[f]],
+                                                test_center[g], test_scale[h],
+                                                test_min_obs[c], test_complete_obs[d],
+                                                test_na_restore[e], test_online[1]),
+                                 roll_crossprod(test_roll_x[[ax]], test_roll_null[[ay]],
+                                                width, test_weights[[f]],
+                                                test_center[g], test_scale[h],
+                                                test_min_obs[c], test_complete_obs[d],
+                                                test_na_restore[e], test_online[2]))
+                    
                   }
                   
                 }

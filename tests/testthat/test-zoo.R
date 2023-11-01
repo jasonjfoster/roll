@@ -153,6 +153,14 @@ test_that("equivalent to zoo::rollapply", {
                        rollapplyr_cube(cor, test_zoo_x[[ax]],
                                        test_zoo_y[[ay]], width))
           
+          expect_equal(roll_crossprod(test_zoo_x[[ax]], test_zoo_y[[ay]],
+                                      width, test_weights[[1]],
+                                      test_center[2], test_scale[2],
+                                      test_min_obs[1], test_complete_obs[2],
+                                      test_na_restore[2], test_online[i]),
+                       rollapplyr_cube(crossprod_scale, test_zoo_x[[ax]],
+                                       test_zoo_y[[ay]], width))
+          
         }
         
         for (ay in 1:(length(test_zoo_yy))) {
