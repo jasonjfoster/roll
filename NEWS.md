@@ -2,6 +2,8 @@
 
 ## Version 1.1.7
 
+* New `roll_crossprod` function for computing rolling and expanding crossproducts of time-series data
+
 * Restructured the C++ header files to be used by other packages
 
 ## Version 1.1.5

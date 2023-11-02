@@ -2040,9 +2040,19 @@ struct RollVarOnlineVec {
           n_obs += 1;
         }
         
-        sum_w = lambda * sum_w + w_new;
-        sum_x = lambda * sum_x + w_new * x_new;
-        sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+        if (width > 1) {
+          
+          sum_w = lambda * sum_w + w_new;
+          sum_x = lambda * sum_x + w_new * x_new;
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+          
+        } else {
+          
+          sum_w = w_new;
+          sum_x = w_new * x_new;
+          sumsq_w = pow(w_new, (long double)2.0);
+          
+        }
         
         if (center && (n_obs > 0)) {
           
@@ -2096,10 +2106,20 @@ struct RollVarOnlineVec {
           
         }
         
-        sum_w = lambda * sum_w + w_new - lambda * w_old;
-        sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-        sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
-          pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+        if (width > 1) {
+          
+          sum_w = lambda * sum_w + w_new - lambda * w_old;
+          sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+            pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+          
+        } else {
+          
+          sum_w = w_new;
+          sum_x = w_new * x_new;
+          sumsq_w = pow(w_new, (long double)2.0);
+          
+        }
         
         if (center && (n_obs > 0)) {
           
@@ -2342,9 +2362,19 @@ struct RollSdOnlineVec {
           n_obs += 1;
         }
         
-        sum_w = lambda * sum_w + w_new;
-        sum_x = lambda * sum_x + w_new * x_new;
-        sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+        if (width > 1) {
+          
+          sum_w = lambda * sum_w + w_new;
+          sum_x = lambda * sum_x + w_new * x_new;
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+          
+        } else {
+          
+          sum_w = w_new;
+          sum_x = w_new * x_new;
+          sumsq_w = pow(w_new, (long double)2.0);
+          
+        }
         
         if (center && (n_obs > 0)) {
           
@@ -2400,10 +2430,20 @@ struct RollSdOnlineVec {
           
         }
         
-        sum_w = lambda * sum_w + w_new - lambda * w_old;
-        sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-        sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
-          pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+        if (width > 1) {
+          
+          sum_w = lambda * sum_w + w_new - lambda * w_old;
+          sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+            pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+          
+        } else {
+          
+          sum_w = w_new;
+          sum_x = w_new * x_new;
+          sumsq_w = pow(w_new, (long double)2.0);
+          
+        }
         
         if (center && (n_obs > 0)) {
           
@@ -3053,9 +3093,19 @@ struct RollCovOnlineVecXX {
           n_obs += 1;
         }
         
-        sum_w = lambda * sum_w + w_new;
-        sum_x = lambda * sum_x + w_new * x_new;
-        sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+        if (width > 1) {
+          
+          sum_w = lambda * sum_w + w_new;
+          sum_x = lambda * sum_x + w_new * x_new;
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+          
+        } else {
+          
+          sum_w = w_new;
+          sum_x = w_new * x_new;
+          sumsq_w = pow(w_new, (long double)2.0);
+          
+        }
         
         if (center && (n_obs > 0)) {
           
@@ -3129,10 +3179,20 @@ struct RollCovOnlineVecXX {
           
         }
         
-        sum_w = lambda * sum_w + w_new - lambda * w_old;
-        sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-        sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
-          pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+        if (width > 1) {
+          
+          sum_w = lambda * sum_w + w_new - lambda * w_old;
+          sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+            pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+          
+        } else {
+          
+          sum_w = w_new;
+          sum_x = w_new * x_new;
+          sumsq_w = pow(w_new, (long double)2.0);
+          
+        }
         
         if (center && (n_obs > 0)) {
           
@@ -3311,10 +3371,21 @@ struct RollCovOnlineVecXY {
           n_obs += 1;
         }
         
-        sum_w = lambda * sum_w + w_new;
-        sum_x = lambda * sum_x + w_new * x_new;
-        sum_y = lambda * sum_y + w_new * y_new;
-        sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+        if (width > 1) {
+          
+          sum_w = lambda * sum_w + w_new;
+          sum_x = lambda * sum_x + w_new * x_new;
+          sum_y = lambda * sum_y + w_new * y_new;
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+          
+        } else {
+          
+          sum_w = w_new;
+          sum_x = w_new * x_new;
+          sum_y = w_new * y_new;
+          sumsq_w = pow(w_new, (long double)2.0);
+          
+        }
         
         if (center && (n_obs > 0)) {
           
@@ -3398,11 +3469,22 @@ struct RollCovOnlineVecXY {
           
         }
         
-        sum_w = lambda * sum_w + w_new - lambda * w_old;
-        sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-        sum_y = lambda * sum_y + w_new * y_new - lambda * w_old * y_old;
-        sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
-          pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+        if (width > 1) {
+          
+          sum_w = lambda * sum_w + w_new - lambda * w_old;
+          sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+          sum_y = lambda * sum_y + w_new * y_new - lambda * w_old * y_old;
+          sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+            pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+          
+        } else {
+          
+          sum_w = w_new;
+          sum_x = w_new * x_new;
+          sum_y = w_new * y_new;
+          sumsq_w = pow(w_new, (long double)2.0);
+          
+        }
         
         if (center && (n_obs > 0)) {
           
@@ -3942,9 +4024,19 @@ struct RollCrossProdOnlineVecXX {
           n_obs += 1;
         }
         
-        sum_w = lambda * sum_w + w_new;
-        sum_x = lambda * sum_x + w_new * x_new;
-        // sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+        if (width > 1) {
+          
+          sum_w = lambda * sum_w + w_new;
+          sum_x = lambda * sum_x + w_new * x_new;
+          // sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+          
+        } else {
+          
+          sum_w = w_new;
+          sum_x = w_new * x_new;
+          // sumsq_w = pow(w_new, (long double)2.0);
+          
+        }
         
         if (center && (n_obs > 0)) {
           
@@ -4018,10 +4110,20 @@ struct RollCrossProdOnlineVecXX {
           
         }
         
-        sum_w = lambda * sum_w + w_new - lambda * w_old;
-        sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-        // sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
-        //   pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+        if (width > 1) {
+          
+          sum_w = lambda * sum_w + w_new - lambda * w_old;
+          sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+          // sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+          //   pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+          
+        } else {
+          
+          sum_w = w_new;
+          sum_x = w_new * x_new;
+          // sumsq_w = pow(w_new, (long double)2.0);
+          
+        }
         
         if (center && (n_obs > 0)) {
           
@@ -4201,10 +4303,21 @@ struct RollCrossProdOnlineVecXY {
           n_obs += 1;
         }
         
-        sum_w = lambda * sum_w + w_new;
-        sum_x = lambda * sum_x + w_new * x_new;
-        sum_y = lambda * sum_y + w_new * y_new;
-        // sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+        if (width > 1) {
+          
+          sum_w = lambda * sum_w + w_new;
+          sum_x = lambda * sum_x + w_new * x_new;
+          sum_y = lambda * sum_y + w_new * y_new;
+          // sumsq_w = pow(lambda, (long double)2.0) * sumsq_w + pow(w_new, (long double)2.0);
+          
+        } else {
+          
+          sum_w = w_new;
+          sum_x = w_new * x_new;
+          sum_y = w_new * y_new;
+          // sumsq_w = pow(w_new, (long double)2.0);
+          
+        }
         
         if (center && (n_obs > 0)) {
           
@@ -4288,11 +4401,22 @@ struct RollCrossProdOnlineVecXY {
           
         }
         
-        sum_w = lambda * sum_w + w_new - lambda * w_old;
-        sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-        sum_y = lambda * sum_y + w_new * y_new - lambda * w_old * y_old;
-        // sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
-        //   pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+        if (width > 1) {
+          
+          sum_w = lambda * sum_w + w_new - lambda * w_old;
+          sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+          sum_y = lambda * sum_y + w_new * y_new - lambda * w_old * y_old;
+          // sumsq_w = pow(lambda, (long double)2.0) * sumsq_w +
+          //   pow(w_new, (long double)2.0) - pow(lambda * w_old, (long double)2.0);
+          
+        } else {
+          
+          sum_w = w_new;
+          sum_x = w_new * x_new;
+          sum_y = w_new * y_new;
+          // sumsq_w = pow(w_new, (long double)2.0);
+          
+        }
         
         if (center && (n_obs > 0)) {
           
