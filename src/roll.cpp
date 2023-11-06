@@ -2040,11 +2040,11 @@ SEXP roll_crossprod_z(const SEXP& x, const SEXP& y,
       if (symmetric) {
         
         // y is null
-        roll::RollCrossProdOfflineMatXX roll_crossprd_offline(xx, n, n_rows_xy, n_cols_x, width,
-                                                              weights, center, scale, min_obs,
-                                                              arma_any_na, na_restore,
-                                                              arma_crossprod);
-        parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_crossprd_offline);
+        roll::RollCrossProdOfflineMatXX roll_crossprod_offline(xx, n, n_rows_xy, n_cols_x, width,
+                                                               weights, center, scale, min_obs,
+                                                               arma_any_na, na_restore,
+                                                               arma_crossprod);
+        parallelFor(0, n_rows_xy * n_cols_x * (n_cols_x + 1) / 2, roll_crossprod_offline);
         
       } else if (!symmetric) {
         
