@@ -14,7 +14,7 @@ test_that("equivalent to zoo::rollapply", {
   test_zoo_yy <- c(lapply(test_ls[-3], function(x){x[ , 4, drop = FALSE]}), # univariate 'y' for base::lm
                    list("random vector with 0's" = test_ls[[2]][ , 4]))
   
-  for (ax in 1:(length(test_zoo_x))) {
+  for (ax in 1:length(test_zoo_x)) {
     for (b in 1:length(test_width)) {
       
       width <- test_width[b]     
@@ -134,7 +134,7 @@ test_that("equivalent to zoo::rollapply", {
           }
         }
         
-        for (ay in 1:(length(test_zoo_y))) {
+        for (ay in 1:length(test_zoo_y)) {
           
           expect_equal(roll_cov(test_zoo_x[[ax]], test_zoo_y[[ay]],
                                 width, test_weights[[1]],
@@ -163,7 +163,7 @@ test_that("equivalent to zoo::rollapply", {
           
         }
         
-        for (ay in 1:(length(test_zoo_yy))) {
+        for (ay in 1:length(test_zoo_yy)) {
           for (g in 1:length(test_intercept)) {
             
             # "essentially perfect fit: summary may be unreliable"
