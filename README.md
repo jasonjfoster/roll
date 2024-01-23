@@ -1,8 +1,8 @@
 # roll <img src = "man/figures/logo.png" align = "right" width = "120">
 
-[![](https://github.com/jjf234/roll/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/jjf234/roll/actions/workflows/check-standard.yaml)
+[![](https://github.com/jasonjfoster/roll/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/jasonjfoster/roll/actions/workflows/check-standard.yaml)
 [![](https://www.r-pkg.org/badges/version/roll)](https://cran.r-project.org/package=roll)
-[![](https://codecov.io/gh/jjf234/roll/graph/badge.svg)](https://app.codecov.io/github/jjf234/roll)
+[![](https://codecov.io/gh/jasonjfoster/roll/graph/badge.svg)](https://app.codecov.io/github/jasonjfoster/roll)
 [![](https://cranlogs.r-pkg.org/badges/roll?color=brightgreen)](https://www.r-pkg.org/pkg/roll)
 
 ## Overview
@@ -25,7 +25,7 @@ Or the development version from GitHub:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("jjf234/roll")
+devtools::install_github("jasonjfoster/roll")
 ```
 
 ## Usage

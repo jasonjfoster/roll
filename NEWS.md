@@ -8,29 +8,29 @@
 
 ## Version 1.1.5
 
-* Added hex sticker and improved documentation ([#27](https://github.com/jjf234/roll/issues/27), [#28](https://github.com/jjf234/roll/issues/28), [#30](https://github.com/jjf234/roll/issues/30))
+* Added hex sticker and improved documentation ([#27](https://github.com/jasonjfoster/roll/issues/27), [#28](https://github.com/jasonjfoster/roll/issues/28), [#30](https://github.com/jasonjfoster/roll/issues/30))
 
 * New `roll_quantile` function for computing rolling and expanding quantiles of time-series data
 
     * Note: `roll_quantile` function is not calculated using an online algorithm
 
-* Fixed an issue in the `roll_min` and `roll_max` functions ([#32](https://github.com/jjf234/roll/issues/32))
+* Fixed an issue in the `roll_min` and `roll_max` functions ([#32](https://github.com/jasonjfoster/roll/issues/32))
 
 ## Version 1.1.4
 
-* Fixed issues related to floating point arithmetic ([#23](https://github.com/jjf234/roll/issues/23), [#24](https://github.com/jjf234/roll/issues/24))
+* Fixed issues related to floating point arithmetic ([#23](https://github.com/jasonjfoster/roll/issues/23), [#24](https://github.com/jasonjfoster/roll/issues/24))
 
 ## Version 1.1.3
 
-* Added vector support to each function ([#20](https://github.com/jjf234/roll/issues/20))
+* Added vector support to each function ([#20](https://github.com/jasonjfoster/roll/issues/20))
 
 * Implemented efficient algorithms for `roll_min` and `roll_max` functions
 
-* New `roll_idxmin` and `roll_idxmax` functions for computing rolling and expanding indices of minimums and maximums, respectively, of time-series data ([#22](https://github.com/jjf234/roll/issues/22))
+* New `roll_idxmin` and `roll_idxmax` functions for computing rolling and expanding indices of minimums and maximums, respectively, of time-series data ([#22](https://github.com/jasonjfoster/roll/issues/22))
 
 ## Version 1.1.2
 
-* New `roll_median`, `roll_min`, `roll_max`, `roll_any`, and `roll_all` functions for computing rolling and expanding medians, minimums, maximums, any, and all, respectively, of time-series data ([#4](https://github.com/jjf234/roll/issues/4), [#13](https://github.com/jjf234/roll/issues/13), [#14](https://github.com/jjf234/roll/issues/14))
+* New `roll_median`, `roll_min`, `roll_max`, `roll_any`, and `roll_all` functions for computing rolling and expanding medians, minimums, maximums, any, and all, respectively, of time-series data ([#4](https://github.com/jasonjfoster/roll/issues/4), [#13](https://github.com/jasonjfoster/roll/issues/13), [#14](https://github.com/jasonjfoster/roll/issues/14))
     
     * Note: `roll_median`, `roll_min`, and `roll_max` functions are not calculated using online algorithms
 
@@ -38,11 +38,11 @@
 
 * Added `online` argument to process observations using online algorithms by default
 
-* `roll_lm` function now returns standard errors ([#7](https://github.com/jjf234/roll/issues/7))
+* `roll_lm` function now returns standard errors ([#7](https://github.com/jasonjfoster/roll/issues/7))
 
-* Simplified checks for `width` and `min_obs` arguments ([#3](https://github.com/jjf234/roll/issues/3))
+* Simplified checks for `width` and `min_obs` arguments ([#3](https://github.com/jasonjfoster/roll/issues/3))
 
-* Added `y` argument to `roll_cov` and `roll_cor` functions ([#2](https://github.com/jjf234/roll/issues/2))
+* Added `y` argument to `roll_cov` and `roll_cor` functions ([#2](https://github.com/jasonjfoster/roll/issues/2))
 
 * Deprecated less common functions (`roll_eigen`, `roll_vif`, and `roll_pcr`) and arguments (`scale` and `center` in the `roll_lm` function); also removed the `parallel_for` argument in favor of a new approach used internally
 
@@ -56,7 +56,7 @@
 
 ## Version 1.0.5
 
-* Fixed an issue in the `src/Makevars` and `src/Makevars.win` files ([#1](https://github.com/jjf234/roll/issues/1))
+* Fixed an issue in the `src/Makevars` and `src/Makevars.win` files ([#1](https://github.com/jasonjfoster/roll/issues/1))
 
 ## Version 1.0.4
 
