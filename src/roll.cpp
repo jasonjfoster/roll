@@ -2377,7 +2377,7 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
     }
     
-    // compute rolling covariances
+    // compute rolling crossproducts
     if (status && online) {
       
       roll::RollCrossProdOnlineMatXX roll_cov_online(data, n, n_rows_xy, n_cols_x, width,
@@ -2475,7 +2475,7 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
       
     }
     
-    // compute rolling covariances
+    // compute rolling crossproducts
     if (status && online) {
       
       roll::RollCrossProdOnlineMatXX roll_cov_online(data, n, n_rows_xy, n_cols_x, width,
