@@ -1,7 +1,7 @@
 Package: roll
 Type: Package
 Title: Rolling and Expanding Statistics
-Version: 1.1.7
+Version: 1.1.8
 Date: YYYY-MM-DD
 Author: Jason Foster
 Maintainer: Jason Foster <jason.j.foster@gmail.com>
