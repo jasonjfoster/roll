@@ -4670,8 +4670,11 @@ struct RollCrossProdOnlineMatXX : public Worker {
                 if (scale) {
                   
                   // don't compute if the standard deviation is zero
-                  if ((sumsq_x < 0) || (sumsq_y < 0) ||
-                      (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
+                  if ((sumsq_x < 0) || (sumsq_y < 0)) {
+                    
+                    arma_cov(j, k, i) = NA_REAL;
+                    
+                  } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
                     
                     arma_cov(j, k, i) = NA_REAL;
                     
@@ -5007,8 +5010,11 @@ struct RollCrossProdOnlineMatXY : public Worker {
                 if (scale) {
                   
                   // don't compute if the standard deviation is zero
-                  if ((sumsq_x < 0) || (sumsq_y < 0) ||
-                      (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
+                  if ((sumsq_x < 0) || (sumsq_y < 0)) {
+                    
+                    arma_cov(j, k, i) = NA_REAL;
+                    
+                  } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
                     
                     arma_cov(j, k, i) = NA_REAL;
                     
@@ -5226,8 +5232,11 @@ struct RollCrossProdOfflineMatXX : public Worker {
             if (scale) {
               
               // don't compute if the standard deviation is zero
-              if ((sumsq_x < 0) || (sumsq_y < 0) ||
-                  (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
+              if ((sumsq_x < 0) || (sumsq_y < 0)) {
+                
+                arma_cov(j, k, i) = NA_REAL;
+                
+              } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
                 
                 arma_cov(j, k, i) = NA_REAL;
                 
@@ -5426,8 +5435,11 @@ struct RollCrossProdOfflineMatXY : public Worker {
             if (scale) {
               
               // don't compute if the standard deviation is zero
-              if ((sumsq_x < 0) || (sumsq_y < 0) ||
-                  (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
+              if ((sumsq_x < 0) || (sumsq_y < 0)) {
+                
+                arma_cov(j, k, i) = NA_REAL;
+                
+              } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
                 
                 arma_cov(j, k, i) = NA_REAL;
                 
