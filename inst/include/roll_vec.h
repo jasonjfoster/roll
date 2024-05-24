@@ -3261,8 +3261,10 @@ struct RollCovOnlineVecXX {
           
           if (scale) {
             
-            // don't compute if the standard deviation is zero
-            if ((sumsq_x < 0) || (sqrt(sumsq_x) <= sqrt(arma::datum::eps)))  {
+            // don't compute if negative or sqrt is zero
+            if (sumsq_x < 0) {
+              arma_cov[i] = NA_REAL;
+            } else if (sqrt(sumsq_x) <= sqrt(arma::datum::eps))  {
               arma_cov[i] = NA_REAL;
             } else {
               arma_cov[i] = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_x));
@@ -3572,12 +3574,11 @@ struct RollCovOnlineVecXY {
             
             if (scale) {
               
-              // don't compute if the standard deviation is zero
-              if ((sumsq_x < 0) || (sumsq_y < 0) ||
-                  (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
-                
+              // don't compute if negative or sqrt is zero
+              if ((sumsq_x < 0) || (sumsq_y < 0)) {
                 arma_cov[i] = NA_REAL;
-                
+              } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
+                arma_cov[i] = NA_REAL;
               } else {
                 arma_cov[i] = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
               }
@@ -3743,8 +3744,10 @@ struct RollCovOfflineVecXX : public Worker {
           
           if (scale) {
             
-            // don't compute if the standard deviation is zero
-            if ((sumsq_x < 0) || (sqrt(sumsq_x) <= sqrt(arma::datum::eps))) {
+            // don't compute if negative or sqrt is zero
+            if (sumsq_x < 0) {
+              arma_cov[i] = NA_REAL;             
+            } else if (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) {
               arma_cov[i] = NA_REAL;
             } else {
               arma_cov[i] = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_x));
@@ -3919,12 +3922,11 @@ struct RollCovOfflineVecXY : public Worker {
             
             if (scale) {
               
-              // don't compute if the standard deviation is zero
-              if ((sumsq_x < 0) || (sumsq_y < 0) ||
-                  (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
-                
+              // don't compute if negative or sqrt is zero
+              if ((sumsq_x < 0) || (sumsq_y < 0)) {
                 arma_cov[i] = NA_REAL;
-                
+              } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
+                arma_cov[i] = NA_REAL;
               } else {
                 arma_cov[i] = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
               }
@@ -4193,8 +4195,8 @@ struct RollCrossProdOnlineVecXX {
           
           if (scale) {
             
-            // don't compute if the standard deviation is zero
-            if ((sumsq_x < 0)) {
+            // don't compute if negative or sqrt is zero
+            if (sumsq_x < 0) {
               arma_cov[i] = NA_REAL;             
             } else if (sqrt(sumsq_x) <= sqrt(arma::datum::eps))  {
               arma_cov[i] = NA_REAL;
@@ -4507,15 +4509,11 @@ struct RollCrossProdOnlineVecXY {
             
             if (scale) {
               
-              // don't compute if the standard deviation is zero
+              // don't compute if negative or sqrt is zero
               if ((sumsq_x < 0) || (sumsq_y < 0)) {
-                
                 arma_cov[i] = NA_REAL;
-                
               } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
-                
                 arma_cov[i] = NA_REAL;
-                
               } else {
                 arma_cov[i] = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
               }
@@ -4682,7 +4680,7 @@ struct RollCrossProdOfflineVecXX : public Worker {
           
           if (scale) {
             
-            // don't compute if the standard deviation is zero
+            // don't compute if negative or sqrt is zero
             if ((sumsq_x < 0)) {
               arma_cov[i] = NA_REAL;             
             } else if (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) {
@@ -4861,15 +4859,11 @@ struct RollCrossProdOfflineVecXY : public Worker {
             
             if (scale) {
               
-              // don't compute if the standard deviation is zero
+              // don't compute if negative or sqrt is zero
               if ((sumsq_x < 0) || (sumsq_y < 0)) {
-                
                 arma_cov[i] = NA_REAL;
-                
               } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
-                
                 arma_cov[i] = NA_REAL;
-                
               } else {
                 arma_cov[i] = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
               }
