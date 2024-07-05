@@ -2059,6 +2059,7 @@ struct RollQuantileOfflineMat : public Worker {
       if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
         
         int k = 0;
+        int k_lower = 0;
         int count = 0;
         long double sum_w = 0;
         
@@ -2099,8 +2100,10 @@ struct RollQuantileOfflineMat : public Worker {
         
         count = 0;
         int n_obs = 0;
-        int idxquantile_x = 0;
-        bool status = false;
+        int idxquantile1_x = 0;
+        int idxquantile2_x = 0;
+        bool status1 = false;
+        bool status2 = false;
         long double sum_upper_w = 0;
         long double sum_upper_w_temp = 0;
         
@@ -2118,11 +2121,12 @@ struct RollQuantileOfflineMat : public Worker {
             
             // last element of sorted array that is 'p' of 'weights'
             // note: 'weights' must be greater than 0
-            if (!status && (sum_upper_w / sum_w >= p)) {
+            if (!status1 && (sum_upper_w / sum_w >= p)) {
               
-              status = true;
-              idxquantile_x = n_size_x - count - 1;
+              status1 = true;
+              idxquantile1_x = n_size_x - count - 1;
               sum_upper_w_temp = sum_upper_w;
+              idxquantile2_x = idxquantile1_x;
               
             }
             
@@ -2130,19 +2134,37 @@ struct RollQuantileOfflineMat : public Worker {
             
           }
           
+          k_lower = sort_ix[std::max(0, n_size_x - count - 2)];
+          
+          if ((arma_any_na_subset[k_lower] == 0) && !std::isnan(x_subset[k_lower])) {
+            
+            if (status1 && !status2) {
+              
+              status2 = true;
+              idxquantile2_x = n_size_x - count - 1;
+              
+            }
+            
+          }
+          
           count += 1;
           
         }
         
-        if ((n_obs >= min_obs)) {
+        if (n_obs >= min_obs) {
           
-          k = sort_ix[idxquantile_x];
+          k = sort_ix[idxquantile1_x];
           
           // average if upper and lower weight is equal
           if (std::fabs(sum_upper_w_temp / sum_w - p) <= sqrt(arma::datum::eps)) {
             
-            int k_lower = sort_ix[idxquantile_x - 1];
-            rcpp_quantile(i, j) = (x_subset[k] + x_subset[k_lower]) / 2;
+            k_lower = sort_ix[std::max(0, idxquantile2_x - 1)];
+            
+            if ((arma_any_na_subset[k_lower] == 0) && !std::isnan(x_subset[k_lower])) {
+              rcpp_quantile(i, j) = (x_subset[k] + x_subset[k_lower]) / 2;
+            } else {
+              rcpp_quantile(i, j) = x_subset[k];
+            }
             
           } else {
             rcpp_quantile(i, j) = x_subset[k];
