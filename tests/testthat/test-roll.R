@@ -18,6 +18,7 @@ test_that("equal to online algorithm", {
     for (b in 1:length(test_width)) {
       
       width <- test_width[b]
+      # test_weights <- list(rep(1, width))
       test_weights <- list(lambda ^ ((2 * width):1))
       # test_weights <- list(rep(1, width), lambda ^ (width:1), 1:width,
       #                      rep(1, 2 * width), lambda ^ ((2 * width):1), 1:(width * 2))
@@ -107,25 +108,25 @@ test_that("equal to online algorithm", {
                                        test_complete_obs[d], test_na_restore[e],
                                        test_online[2]))
 
-              # "'online' is not supported"
+              # "'online' is only supported for equal 'weights'"
               expect_equal(roll_median(test_roll_x[[ax]], width,
-                                       test_weights[[f]], test_min_obs[c],
+                                       rep(1, width), test_min_obs[c],
                                        test_complete_obs[d], test_na_restore[e],
                                        test_online[1]),
                            roll_median(test_roll_x[[ax]], width,
-                                       test_weights[[f]], test_min_obs[c],
+                                       rep(1, width), test_min_obs[c],
                                        test_complete_obs[d], test_na_restore[e],
                                        test_online[2]))
               
               for (g in 1:length(test_p)) {
                 
-                # "'online' is not supported"
+                # "'online' is only supported for equal 'weights'"
                 expect_equal(roll_quantile(test_roll_x[[ax]],  width,
-                                           test_weights[[f]], test_p[[g]],
+                                           rep(1, width), test_p[[g]],
                                            test_min_obs[c], test_complete_obs[d],
                                            test_na_restore[e], test_online[1]),
                              roll_quantile(test_roll_x[[ax]], width,
-                                           test_weights[[f]], test_p[[g]],
+                                           rep(1, width), test_p[[g]],
                                            test_min_obs[c], test_complete_obs[d],
                                            test_na_restore[e], test_online[2]))
                 

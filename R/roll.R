@@ -433,12 +433,14 @@ roll_idxmax <- function(x, width, weights = rep(1, width),
 ##' # expanding medians with partial windows
 ##' roll_median(x, width = n, min_obs = 1)
 ##' 
+##' \dontrun{
 ##' # expanding medians with partial windows and weights
 ##' roll_median(x, width = n, min_obs = 1, weights = weights)
+##' }
 ##' @export
 roll_median <- function(x, width, weights = rep(1, width),
                         min_obs = width, complete_obs = FALSE, na_restore = FALSE,
-                        online = FALSE) {
+                        online = TRUE) {
   return(.Call(`_roll_roll_quantile`,
                x,
                as.integer(width),
@@ -485,12 +487,14 @@ roll_median <- function(x, width, weights = rep(1, width),
 ##' # expanding quantiles with partial windows
 ##' roll_quantile(x, width = n, min_obs = 1)
 ##' 
+##' \dontrun{
 ##' # expanding quantiles with partial windows and weights
 ##' roll_quantile(x, width = n, min_obs = 1, weights = weights)
+##' }
 ##' @export
 roll_quantile <- function(x, width, weights = rep(1, width), p = 0.5,
                           min_obs = width, complete_obs = FALSE, na_restore = FALSE,
-                          online = FALSE) {
+                          online = TRUE) {
   return(.Call(`_roll_roll_quantile`,
                x,
                as.integer(width),

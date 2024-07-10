@@ -83,7 +83,6 @@ test_that("equivalent to zoo::rollapply", {
                      zoo::rollapplyr(test_zoo_x[[ax]], width = width,
                                      which.max, partial = TRUE))
 
-        # "'online' is not supported"
         expect_equal(roll_median(test_zoo_x[[ax]], width,
                                  test_weights[[1]], test_min_obs[1],
                                  test_complete_obs[2], test_na_restore[2],
@@ -92,8 +91,7 @@ test_that("equivalent to zoo::rollapply", {
                                      median, partial = TRUE))
 
         for (g in 1:length(test_p)) {
-
-          # "'online' is not supported"
+          
           expect_equal(roll_quantile(test_zoo_x[[ax]], width,
                                      test_weights[[1]], test_p[[g]],
                                      test_min_obs[1], test_complete_obs[2],

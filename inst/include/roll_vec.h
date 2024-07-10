@@ -1835,6 +1835,197 @@ struct RollIdxMaxOfflineVec : public Worker {
   
 };
 
+// 'Worker' function for computing the rolling statistic using an online algorithm
+struct RollQuantileOnlineVec {
+  
+  const RVector<double> x;      // source
+  const int n;
+  const int n_rows_x;
+  const int width;
+  const arma::vec arma_weights;
+  const double p;
+  const int min_obs;
+  const bool na_restore;
+  RVector<double> rcpp_quantile;// destination (pass by reference)
+  
+  // initialize with source and destination
+  RollQuantileOnlineVec(const NumericVector x, const int n,
+                        const int n_rows_x, const int width,
+                        const arma::vec arma_weights, const double p,
+                        const int min_obs, const bool na_restore,
+                        NumericVector rcpp_quantile)
+    : x(x), n(n),
+      n_rows_x(n_rows_x), width(width),
+      arma_weights(arma_weights), p(p),
+      min_obs(min_obs), na_restore(na_restore),
+      rcpp_quantile(rcpp_quantile) { }
+  
+  // function call operator that iterates by index
+  void operator()() {
+    
+    int n_obs = 0;
+    long double w_new = 0;
+    long double w_old = 0;
+    long double x_new = 0;
+    long double x_old = 0;
+    long double sum_w = 0;
+    long double sum_lower_w = 0;
+    long double sum_upper_w = 0;
+    std::multiset<std::tuple<long double, long double, int>> mset_lower;
+    std::multiset<std::tuple<long double, long double, int>> mset_upper;
+    
+    for (int i = 0; i < n_rows_x; i++) {
+      
+      // expanding window
+      if (i < width) {
+        
+        // don't include if missing value and 'any_na' argument is 1
+        // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+        if (!std::isnan(x[i])) {
+          n_obs += 1;
+        }
+        
+        // rolling window
+      } else {
+        
+        if (!std::isnan(x[i]) && std::isnan(x[i - width])) {
+          
+          n_obs += 1;
+          
+        } else if (std::isnan(x[i]) && !std::isnan(x[i - width])) {
+          
+          n_obs -= 1;
+          
+        }
+        
+      }
+      
+      if (width > 1) {
+        
+        if (!std::isnan(x[i])) {
+          
+          w_new = arma_weights[n - 1];
+          x_new = x[i];
+          
+          std::tuple<long double, long double, int> tpl_new = std::make_tuple(x_new, w_new, i);
+          
+          sum_w += w_new;
+          
+          if (mset_lower.empty() || (x_new <= std::get<0>(*mset_lower.rbegin()))) {
+            
+            mset_lower.insert(tpl_new);
+            sum_lower_w += w_new;
+            
+          } else {
+            
+            mset_upper.insert(tpl_new);
+            sum_upper_w += w_new;
+            
+          }
+          
+          while (sum_lower_w / sum_w > p) {
+            
+            mset_upper.insert(*mset_lower.rbegin());
+            sum_upper_w += std::get<1>(*mset_lower.rbegin());
+            sum_lower_w -= std::get<1>(*mset_lower.rbegin());
+            mset_lower.erase(*mset_lower.rbegin());
+            
+          }
+          
+          while (sum_lower_w / sum_w < p) {
+            
+            mset_lower.insert(*mset_upper.begin());
+            sum_lower_w += std::get<1>(*mset_upper.begin());
+            sum_upper_w -= std::get<1>(*mset_upper.begin());
+            mset_upper.erase(*mset_upper.begin());
+            
+          }
+          
+        }
+        
+        // rolling window
+        if (i >= width) {
+          
+          if (!std::isnan(x[i - width])) {
+            
+            w_old = arma_weights[n - width];
+            x_old = x[i - width];
+            
+            std::tuple<long double, long double, int> tpl_old = std::make_tuple(x_old, w_old, i - width);
+            
+            sum_w -= w_old;
+            
+            if (!mset_lower.empty() && (x_old <= std::get<0>(*mset_lower.rbegin()))) {
+              
+              mset_lower.erase(mset_lower.find(tpl_old));
+              sum_lower_w -= w_old;
+              
+            } else {
+              
+              mset_upper.erase(mset_upper.find(tpl_old));
+              sum_upper_w -= w_old;
+              
+            }
+            
+            while (sum_lower_w / sum_w > p) {
+              
+              mset_upper.insert(*mset_lower.rbegin());
+              sum_upper_w += std::get<1>(*mset_lower.rbegin());
+              sum_lower_w -= std::get<1>(*mset_lower.rbegin());
+              mset_lower.erase(*mset_lower.rbegin());
+              
+            }
+            
+            while (sum_lower_w / sum_w < p) {
+              
+              mset_lower.insert(*mset_upper.begin());
+              sum_lower_w += std::get<1>(*mset_upper.begin());
+              sum_upper_w -= std::get<1>(*mset_upper.begin());
+              mset_upper.erase(*mset_upper.begin());
+              
+            }
+            
+          }
+          
+        }
+        
+        // don't compute if missing value and 'na_restore' argument is TRUE
+        if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+          
+          if (n_obs >= min_obs) {
+            
+            if (p == 0) {
+              rcpp_quantile[i] = std::get<0>(*mset_upper.begin());
+            } else if (p == 1) {
+              rcpp_quantile[i] = std::get<0>(*mset_lower.rbegin());
+            } else if (std::fabs(sum_lower_w / sum_w - p) <= sqrt(arma::datum::eps)) {
+              rcpp_quantile[i] = (std::get<0>(*mset_lower.rbegin()) + std::get<0>(*mset_upper.begin())) / 2;
+            } else {
+              rcpp_quantile[i] = std::get<0>(*mset_lower.rbegin());
+            }
+            
+          } else {
+            rcpp_quantile[i] = NA_REAL;
+          }
+          
+        } else {
+          
+          // can be either NA or NaN
+          rcpp_quantile[i] = x[i];
+          
+        }
+        
+      } else if (n_obs >= min_obs) {
+        rcpp_quantile[i] = x[i];
+      } else {
+        rcpp_quantile[i] = NA_REAL;
+      }
+      
+    }
+  }
+  
+};
+
 // 'Worker' function for computing the rolling statistic using an offline algorithm
 struct RollQuantileOfflineVec : public Worker {
   

@@ -6,7 +6,7 @@
 \usage{
 roll_quantile(x, width, weights = rep(1, width), p = 0.5,
   min_obs = width, complete_obs = FALSE, na_restore = FALSE,
-  online = FALSE)
+  online = TRUE)
 }
 \arguments{
 \item{x}{vector or matrix. Rows are observations and columns are variables.}
@@ -52,8 +52,10 @@ roll_quantile(x, width = 5, min_obs = 1)
 # expanding quantiles with partial windows
 roll_quantile(x, width = n, min_obs = 1)
 
+\dontrun{
 # expanding quantiles with partial windows and weights
 roll_quantile(x, width = n, min_obs = 1, weights = weights)
+}
 }
 \references{
 Hyndman, R.J. and Fan, Y. (1996). "Sample quantiles in statistical packages."

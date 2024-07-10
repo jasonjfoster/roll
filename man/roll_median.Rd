@@ -5,7 +5,7 @@
 \title{Rolling Medians}
 \usage{
 roll_median(x, width, weights = rep(1, width), min_obs = width,
-  complete_obs = FALSE, na_restore = FALSE, online = FALSE)
+  complete_obs = FALSE, na_restore = FALSE, online = TRUE)
 }
 \arguments{
 \item{x}{vector or matrix. Rows are observations and columns are variables.}
@@ -45,6 +45,8 @@ roll_median(x, width = 5, min_obs = 1)
 # expanding medians with partial windows
 roll_median(x, width = n, min_obs = 1)
 
+\dontrun{
 # expanding medians with partial windows and weights
 roll_median(x, width = n, min_obs = 1, weights = weights)
+}
 }

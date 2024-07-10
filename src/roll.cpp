@@ -1104,12 +1104,15 @@ SEXP roll_quantile(const SEXP& x, const int& width,
         
       } else {
         
-        warning("'online' is not supported");
-        roll::RollQuantileOfflineMat roll_quantile_offline(xx, n, n_rows_x, n_cols_x, width,
-                                                           weights, 1 - p, min_obs,
-                                                           arma_any_na, na_restore,
-                                                           rcpp_quantile);
-        parallelFor(0, n_rows_x * n_cols_x, roll_quantile_offline);
+        if (any(weights != weights[0])) {
+          stop("'online' is only supported for equal 'weights'");
+        }
+        
+        roll::RollQuantileOnlineMat roll_quantile_online(xx, n, n_rows_x, n_cols_x, width,
+                                                         weights, p, min_obs,
+                                                         arma_any_na, na_restore,
+                                                         rcpp_quantile);
+        parallelFor(0, n_cols_x, roll_quantile_online);
         
       }
       
@@ -1198,12 +1201,15 @@ SEXP roll_quantile(const SEXP& x, const int& width,
         
       } else {
         
-        warning("'online' is not supported"); 
-        roll::RollQuantileOfflineVec roll_quantile_offline(xx, n, n_rows_x, width,
-                                                           weights, 1 - p, min_obs,
-                                                           na_restore,
-                                                           rcpp_quantile);
-        parallelFor(0, n_rows_x, roll_quantile_offline);
+        if (any(weights != weights[0])) {
+          stop("'online' is only supported for equal 'weights'");
+        }
+        
+        roll::RollQuantileOnlineVec roll_quantile_online(xx, n, n_rows_x, width,
+                                                         weights, p, min_obs,
+                                                         na_restore,
+                                                         rcpp_quantile);
+        roll_quantile_online();
         
       }
       
