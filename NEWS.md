@@ -1,5 +1,9 @@
 # roll
 
+## Version 1.1.8
+
+* Implemented efficient algorithms for `roll_median` and `roll_quantile` functions
+
 ## Version 1.1.7
 
 * New `roll_crossprod` function for computing rolling and expanding crossproducts of time-series data

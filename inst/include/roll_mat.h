@@ -2052,6 +2052,7 @@ struct RollQuantileOnlineMat : public Worker {
     for (std::size_t j = begin_col; j < end_col; j++) {
       
       int n_obs = 0;
+      long double lambda = 0;
       long double w_new = 0;
       long double w_old = 0;
       long double x_new = 0;
@@ -2059,10 +2060,36 @@ struct RollQuantileOnlineMat : public Worker {
       long double sum_w = 0;
       long double sum_lower_w = 0;
       long double sum_upper_w = 0;
-      std::multiset<std::tuple<long double, long double, int>> mset_lower;
-      std::multiset<std::tuple<long double, long double, int>> mset_upper;
+      std::multiset<std::tuple<long double, int>> mset_lower;
+      std::multiset<std::tuple<long double, int>> mset_upper;
+      
+      // int count = 0; // uncomment if exponential-weights
+      int offset = 0;
+      int n_size_x = 0;
+      bool status = false;
       
       for (int i = 0; i < n_rows_x; i++) {
+        
+        // // uncomment if exponential-weights
+        // sum_w = 0;
+        // count = 0;
+        //
+        // // number of observations is either the window size or,
+        // // for partial results, the number of the current row
+        // while ((width > count) && (i >= count)) {
+        //   
+        //   // don't include if missing value and 'any_na' argument is 1
+        //   // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+        //   if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j))) {
+        //     
+        //     // compute the sum
+        //     sum_w += arma_weights[n - count - 1];
+        //     
+        //   }
+        //   
+        //   count += 1;
+        //   
+        // }
         
         // expanding window
         if (i < width) {
@@ -2092,14 +2119,18 @@ struct RollQuantileOnlineMat : public Worker {
         
         if (width > 1) {
           
+          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+          sum_lower_w = lambda * sum_lower_w;
+          sum_upper_w = lambda * sum_upper_w;
+          
           if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
             
             w_new = arma_weights[n - 1];
             x_new = x(i, j);
             
-            std::tuple<long double, long double, int> tpl_new = std::make_tuple(x_new, w_new, i);
+            std::tuple<long double, int> tpl_new = std::make_tuple(x_new, i);
             
-            sum_w += w_new;
+            sum_w += lambda * w_new; // comment if exponential-weights
             
             if (mset_lower.empty() || (x_new <= std::get<0>(*mset_lower.rbegin()))) {
               
@@ -2113,21 +2144,43 @@ struct RollQuantileOnlineMat : public Worker {
               
             }
             
-            while (sum_lower_w / sum_w > p) {
+            status = false;
+            
+            while (!status && (sum_lower_w / sum_w > p)) {
               
-              mset_upper.insert(*mset_lower.rbegin());
-              sum_upper_w += std::get<1>(*mset_lower.rbegin());
-              sum_lower_w -= std::get<1>(*mset_lower.rbegin());
-              mset_lower.erase(*mset_lower.rbegin());
+              offset = std::get<1>(*mset_lower.rbegin());
+              n_size_x = i - offset;
+              
+              if (n - n_size_x > 0) {
+                
+                mset_upper.insert(*mset_lower.rbegin());
+                sum_upper_w += arma_weights[std::max(0, n - n_size_x - 1)];
+                sum_lower_w -= arma_weights[std::max(0, n - n_size_x - 1)];
+                mset_lower.erase(*mset_lower.rbegin());
+                
+              } else {
+                status = true;
+              }
               
             }
             
-            while (sum_lower_w / sum_w < p) {
+            status = false;
+            
+            while (!status && !mset_upper.empty() && (sum_lower_w / sum_w < p)) {
               
-              mset_lower.insert(*mset_upper.begin());
-              sum_lower_w += std::get<1>(*mset_upper.begin());
-              sum_upper_w -= std::get<1>(*mset_upper.begin());
-              mset_upper.erase(*mset_upper.begin());
+              offset = std::get<1>(*mset_upper.begin());
+              n_size_x = i - offset;
+              
+              if (n - n_size_x > 0) {
+                
+                mset_lower.insert(*mset_upper.begin());
+                sum_lower_w += arma_weights[std::max(0, n - n_size_x - 1)];
+                sum_upper_w -= arma_weights[std::max(0, n - n_size_x - 1)];
+                mset_upper.erase(*mset_upper.begin());
+                
+              } else {
+                status = true;
+              }
               
             }
             
@@ -2141,37 +2194,59 @@ struct RollQuantileOnlineMat : public Worker {
               w_old = arma_weights[n - width];
               x_old = x(i - width, j);
               
-              std::tuple<long double, long double, int> tpl_old = std::make_tuple(x_old, w_old, i - width);
+              std::tuple<long double, int> tpl_old = std::make_tuple(x_old, i - width);
               
-              sum_w -= w_old;
+              sum_w -= lambda * w_old; // comment if exponential-weights
               
               if (!mset_lower.empty() && (x_old <= std::get<0>(*mset_lower.rbegin()))) {
                 
                 mset_lower.erase(mset_lower.find(tpl_old));
-                sum_lower_w -= w_old;
+                sum_lower_w -= lambda * w_old;
                 
               } else {
                 
                 mset_upper.erase(mset_upper.find(tpl_old));
-                sum_upper_w -= w_old;
+                sum_upper_w -= lambda * w_old;
                 
               }
               
-              while (sum_lower_w / sum_w > p) {
+              status = false;
+              
+              while (!status && (sum_lower_w / sum_w > p)) {
                 
-                mset_upper.insert(*mset_lower.rbegin());
-                sum_upper_w += std::get<1>(*mset_lower.rbegin());
-                sum_lower_w -= std::get<1>(*mset_lower.rbegin());
-                mset_lower.erase(*mset_lower.rbegin());
+                offset = std::get<1>(*mset_lower.rbegin());
+                n_size_x = i - offset;
+                
+                if (n - n_size_x > 0) {
+                  
+                  mset_upper.insert(*mset_lower.rbegin());
+                  sum_upper_w += arma_weights[std::max(0, n - n_size_x - 1)];
+                  sum_lower_w -= arma_weights[std::max(0, n - n_size_x - 1)];
+                  mset_lower.erase(*mset_lower.rbegin());
+                  
+                } else {
+                  status = true;
+                }
                 
               }
               
-              while (sum_lower_w / sum_w < p) {
+              status = false;
+              
+              while (!status && !mset_upper.empty() && (sum_lower_w / sum_w < p)) {
                 
-                mset_lower.insert(*mset_upper.begin());
-                sum_lower_w += std::get<1>(*mset_upper.begin());
-                sum_upper_w -= std::get<1>(*mset_upper.begin());
-                mset_upper.erase(*mset_upper.begin());
+                offset = std::get<1>(*mset_upper.begin());
+                n_size_x = i - offset;
+                
+                if (n - n_size_x > 0) {
+                  
+                  mset_lower.insert(*mset_upper.begin());
+                  sum_lower_w += arma_weights[std::max(0, n - n_size_x - 1)];
+                  sum_upper_w -= arma_weights[std::max(0, n - n_size_x - 1)];
+                  mset_upper.erase(*mset_upper.begin());
+                  
+                } else {
+                  status = true;
+                }
                 
               }
               
