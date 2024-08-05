@@ -1242,7 +1242,7 @@ struct RollMinOnlineMat : public Worker {
             
           }
           
-          while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+          while (!deck.empty() && (deck.front() <= i - width)) {
             deck.pop_front();
           }
           
@@ -1457,7 +1457,7 @@ struct RollMaxOnlineMat : public Worker {
             
           }
           
-          while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+          while (!deck.empty() && (deck.front() <= i - width)) {
             deck.pop_front();
           }
           
@@ -1672,7 +1672,7 @@ struct RollIdxMinOnlineMat : public Worker {
             
           }
           
-          while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+          while (!deck.empty() && (deck.front() <= i - width)) {
             deck.pop_front();
           }
           
@@ -1893,7 +1893,7 @@ struct RollIdxMaxOnlineMat : public Worker {
             
           }
           
-          while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+          while (!deck.empty() && (deck.front() <= i - width)) {
             deck.pop_front();
           }
           

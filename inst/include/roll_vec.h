@@ -1144,7 +1144,7 @@ struct RollMinOnlineVec {
           
         }
         
-        while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+        while (!deck.empty() && (deck.front() <= i - width)) {
           deck.pop_front();
         }
         
@@ -1334,7 +1334,7 @@ struct RollMaxOnlineVec {
           
         }
         
-        while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+        while (!deck.empty() && (deck.front() <= i - width)) {
           deck.pop_front();
         }
         
@@ -1524,7 +1524,7 @@ struct RollIdxMinOnlineVec {
           
         }
         
-        while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+        while (!deck.empty() && (deck.front() <= i - width)) {
           deck.pop_front();
         }
         
@@ -1720,7 +1720,7 @@ struct RollIdxMaxOnlineVec {
           
         }
         
-        while (!deck.empty() && (n_obs > 0) && (deck.front() <= i - width)) {
+        while (!deck.empty() && (deck.front() <= i - width)) {
           deck.pop_front();
         }
         
