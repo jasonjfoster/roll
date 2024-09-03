@@ -8,6 +8,10 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
+void update_n_obs(int& n_obs, const  bool& is_na,
+                   const bool& is_na_old, const int& i,
+                   const int& width);
+
 arma::ivec stl_sort_index(arma::vec& x);
 
 namespace roll {
@@ -20,97 +24,65 @@ struct RollAnyOnlineMat : public Worker {
   const int n_cols_x;
   const int width;
   const int min_obs;
-  const RVector<int> rcpp_any_na;
+  const arma::uvec arma_any_na;
   const bool na_restore;
   RMatrix<int> rcpp_any;        // destination (pass by reference)
   
   // initialize with source and destination
   RollAnyOnlineMat(const IntegerMatrix x, const int n_rows_x,
                    const int n_cols_x, const int width,
-                   const int min_obs, const IntegerVector rcpp_any_na,
+                   const int min_obs, const arma::uvec arma_any_na,
                    const bool na_restore, IntegerMatrix rcpp_any)
     : x(x), n_rows_x(n_rows_x),
       n_cols_x(n_cols_x), width(width),
-      min_obs(min_obs), rcpp_any_na(rcpp_any_na),
+      min_obs(min_obs), arma_any_na(arma_any_na),
       na_restore(na_restore), rcpp_any(rcpp_any) { }
   
   // function call operator that iterates by column
   void operator()(std::size_t begin_col, std::size_t end_col) {
     for (std::size_t j = begin_col; j < end_col; j++) {
       
-      int count = 0;
+      bool is_na = false;
+      bool is_na_old = false;
       int n_obs = 0;
-      int x_new = 0;
-      int x_old = 0;
       int sum_x = 0;
       
       for (int i = 0; i < n_rows_x; i++) {
         
-        if ((rcpp_any_na[i] != 0) || (x(i, j) == NA_INTEGER) || (x(i, j) == 0)) {
-          
-          x_new = 0;
-          
-        } else {
-          
-          x_new = 1;
-          
+        is_na = (arma_any_na[i] != 0) || (x(i, j) == NA_INTEGER);
+        
+        if (i >= width) {
+          is_na_old = (arma_any_na[i - width] != 0) || (x(i - width, j) == NA_INTEGER);
         }
         
-        // expanding window
-        if (i < width) {
+        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        
+        if (!is_na) {
           
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((rcpp_any_na[i] == 0) && (x(i, j) != NA_INTEGER)) {
-            n_obs += 1;
+          // compute the sum
+          if (x(i, j) != 0) {
+            sum_x += 1;
           }
-          
-          sum_x = sum_x + x_new;
-          
-          count += 1;
           
         }
         
         // rolling window
         if (i >= width) {
-          
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((rcpp_any_na[i] == 0) && (x(i, j) != NA_INTEGER) &&
-              ((rcpp_any_na[i - width] != 0) || (x(i - width, j) == NA_INTEGER))) {
-            
-            n_obs += 1;
-            
-          } else if (((rcpp_any_na[i] != 0) || (x(i, j) == NA_INTEGER)) &&
-            (rcpp_any_na[i - width] == 0) && (x(i - width, j) != NA_INTEGER)) {
-            
-            n_obs -= 1;
-            
+          if (!is_na_old) {
+            if (x(i - width, j) != 0) {
+              sum_x -= 1;
+            }
           }
-          
-          if ((rcpp_any_na[i - width] != 0) || (x(i - width, j) == NA_INTEGER) ||
-              (x(i - width, j) == 0)) {
-            
-            x_old = 0;
-            
-          } else {
-            
-            x_old = 1;
-            
-          }
-          
-          sum_x = sum_x + x_new - x_old;
-          
         }
         
         // don't compute if missing value and 'na_restore' argument is TRUE
-        if ((!na_restore) || (na_restore && (x(i, j) != NA_INTEGER))) {
+        if (!na_restore || (x(i, j) != NA_INTEGER)) {
           
           if (n_obs >= min_obs) {
             
             if (sum_x > 0) {
               rcpp_any(i, j) = 1;
-            } else if (n_obs == count) {
+            } else if ((i >= width && n_obs == width) || (i < width && n_obs == i + 1)) {
               rcpp_any(i, j) = 0;
             } else {
               rcpp_any(i, j) = NA_INTEGER;
@@ -142,18 +114,18 @@ struct RollAnyOfflineMat : public Worker {
   const int n_cols_x;
   const int width;
   const int min_obs;
-  const RVector<int> rcpp_any_na;
+  const arma::uvec arma_any_na;
   const bool na_restore;
   RMatrix<int> rcpp_any;        // destination (pass by reference)
   
   // initialize with source and destination
   RollAnyOfflineMat(const IntegerMatrix x, const int n_rows_x,
                     const int n_cols_x, const int width,
-                    const int min_obs, const IntegerVector rcpp_any_na,
+                    const int min_obs, const arma::uvec arma_any_na,
                     const bool na_restore, IntegerMatrix rcpp_any)
     : x(x), n_rows_x(n_rows_x),
       n_cols_x(n_cols_x), width(width),
-      min_obs(min_obs), rcpp_any_na(rcpp_any_na),
+      min_obs(min_obs), arma_any_na(arma_any_na),
       na_restore(na_restore), rcpp_any(rcpp_any) { }
   
   // function call operator that iterates by index
@@ -164,31 +136,30 @@ struct RollAnyOfflineMat : public Worker {
       int i = z / n_cols_x;
       int j = z % n_cols_x;
       
-      int count = 0;
       int n_obs = 0;
       int sum_x = 0;
       
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && (x(i, j) != NA_INTEGER))) {
+      if (!na_restore || (x(i, j) != NA_INTEGER)) {
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (i >= count)) {
+        for (int k = 0; width > k && i >= k; k++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((rcpp_any_na[i - count] == 0) && (x(i - count, j) != NA_INTEGER)) {
+          bool is_na = (arma_any_na[i - k] != 0) || (x(i - k, j) == NA_INTEGER);
+          
+          if (!is_na) {
             
             // compute the sum
-            if (x(i - count, j) == 1) {
-              sum_x = 1;
+            if (x(i - k, j) == 1) {
+              sum_x += 1;
             }
             
             n_obs += 1;
             
           }
-          
-          count += 1;
           
         }
         
@@ -196,7 +167,7 @@ struct RollAnyOfflineMat : public Worker {
           
           if (sum_x > 0) {
             rcpp_any(i, j) = 1;
-          } else if (n_obs == count) {
+          } else if ((i >= width && n_obs == width) || (i < width && n_obs == i + 1)) {
             rcpp_any(i, j) = 0;
           } else {
             rcpp_any(i, j) = NA_INTEGER;

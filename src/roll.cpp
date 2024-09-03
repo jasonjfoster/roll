@@ -126,6 +126,32 @@ void check_lm(const int& n_rows_x, const int& n_rows_y) {
   
 }
 
+void update_n_obs(int& n_obs, const  bool& is_na,
+                  const bool& is_na_old, const int& i,
+                  const int& width) {
+  
+  // expanding window
+  if (i < width) {
+    
+    // don't include if missing value and 'any_na' argument is 1
+    // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+    if (!is_na) {
+      n_obs += 1;
+    }
+    
+    // rolling window
+  } else {
+    
+    if (!is_na && is_na_old) {
+      n_obs += 1;
+    } else if (is_na && !is_na_old) {
+      n_obs -= 1;
+    }
+    
+  }
+  
+}
+
 List dimnames_lm_x(const List& input, const int& n_cols_x,
                    const bool& intercept) {
   
@@ -202,6 +228,32 @@ IntegerVector any_na_i(const IntegerMatrix& x) {
   int n_rows_x = x.nrow();
   int n_cols_x = x.ncol();
   IntegerVector result(n_rows_x);
+  
+  for (int i = 0; i < n_rows_x; i++) {
+    
+    int any_na = 0;
+    int j = 0;
+    
+    while ((any_na == 0) && (j < n_cols_x)) {
+      if (x(i, j) == NA_INTEGER) {
+        any_na = 1;
+      }
+      j += 1;
+    }
+    
+    result[i] = any_na;
+    
+  }
+  
+  return result;
+  
+}
+
+arma::uvec any_na_i_NEW(const IntegerMatrix& x) {
+  
+  int n_rows_x = x.nrow();
+  int n_cols_x = x.ncol();
+  arma::uvec result(n_rows_x);
   
   for (int i = 0; i < n_rows_x; i++) {
     
@@ -309,11 +361,10 @@ SEXP roll_any(const SEXP& x, const int& width,
   
   if (Rf_isMatrix(x)) {
     
-    LogicalMatrix xx(x);
+    IntegerMatrix xx(x); // RMatrix<bool> is not supported
     int n_rows_x = xx.nrow();
     int n_cols_x = xx.ncol();
-    IntegerVector rcpp_any_na(n_rows_x);
-    IntegerMatrix rcpp_x(xx);
+    arma::uvec arma_any_na(n_rows_x);
     IntegerMatrix rcpp_any(n_rows_x, n_cols_x);
     
     // check 'width' argument for errors
@@ -326,21 +377,23 @@ SEXP roll_any(const SEXP& x, const int& width,
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
     if (complete_obs) {
-      rcpp_any_na = any_na_i(rcpp_x);
+      arma_any_na = any_na_i_NEW(x);
+    } else {
+      arma_any_na.fill(0);
     }
     
     // compute rolling any
     if (online) {
       
-      roll::RollAnyOnlineMat roll_any_online(rcpp_x, n_rows_x, n_cols_x, width,
-                                             min_obs, rcpp_any_na, na_restore,
+      roll::RollAnyOnlineMat roll_any_online(xx, n_rows_x, n_cols_x, width,
+                                             min_obs, arma_any_na, na_restore,
                                              rcpp_any);
       parallelFor(0, n_cols_x, roll_any_online);
       
     } else {
       
-      roll::RollAnyOfflineMat roll_any_offline(rcpp_x, n_rows_x, n_cols_x, width,
-                                               min_obs, rcpp_any_na, na_restore,
+      roll::RollAnyOfflineMat roll_any_offline(xx, n_rows_x, n_cols_x, width,
+                                               min_obs, arma_any_na, na_restore,
                                                rcpp_any);
       parallelFor(0, n_rows_x * n_cols_x, roll_any_offline);
       
