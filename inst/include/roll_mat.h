@@ -144,16 +144,16 @@ struct RollAnyOfflineMat : public Worker {
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        for (int k = 0; width > k && i >= k; k++) {
+        for (int count = 0; width > count && i >= count; count++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          bool is_na = (arma_any_na[i - k] != 0) || (x(i - k, j) == NA_INTEGER);
+          bool is_na = (arma_any_na[i - count] != 0) || (x(i - count, j) == NA_INTEGER);
           
           if (!is_na) {
             
             // compute the sum
-            if (x(i - k, j) == 1) {
+            if (x(i - count, j) == 1) {
               sum_x += 1;
             }
             
@@ -2657,17 +2657,17 @@ struct RollVarOfflineMat : public Worker {
           
           // number of observations is either the window size or,
           // for partial results, the number of the current row
-          for (int k = 0; width > k && i >= k; k++) {
+          for (int count = 0; width > count && i >= count; count++) {
             
             // don't include if missing value and 'any_na' argument is 1
             // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-            bool is_na = (arma_any_na[i - k] != 0) || std::isnan(x(i - k, j));
+            bool is_na = (arma_any_na[i - count] != 0) || std::isnan(x(i - count, j));
             
             if (!is_na) {
               
               // compute the sum
-              sum_w += arma_weights[n - k - 1];
-              sum_x += arma_weights[n - k - 1] * x(i - k, j);
+              sum_w += arma_weights[n - count - 1];
+              sum_x += arma_weights[n - count - 1] * x(i - count, j);
               
             }
             
@@ -2685,27 +2685,27 @@ struct RollVarOfflineMat : public Worker {
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        for (int k = 0; width > k && i >= k; k++) {
+        for (int count = 0; width > count && i >= count; count++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          bool is_na = (arma_any_na[i - k] != 0) || std::isnan(x(i - k, j));
+          bool is_na = (arma_any_na[i - count] != 0) || std::isnan(x(i - count, j));
           
           if (!is_na) {
             
-            sum_w += arma_weights[n - k - 1];
-            sumsq_w += arma_weights[n - k - 1] * arma_weights[n - k - 1];
+            sum_w += arma_weights[n - count - 1];
+            sumsq_w += arma_weights[n - count - 1] * arma_weights[n - count - 1];
             
             // compute the sum of squares with 'center' argument
             if (center) {
               
-              sumsq_x += arma_weights[n - k - 1] *
-                (x(i - k, j) - mean_x) * (x(i - k, j) - mean_x);
+              sumsq_x += arma_weights[n - count - 1] *
+                (x(i - count, j) - mean_x) * (x(i - count, j) - mean_x);
               
             } else if (!center) {
               
-              sumsq_x += arma_weights[n - k - 1] *
-                x(i - k, j) * x(i - k, j);
+              sumsq_x += arma_weights[n - count - 1] *
+                x(i - count, j) * x(i - count, j);
               
             }
             
