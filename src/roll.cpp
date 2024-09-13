@@ -466,11 +466,10 @@ SEXP roll_all(const SEXP& x, const int& width,
   
   if (Rf_isMatrix(x)) {
     
-    LogicalMatrix xx(x);
+    IntegerMatrix xx(x); // RMatrix<bool> is not supported
     int n_rows_x = xx.nrow();
     int n_cols_x = xx.ncol();
-    IntegerVector rcpp_any_na(n_rows_x);
-    IntegerMatrix rcpp_x(xx);
+    arma::uvec arma_any_na(n_rows_x);
     IntegerMatrix rcpp_all(n_rows_x, n_cols_x);
     
     // check 'width' argument for errors
@@ -483,21 +482,23 @@ SEXP roll_all(const SEXP& x, const int& width,
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
     if (complete_obs) {
-      rcpp_any_na = any_na_i(rcpp_x);
+      arma_any_na = any_na_i_NEW(x);
+    } else {
+      arma_any_na.fill(0);
     }
     
     // compute rolling all
     if (online) {
       
-      roll::RollAllOnlineMat roll_all_online(rcpp_x, n_rows_x, n_cols_x, width,
-                                             min_obs, rcpp_any_na, na_restore,
+      roll::RollAllOnlineMat roll_all_online(xx, n_rows_x, n_cols_x, width,
+                                             min_obs, arma_any_na, na_restore,
                                              rcpp_all);
       parallelFor(0, n_cols_x, roll_all_online);
       
     } else {
       
-      roll::RollAllOfflineMat roll_all_offline(rcpp_x, n_rows_x, n_cols_x, width,
-                                               min_obs, rcpp_any_na, na_restore,
+      roll::RollAllOfflineMat roll_all_offline(xx, n_rows_x, n_cols_x, width,
+                                               min_obs, arma_any_na, na_restore,
                                                rcpp_all);
       parallelFor(0, n_rows_x * n_cols_x, roll_all_offline);
       

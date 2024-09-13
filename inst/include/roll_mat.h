@@ -198,97 +198,65 @@ struct RollAllOnlineMat : public Worker {
   const int n_cols_x;
   const int width;
   const int min_obs;
-  const RVector<int> rcpp_any_na;
+  const arma::uvec arma_any_na;
   const bool na_restore;
   RMatrix<int> rcpp_all;        // destination (pass by reference)
   
   // initialize with source and destination
   RollAllOnlineMat(const IntegerMatrix x, const int n_rows_x,
                    const int n_cols_x, const int width,
-                   const int min_obs, const IntegerVector rcpp_any_na,
+                   const int min_obs, const arma::uvec arma_any_na,
                    const bool na_restore, IntegerMatrix rcpp_all)
     : x(x), n_rows_x(n_rows_x),
       n_cols_x(n_cols_x), width(width),
-      min_obs(min_obs), rcpp_any_na(rcpp_any_na),
+      min_obs(min_obs), arma_any_na(arma_any_na),
       na_restore(na_restore), rcpp_all(rcpp_all) { }
   
   // function call operator that iterates by column
   void operator()(std::size_t begin_col, std::size_t end_col) {
     for (std::size_t j = begin_col; j < end_col; j++) {
       
-      int count = 0;
+      bool is_na = false;
+      bool is_na_old = false;
       int n_obs = 0;
-      int x_new = 0;
-      int x_old = 0;
       int sum_x = 0;
       
       for (int i = 0; i < n_rows_x; i++) {
         
-        if ((rcpp_any_na[i] != 0) || (x(i, j) == NA_INTEGER) || (x(i, j) != 0)) {
-          
-          x_new = 0;
-          
-        } else {
-          
-          x_new = 1;
-          
+        is_na = (arma_any_na[i] != 0) || (x(i, j) == NA_INTEGER);
+        
+        if (i >= width) {
+          is_na_old = (arma_any_na[i - width] != 0) || (x(i - width, j) == NA_INTEGER);
         }
         
-        // expanding window
-        if (i < width) {
+        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        
+        if (!is_na) {
           
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((rcpp_any_na[i] == 0) && (x(i, j) != NA_INTEGER)) {
-            n_obs += 1;
+          // compute the sum
+          if (x(i, j) == 0) {
+            sum_x += 1;
           }
-          
-          sum_x = sum_x + x_new;
-          
-          count += 1;
           
         }
         
         // rolling window
         if (i >= width) {
-          
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((rcpp_any_na[i] == 0) && (x(i, j) != NA_INTEGER) &&
-              ((rcpp_any_na[i - width] != 0) || (x(i - width, j) == NA_INTEGER))) {
-            
-            n_obs += 1;
-            
-          } else if (((rcpp_any_na[i] != 0) || (x(i, j) == NA_INTEGER)) &&
-            (rcpp_any_na[i - width] == 0) && (x(i - width, j) != NA_INTEGER)) {
-            
-            n_obs -= 1;
-            
+          if (!is_na_old) {
+            if (x(i - width, j) == 0) {
+              sum_x -= 1;
+            }
           }
-          
-          if ((rcpp_any_na[i - width] != 0) || (x(i - width, j) == NA_INTEGER) ||
-              (x(i - width, j) != 0)) {
-            
-            x_old = 0;
-            
-          } else {
-            
-            x_old = 1;
-            
-          }
-          
-          sum_x = sum_x + x_new - x_old;
-          
         }
         
         // don't compute if missing value and 'na_restore' argument is TRUE
-        if ((!na_restore) || (na_restore && (x(i, j) != NA_INTEGER))) {
+        if (!na_restore || (x(i, j) != NA_INTEGER)) {
           
           if (n_obs >= min_obs) {
             
             if (sum_x > 0) {
               rcpp_all(i, j) = 0;
-            } else if (n_obs == count) {
+            } else if ((i >= width && n_obs == width) || (i < width && n_obs == i + 1)) {
               rcpp_all(i, j) = 1;
             } else {
               rcpp_all(i, j) = NA_INTEGER;
@@ -320,18 +288,18 @@ struct RollAllOfflineMat : public Worker {
   const int n_cols_x;
   const int width;
   const int min_obs;
-  const RVector<int> rcpp_any_na;
+  const arma::uvec arma_any_na;
   const bool na_restore;
   RMatrix<int> rcpp_all;        // destination (pass by reference)
   
   // initialize with source and destination
   RollAllOfflineMat(const IntegerMatrix x, const int n_rows_x,
                     const int n_cols_x, const int width,
-                    const int min_obs, const IntegerVector rcpp_any_na,
+                    const int min_obs, const arma::uvec arma_any_na,
                     const bool na_restore, IntegerMatrix rcpp_all)
     : x(x), n_rows_x(n_rows_x),
       n_cols_x(n_cols_x), width(width),
-      min_obs(min_obs), rcpp_any_na(rcpp_any_na),
+      min_obs(min_obs), arma_any_na(arma_any_na),
       na_restore(na_restore), rcpp_all(rcpp_all) { }
   
   // function call operator that iterates by index
@@ -342,31 +310,31 @@ struct RollAllOfflineMat : public Worker {
       int i = z / n_cols_x;
       int j = z % n_cols_x;
       
-      int count = 0;
-      int n_obs = 0;
-      int sum_x = 0;
-      
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && (x(i, j) != NA_INTEGER))) {
+      if (!na_restore || (x(i, j) != NA_INTEGER)) {
+        
+        int n_obs = 0;
+        int sum_x = 0;
+        int is_na = false;
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (i >= count)) {
+        for (int count = 0; width > count && i >= count; count++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((rcpp_any_na[i - count] == 0) && (x(i - count, j) != NA_INTEGER)) {
+          is_na = (arma_any_na[i - count] != 0) || (x(i - count, j) == NA_INTEGER);
+          
+          if (!is_na) {
             
             // compute the sum
             if (x(i - count, j) == 0) {
-              sum_x = 1;
+              sum_x += 1;
             }
             
             n_obs += 1;
             
           }
-          
-          count += 1;
           
         }
         
@@ -374,7 +342,7 @@ struct RollAllOfflineMat : public Worker {
           
           if (sum_x > 0) {
             rcpp_all(i, j) = 0;
-          } else if (n_obs == count) {
+          } else if ((i >= width && n_obs == width) || (i < width && n_obs == i + 1)) {
             rcpp_all(i, j) = 1;
           } else {
             rcpp_all(i, j) = NA_INTEGER;
@@ -2024,6 +1992,8 @@ struct RollQuantileOnlineMat : public Worker {
     for (std::size_t j = begin_col; j < end_col; j++) {
       
       int n_obs = 0;
+      bool is_na = false;
+      bool is_na_old = false;
       long double lambda = 0;
       long double w_new = 0;
       long double w_old = 0;
@@ -2035,7 +2005,6 @@ struct RollQuantileOnlineMat : public Worker {
       std::multiset<std::tuple<long double, int>> mset_lower;
       std::multiset<std::tuple<long double, int>> mset_upper;
       
-      // int count = 0; // uncomment if exponential-weights
       int offset = 0;
       int n_size_x = 0;
       bool status = false;
@@ -2044,50 +2013,31 @@ struct RollQuantileOnlineMat : public Worker {
         
         // // uncomment if exponential-weights
         // sum_w = 0;
-        // count = 0;
-        //
+        // 
         // // number of observations is either the window size or,
         // // for partial results, the number of the current row
-        // while ((width > count) && (i >= count)) {
+        // for (int count = 0; width > count && i >= count; count++) {
         //   
         //   // don't include if missing value and 'any_na' argument is 1
         //   // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-        //   if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j))) {
+        //   is_na = (arma_any_na[i - count] != 0) || std::isnan(x(i - count, j));
+        //   
+        //   if (!is_na) {
         //     
         //     // compute the sum
         //     sum_w += arma_weights[n - count - 1];
         //     
         //   }
         //   
-        //   count += 1;
-        //   
         // }
         
-        // expanding window
-        if (i < width) {
-          
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
-            n_obs += 1;
-          }
-          
-          // rolling window
-        } else {
-          
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) &&
-              ((arma_any_na[i - width] != 0) || std::isnan(x(i - width, j)))) {
-            
-            n_obs += 1;
-            
-          } else if (((arma_any_na[i] != 0) || std::isnan(x(i, j))) &&
-            (arma_any_na[i - width] == 0) && !std::isnan(x(i - width, j))) {
-            
-            n_obs -= 1;
-            
-          }
-          
+        is_na = (arma_any_na[i] != 0) || std::isnan(x(i, j));
+        
+        if (i >= width) {
+          is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
+        
+        update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (width > 1) {
           
@@ -2095,7 +2045,7 @@ struct RollQuantileOnlineMat : public Worker {
           sum_lower_w = lambda * sum_lower_w;
           sum_upper_w = lambda * sum_upper_w;
           
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
+          if (!is_na) {
             
             w_new = arma_weights[n - 1];
             x_new = x(i, j);
@@ -2161,7 +2111,7 @@ struct RollQuantileOnlineMat : public Worker {
           // rolling window
           if (i >= width) {
             
-            if ((arma_any_na[i - width] == 0) && !std::isnan(x(i - width, j))) {
+            if (!is_na_old) {
               
               w_old = arma_weights[n - width];
               x_old = x(i - width, j);
@@ -2227,7 +2177,7 @@ struct RollQuantileOnlineMat : public Worker {
           }
           
           // don't compute if missing value and 'na_restore' argument is TRUE
-          if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+          if (!na_restore || !std::isnan(x(i, j))) {
             
             if (n_obs >= min_obs) {
               
@@ -2282,7 +2232,7 @@ struct RollQuantileOfflineMat : public Worker {
   // initialize with source and destination
   RollQuantileOfflineMat(const NumericMatrix x, const int n,
                          const int n_rows_x, const int n_cols_x,
-                         const int width,  const arma::vec arma_weights,
+                         const int width, const arma::vec arma_weights,
                          const double p, const int min_obs,
                          const arma::uvec arma_any_na, const bool na_restore,
                          NumericMatrix rcpp_quantile)
@@ -2302,16 +2252,15 @@ struct RollQuantileOfflineMat : public Worker {
       int j = z % n_cols_x;
       
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+      if (!na_restore || !std::isnan(x(i, j))) {
         
         int k = 0;
-        int k_lower = 0;
-        int count = 0;
+        bool is_na = false;
         long double sum_w = 0;
         
         int offset = std::max(0, i - width + 1);
         int n_size_x = i - offset + 1;
-        arma::vec x_subset(n_size_x);
+        arma::vec x_subset(n_size_x); 
         arma::vec arma_weights_subset(n_size_x);
         arma::uvec arma_any_na_subset(n_size_x);
         
@@ -2327,25 +2276,25 @@ struct RollQuantileOfflineMat : public Worker {
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (n_size_x - 1 >= count)) {
+        for (int count = 0; count < n_size_x; count++) {
           
           k = sort_ix[n_size_x - count - 1];
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
+          is_na = arma_any_na_subset[k] == 1 || std::isnan(x_subset[k]);
+          
+          if (!is_na) {
             
             // compute the sum
             sum_w += arma_weights_subset[k];
             
           }
           
-          count += 1;
-          
         }
         
-        count = 0;
         int n_obs = 0;
+        int k_lower = 0;
         int idxquantile1_x = 0;
         int idxquantile2_x = 0;
         bool status1 = false;
@@ -2355,14 +2304,17 @@ struct RollQuantileOfflineMat : public Worker {
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (n_size_x - 1 >= count)) {
+        for (int count = 0; count < n_size_x; count++) {
           
           k = sort_ix[n_size_x - count - 1];
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na_subset[k] == 0) && !std::isnan(x_subset[k])) {
+          is_na = arma_any_na_subset[k] == 1 || std::isnan(x_subset[k]);
+          
+          if (!is_na) {
             
+            // compute the sum
             sum_upper_w += arma_weights_subset[k];
             
             // last element of sorted array that is 'p' of 'weights'
@@ -2382,18 +2334,16 @@ struct RollQuantileOfflineMat : public Worker {
           
           k_lower = sort_ix[std::max(0, n_size_x - count - 2)];
           
-          if ((arma_any_na_subset[k_lower] == 0) && !std::isnan(x_subset[k_lower])) {
-            
+          is_na = arma_any_na_subset[k_lower] != 0 || std::isnan(x_subset[k_lower]);
+          
+          if (!is_na) {
             if (status1 && !status2) {
               
               status2 = true;
               idxquantile2_x = n_size_x - count - 1;
               
             }
-            
           }
-          
-          count += 1;
           
         }
         
@@ -4706,7 +4656,6 @@ struct RollCrossProdOnlineMatXX : public Worker {
               } else {
                 sumsq_xy = lambda * sumsq_xy;
               }
-              
               
               // rolling window
             } else {
