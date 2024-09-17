@@ -2533,24 +2533,22 @@ struct RollVarOnlineMat : public Worker {
             
           }
           
-          // don't compute if missing value and 'na_restore' argument is TRUE
-          if (!na_restore || !std::isnan(x(i, j))) {
-            
-            if ((n_obs > 1) && (n_obs >= min_obs)) {
-              arma_var(i, j) = sumsq_x / (sum_w - sumsq_w / sum_w);
-            } else {
-              arma_var(i, j) = NA_REAL;
-            }
-            
+        }
+        
+        // don't compute if missing value and 'na_restore' argument is TRUE
+        if (!na_restore || !std::isnan(x(i, j))) {
+          
+          if ((n_obs > 1) && (n_obs >= min_obs)) {
+            arma_var(i, j) = sumsq_x / (sum_w - sumsq_w / sum_w);
           } else {
-            
-            // can be either NA or NaN
-            arma_var(i, j) = x(i, j);
-            
+            arma_var(i, j) = NA_REAL;
           }
           
         } else {
-          arma_var(i, j) = NA_REAL;
+          
+          // can be either NA or NaN
+          arma_var(i, j) = x(i, j);
+          
         }
         
       }
