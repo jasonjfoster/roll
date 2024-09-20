@@ -1098,19 +1098,19 @@ struct RollMinOnlineMat : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  RMatrix<double> rcpp_min;     // destination (pass by reference)
+  arma::mat& arma_min;          // destination (pass by reference)
   
   // initialize with source and destination
   RollMinOnlineMat(const NumericMatrix x, const int n,
                    const int n_rows_x, const int n_cols_x,
                    const int width, const arma::vec arma_weights,
                    const int min_obs, const arma::uvec arma_any_na,
-                   const bool na_restore, NumericMatrix rcpp_min)
+                   const bool na_restore, arma::mat& arma_min)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
       min_obs(min_obs), arma_any_na(arma_any_na),
-      na_restore(na_restore), rcpp_min(rcpp_min) { }
+      na_restore(na_restore), arma_min(arma_min) { }
   
   // function call operator that iterates by column
   void operator()(std::size_t begin_col, std::size_t end_col) {
@@ -1118,58 +1118,23 @@ struct RollMinOnlineMat : public Worker {
       
       int n_obs = 0;
       int idxmin_x = 0;
+      bool is_na = false;
+      bool is_na_old = false;
       std::deque<int> deck(width);
       
       for (int i = 0; i < n_rows_x; i++) {
         
-        // expanding window
-        if (i < width) {
-          
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
-            n_obs += 1;
-          }
-          
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
-            
-            while (!deck.empty() && ((arma_any_na[deck.back()] != 0) ||
-                   std::isnan(x(deck.back(), j)) || (x(i, j) < x(deck.back(), j)))) {
-              
-              deck.pop_back();
-              
-            }
-            
-            deck.push_back(i);
-            
-          }
-          
-          if (width > 1) {
-            idxmin_x = deck.front();
-          } else {
-            idxmin_x = i;
-          }
-          
+        is_na = (arma_any_na[i] != 0) || std::isnan(x(i, j));
+        
+        if (i >= width) {
+          is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
         
-        // rolling window
-        if (i >= width) {
+        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        
+        if (width > 1) {
           
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) &&
-              ((arma_any_na[i - width] != 0) || std::isnan(x(i - width, j)))) {
-            
-            n_obs += 1;
-            
-          } else if (((arma_any_na[i] != 0) || std::isnan(x(i, j))) &&
-            (arma_any_na[i - width] == 0) && !std::isnan(x(i - width, j))) {
-            
-            n_obs -= 1;
-            
-          }
-          
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
+          if (!is_na) {
             
             while (!deck.empty() && ((arma_any_na[deck.back()] != 0) ||
                    std::isnan(x(deck.back(), j)) || (x(i, j) < x(deck.back(), j)))) {
@@ -1182,31 +1147,32 @@ struct RollMinOnlineMat : public Worker {
             
           }
           
-          while (!deck.empty() && (deck.front() <= i - width)) {
-            deck.pop_front();
+          // rolling window
+          if (i >= width) {
+            while (!deck.empty() && (deck.front() <= i - width)) {
+              deck.pop_front();
+            }
           }
           
-          if (width > 1) {
-            idxmin_x = deck.front();
-          } else {
-            idxmin_x = i;
-          }
+          idxmin_x = deck.front();
           
+        } else {
+          idxmin_x = i;
         }
         
         // don't compute if missing value and 'na_restore' argument is TRUE
-        if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+        if (!na_restore || !std::isnan(x(i, j))) {
           
           if (n_obs >= min_obs) {
-            rcpp_min(i, j) = x(idxmin_x, j);
+            arma_min(i, j) = x(idxmin_x, j);
           } else {
-            rcpp_min(i, j) = NA_REAL;
+            arma_min(i, j) = NA_REAL;
           }
           
         } else {
           
           // can be either NA or NaN
-          rcpp_min(i, j) = x(i, j);
+          arma_min(i, j) = x(i, j);
           
         }
         
@@ -1229,19 +1195,19 @@ struct RollMinOfflineMat : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  RMatrix<double> rcpp_min;     // destination (pass by reference)
+  arma::mat& arma_min;          // destination (pass by reference)
   
   // initialize with source and destination
   RollMinOfflineMat(const NumericMatrix x, const int n,
                     const int n_rows_x, const int n_cols_x,
                     const int width, const arma::vec arma_weights,
                     const int min_obs, const arma::uvec arma_any_na,
-                    const bool na_restore, NumericMatrix rcpp_min)
+                    const bool na_restore, arma::mat& arma_min)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
       min_obs(min_obs), arma_any_na(arma_any_na),
-      na_restore(na_restore), rcpp_min(rcpp_min) { }
+      na_restore(na_restore), arma_min(arma_min) { }
   
   // function call operator that iterates by index
   void operator()(std::size_t begin_index, std::size_t end_index) {
@@ -1251,20 +1217,22 @@ struct RollMinOfflineMat : public Worker {
       int i = z / n_cols_x;
       int j = z % n_cols_x;
       
-      int count = 0;
-      int n_obs = 0;
-      int idxmin_x = i;
-      
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+      if (!na_restore || !std::isnan(x(i, j))) {
+        
+        int n_obs = 0;
+        int idxmin_x = i;
+        bool is_na = false;
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (i >= count)) {
+        for (int count = 0; width > count && i >= count; count++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j))) {
+          is_na = arma_any_na[i - count] != 0 || std::isnan(x(i - count, j));
+          
+          if (!is_na) {
             
             // last element of sorted array
             // note: 'weights' must be greater than 0
@@ -1279,20 +1247,18 @@ struct RollMinOfflineMat : public Worker {
             
           }
           
-          count += 1;
-          
         }
         
-        if ((n_obs >= min_obs)) {
-          rcpp_min(i, j) = x(idxmin_x, j);
+        if (n_obs >= min_obs) {
+          arma_min(i, j) = x(idxmin_x, j);
         } else {
-          rcpp_min(i, j) = NA_REAL;
+          arma_min(i, j) = NA_REAL;
         }
         
       } else {
         
         // can be either NA or NaN
-        rcpp_min(i, j) = x(i, j);
+        arma_min(i, j) = x(i, j);
         
       }
       
@@ -1313,19 +1279,19 @@ struct RollMaxOnlineMat : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  RMatrix<double> rcpp_max;     // destination (pass by reference)
+  arma::mat& arma_max;          // destination (pass by reference)
   
   // initialize with source and destination
   RollMaxOnlineMat(const NumericMatrix x, const int n,
                    const int n_rows_x, const int n_cols_x,
                    const int width, const arma::vec arma_weights,
                    const int min_obs, const arma::uvec arma_any_na,
-                   const bool na_restore, NumericMatrix rcpp_max)
+                   const bool na_restore, arma::mat& arma_max)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
       min_obs(min_obs), arma_any_na(arma_any_na),
-      na_restore(na_restore), rcpp_max(rcpp_max) { }
+      na_restore(na_restore), arma_max(arma_max) { }
   
   // function call operator that iterates by column
   void operator()(std::size_t begin_col, std::size_t end_col) {
@@ -1333,58 +1299,23 @@ struct RollMaxOnlineMat : public Worker {
       
       int n_obs = 0;
       int idxmax_x = 0;
+      bool is_na = false;
+      bool is_na_old = false;
       std::deque<int> deck(width);
       
       for (int i = 0; i < n_rows_x; i++) {
         
-        // expanding window
-        if (i < width) {
-          
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
-            n_obs += 1;
-          }
-          
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
-            
-            while (!deck.empty() && ((arma_any_na[deck.back()] != 0) || 
-                   std::isnan(x(deck.back(), j)) || (x(i, j) > x(deck.back(), j)))) {
-              
-              deck.pop_back();
-              
-            }
-            
-            deck.push_back(i);
-            
-          }
-          
-          if (width > 1) {
-            idxmax_x = deck.front();
-          } else {
-            idxmax_x = i;
-          }
-          
+        is_na = (arma_any_na[i] != 0) || std::isnan(x(i, j));
+        
+        if (i >= width) {
+          is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
         
-        // rolling window
-        if (i >= width) {
+        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        
+        if (width > 1) {
           
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) &&
-              ((arma_any_na[i - width] != 0) || std::isnan(x(i - width, j)))) {
-            
-            n_obs += 1;
-            
-          } else if (((arma_any_na[i] != 0) || std::isnan(x(i, j))) &&
-            (arma_any_na[i - width] == 0) && !std::isnan(x(i - width, j))) {
-            
-            n_obs -= 1;
-            
-          }
-          
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
+          if (!is_na) {
             
             while (!deck.empty() && ((arma_any_na[deck.back()] != 0) ||
                    std::isnan(x(deck.back(), j)) || (x(i, j) > x(deck.back(), j)))) {
@@ -1397,31 +1328,32 @@ struct RollMaxOnlineMat : public Worker {
             
           }
           
-          while (!deck.empty() && (deck.front() <= i - width)) {
-            deck.pop_front();
+          // rolling window
+          if (i >= width) {
+            while (!deck.empty() && (deck.front() <= i - width)) {
+              deck.pop_front();
+            }
           }
           
-          if (width > 1) {
-            idxmax_x = deck.front();
-          } else {
-            idxmax_x = i;
-          }
+          idxmax_x = deck.front();
           
+        } else {
+          idxmax_x = i;
         }
         
         // don't compute if missing value and 'na_restore' argument is TRUE
-        if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+        if (!na_restore || !std::isnan(x(i, j))) {
           
           if (n_obs >= min_obs) {
-            rcpp_max(i, j) = x(idxmax_x, j);
+            arma_max(i, j) = x(idxmax_x, j);
           } else {
-            rcpp_max(i, j) = NA_REAL;
+            arma_max(i, j) = NA_REAL;
           }
           
         } else {
           
           // can be either NA or NaN
-          rcpp_max(i, j) = x(i, j);
+          arma_max(i, j) = x(i, j);
           
         }
         
@@ -1444,19 +1376,19 @@ struct RollMaxOfflineMat : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  RMatrix<double> rcpp_max;     // destination (pass by reference)
+  arma::mat& arma_max;          // destination (pass by reference)
   
   // initialize with source and destination
   RollMaxOfflineMat(const NumericMatrix x, const int n,
                     const int n_rows_x, const int n_cols_x,
                     const int width, const arma::vec arma_weights,
                     const int min_obs, const arma::uvec arma_any_na,
-                    const bool na_restore, NumericMatrix rcpp_max)
+                    const bool na_restore, arma::mat& arma_max)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
       min_obs(min_obs), arma_any_na(arma_any_na),
-      na_restore(na_restore), rcpp_max(rcpp_max) { }
+      na_restore(na_restore), arma_max(arma_max) { }
   
   // function call operator that iterates by index
   void operator()(std::size_t begin_index, std::size_t end_index) {
@@ -1466,22 +1398,24 @@ struct RollMaxOfflineMat : public Worker {
       int i = z / n_cols_x;
       int j = z % n_cols_x;
       
-      int count = 0;
-      int n_obs = 0;
-      int idxmax_x = i;
-      
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+      if (!na_restore || !std::isnan(x(i, j))) {
+        
+        int n_obs = 0;
+        int idxmax_x = i;
+        bool is_na = false;
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (i >= count)) {
+        for (int count = 0; width > count && i >= count; count++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j))) {
+          is_na = arma_any_na[i - count] != 0 || std::isnan(x(i - count, j));
+          
+          if (!is_na) {
             
-            // first element of sorted array
+            // last element of sorted array
             // note: 'weights' must be greater than 0
             if ((arma_any_na[idxmax_x] != 0) || std::isnan(x(idxmax_x, j)) ||
                 (x(i - count, j) >= x(idxmax_x, j))) {
@@ -1494,20 +1428,18 @@ struct RollMaxOfflineMat : public Worker {
             
           }
           
-          count += 1;
-          
         }
         
-        if ((n_obs >= min_obs)) {
-          rcpp_max(i, j) = x(idxmax_x, j);
+        if (n_obs >= min_obs) {
+          arma_max(i, j) = x(idxmax_x, j);
         } else {
-          rcpp_max(i, j) = NA_REAL;
+          arma_max(i, j) = NA_REAL;
         }
         
       } else {
         
         // can be either NA or NaN
-        rcpp_max(i, j) = x(i, j);
+        arma_max(i, j) = x(i, j);
         
       }
       
@@ -1971,7 +1903,7 @@ struct RollQuantileOnlineMat : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  RMatrix<double> rcpp_quantile;// destination (pass by reference)
+  arma::mat& arma_quantile;     // destination (pass by reference)
   
   // initialize with source and destination
   RollQuantileOnlineMat(const NumericMatrix x, const int n,
@@ -1979,13 +1911,13 @@ struct RollQuantileOnlineMat : public Worker {
                         const int width, const arma::vec arma_weights,
                         const double p, const int min_obs,
                         const arma::uvec arma_any_na, const bool na_restore,
-                        NumericMatrix rcpp_quantile)
+                        arma::mat& arma_quantile)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
       p(p), min_obs(min_obs),
       arma_any_na(arma_any_na), na_restore(na_restore),
-      rcpp_quantile(rcpp_quantile) { }
+      arma_quantile(arma_quantile) { }
   
   // function call operator that iterates by index
   void operator()(std::size_t begin_col, std::size_t end_col) {
@@ -2182,30 +2114,36 @@ struct RollQuantileOnlineMat : public Worker {
             if (n_obs >= min_obs) {
               
               if (p == 0) {
-                rcpp_quantile(i, j) = std::get<0>(*mset_upper.begin());
+                arma_quantile(i, j) = std::get<0>(*mset_upper.begin());
               } else if (p == 1) {
-                rcpp_quantile(i, j) = std::get<0>(*mset_lower.rbegin());
+                arma_quantile(i, j) = std::get<0>(*mset_lower.rbegin());
               } else if (std::fabs(sum_lower_w / sum_w - p) <= sqrt(arma::datum::eps)) {
-                rcpp_quantile(i, j) = (std::get<0>(*mset_lower.rbegin()) + std::get<0>(*mset_upper.begin())) / 2;
+                arma_quantile(i, j) = (std::get<0>(*mset_lower.rbegin()) + std::get<0>(*mset_upper.begin())) / 2;
               } else {
-                rcpp_quantile(i, j) = std::get<0>(*mset_lower.rbegin());
+                arma_quantile(i, j) = std::get<0>(*mset_lower.rbegin());
               }
               
             } else {
-              rcpp_quantile(i, j) = NA_REAL;
+              arma_quantile(i, j) = NA_REAL;
             }
             
           } else {
             
             // can be either NA or NaN
-            rcpp_quantile(i, j) = x(i, j);
+            arma_quantile(i, j) = x(i, j);
             
           }
           
-        } else if (n_obs >= min_obs) {
-          rcpp_quantile(i, j) = x(i, j);
+        } else if (!na_restore || !std::isnan(x(i, j))) {
+          
+          if (n_obs >= min_obs) {
+            arma_quantile(i, j) = x(i, j);
+          } else {
+            arma_quantile(i, j) = NA_REAL;
+          }
+          
         } else {
-          rcpp_quantile(i, j) = NA_REAL;
+          arma_quantile(i, j) = NA_REAL;
         }
         
       }
@@ -2227,7 +2165,7 @@ struct RollQuantileOfflineMat : public Worker {
   const int min_obs;
   const arma::uvec arma_any_na;
   const bool na_restore;
-  RMatrix<double> rcpp_quantile;// destination (pass by reference)
+  arma::mat& arma_quantile;     // destination (pass by reference)
   
   // initialize with source and destination
   RollQuantileOfflineMat(const NumericMatrix x, const int n,
@@ -2235,13 +2173,13 @@ struct RollQuantileOfflineMat : public Worker {
                          const int width, const arma::vec arma_weights,
                          const double p, const int min_obs,
                          const arma::uvec arma_any_na, const bool na_restore,
-                         NumericMatrix rcpp_quantile)
+                         arma::mat& arma_quantile)
     : x(x), n(n),
       n_rows_x(n_rows_x), n_cols_x(n_cols_x),
       width(width), arma_weights(arma_weights),
       p(p), min_obs(min_obs),
       arma_any_na(arma_any_na), na_restore(na_restore),
-      rcpp_quantile(rcpp_quantile) { }
+      arma_quantile(arma_quantile) { }
   
   // function call operator that iterates by index
   void operator()(std::size_t begin_index, std::size_t end_index) {
@@ -2357,23 +2295,23 @@ struct RollQuantileOfflineMat : public Worker {
             k_lower = sort_ix[std::max(0, idxquantile2_x - 1)];
             
             if ((arma_any_na_subset[k_lower] == 0) && !std::isnan(x_subset[k_lower])) {
-              rcpp_quantile(i, j) = (x_subset[k] + x_subset[k_lower]) / 2;
+              arma_quantile(i, j) = (x_subset[k] + x_subset[k_lower]) / 2;
             } else {
-              rcpp_quantile(i, j) = x_subset[k];
+              arma_quantile(i, j) = x_subset[k];
             }
             
           } else {
-            rcpp_quantile(i, j) = x_subset[k];
+            arma_quantile(i, j) = x_subset[k];
           }
           
         } else {
-          rcpp_quantile(i, j) = NA_REAL;
+          arma_quantile(i, j) = NA_REAL;
         }
         
       } else {
         
         // can be either NA or NaN
-        rcpp_quantile(i, j) = x(i, j);
+        arma_quantile(i, j) = x(i, j);
         
       }
       
