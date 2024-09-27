@@ -609,12 +609,12 @@ struct RollProdOnlineMat : public Worker {
     for (std::size_t j = begin_col; j < end_col; j++) {
       
       int n_obs = 0;
+      int n_obs_prev = 0;
       int n_zero = 0;
+      bool is_na = false;
+      bool is_na_old = false;
       long double lambda = 0;
-      long double n_new = 0;
-      long double n_old = 0;
-      long double n_exp = 0;
-      long double w_new = 0;
+      long double w_new = 1;
       long double w_old = 0;
       long double x_new = 0;
       long double x_old = 0;
@@ -624,85 +624,34 @@ struct RollProdOnlineMat : public Worker {
       if (arma_weights[n - 1] == 0) {
         lambda = 1;
       } else if (width > 1) {
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+        
       } else {
         lambda = arma_weights[n - 1];
       }
       
       for (int i = 0; i < n_rows_x; i++) {
         
-        // expanding window
-        if (i < width) {
-          
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j))) {
-            n_obs += 1;
-          }
-          
-          if ((arma_any_na[i] != 0) || std::isnan(x(i, j))) {
-            
-            n_new = n_obs;
-            w_new = 1;
-            x_new = 1;
-            
-          } else {
-            
-            n_new = n_obs - 1;
-            w_new = arma_weights[n - 1];
-            
-            if (x(i, j) == 0) {
-              
-              x_new = 1;
-              n_zero += 1;
-              
-            } else {
-              x_new = x(i, j);
-            }
-            
-          }
-          
-          if (n_new == 0) {
-            n_exp = 1;
-          } else if (n_new > n_old) {
-            n_exp = n_exp * lambda;
-          } else if (n_new < n_old) {
-            n_exp = n_exp / lambda;
-          }
-          
-          n_old = n_new;
-          prod_w *= w_new * n_exp;
-          prod_x *= x_new;
-          
+        // w_new = 1;
+        w_old = 1;
+        x_new = 1;
+        x_old = 1;
+        n_obs_prev = n_obs;
+        
+        is_na = (arma_any_na[i] != 0) || std::isnan(x(i, j));
+        
+        if (i >= width) {
+          is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
         
-        // rolling window
-        if (i >= width) {
+        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        
+        if (width > 1) {
           
-          // don't include if missing value and 'any_na' argument is 1
-          // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na[i] == 0) && !std::isnan(x(i, j)) &&
-              ((arma_any_na[i - width] != 0) || std::isnan(x(i - width, j)))) {
-            
-            n_obs += 1;
-            
-          } else if (((arma_any_na[i] != 0) || std::isnan(x(i, j))) &&
-            (arma_any_na[i - width] == 0) && !std::isnan(x(i - width, j))) {
-            
-            n_obs -= 1;
-            
-          }
+          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
           
-          if ((arma_any_na[i] != 0) || std::isnan(x(i, j))) {
+          if (!is_na) {
             
-            n_new = n_obs;
-            w_new = 1;
-            x_new = 1;
-            
-          } else {
-            
-            n_new = n_obs - 1;
-            w_new = arma_weights[n - 1];
+            w_new = arma_weights[n - n_obs];
             
             if (x(i, j) == 0) {
               
@@ -715,46 +664,66 @@ struct RollProdOnlineMat : public Worker {
             
           }
           
-          if ((arma_any_na[i - width] != 0) || std::isnan(x(i - width, j))) {
+          if (n_obs < n_obs_prev) {
+            w_new /= lambda;
+          }
+          
+          // expanding window
+          if (i < width) {
             
-            w_old = 1;
-            x_old = 1;
+            prod_w *= w_new;
+            prod_x *= x_new;
             
+            // rolling window
           } else {
             
-            if (x(i - width, j) == 0) {
+            if (!is_na_old) {
               
-              x_old = 1;
-              n_zero -= 1;
-              
-            } else {
-              x_old = x(i - width, j);
-            }
-            
-            if (arma_weights[n - width] == 0) {
-              w_old = 1;
-            } else {
               w_old = arma_weights[n - width];
+              
+              if (x(i - width, j) == 0) {
+                
+                x_old = 1;
+                n_zero -= 1;
+                
+              } else {
+                x_old = x(i - width, j);
+              }
+              
+            }
+            
+            prod_w *= w_new / w_old;
+            prod_x *= x_new / x_old;
+            
+          }
+          
+        } else {
+          
+          if (!is_na) {
+            
+            w_new = arma_weights[n - 1];
+            
+            if (x(i, j) == 0) {
+              
+              x_new = 1;
+              n_zero = 1;
+              
+            } else {
+              
+              x_new = x(i, j);
+              n_zero = 0;
+              
             }
             
           }
           
-          if (n_new == 0) {
-            n_exp = 1;
-          } else if (n_new > n_old) {
-            n_exp = n_exp * lambda;
-          } else if (n_new < n_old) {
-            n_exp = n_exp / lambda;
-          }
-          
-          n_old = n_new;
-          prod_w *= w_new * n_exp / w_old;
-          prod_x *= x_new / x_old;
+          prod_w = w_new;
+          prod_x = x_new;
           
         }
         
         // don't compute if missing value and 'na_restore' argument is TRUE
-        if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+        if (!na_restore || !std::isnan(x(i, j))) {
           
           if (n_obs >= min_obs) {
             
@@ -816,28 +785,28 @@ struct RollProdOfflineMat : public Worker {
       int i = z / n_cols_x;
       int j = z % n_cols_x;
       
-      int count = 0;
-      int n_obs = 0;
-      long double prod_x = 1;
-      
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+      if (!na_restore || !std::isnan(x(i, j))) {
+        
+        int n_obs = 0;
+        bool is_na = false;
+        long double prod_x = 1;
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (i >= count)) {
+        for (int count = 0; width > count && i >= count; count++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-          if ((arma_any_na[i - count] == 0) && !std::isnan(x(i - count, j))) {
+          is_na = (arma_any_na[i - count] != 0) || std::isnan(x(i - count, j));
+          
+          if (!is_na) {
             
             // compute the product
             prod_x *= arma_weights[n - count - 1] * x(i - count, j);
             n_obs += 1;
             
           }
-          
-          count += 1;
           
         }
         
@@ -2109,6 +2078,7 @@ struct RollQuantileOnlineMat : public Worker {
           }
           
           // don't compute if missing value and 'na_restore' argument is TRUE
+          // note: equal-weights tests fail if combined loop via quantile_x
           if (!na_restore || !std::isnan(x(i, j))) {
             
             if (n_obs >= min_obs) {
@@ -2133,7 +2103,7 @@ struct RollQuantileOnlineMat : public Worker {
             arma_quantile(i, j) = x(i, j);
             
           }
-          
+        
         } else if (!na_restore || !std::isnan(x(i, j))) {
           
           if (n_obs >= min_obs) {
