@@ -405,7 +405,11 @@ struct RollSumOnlineMat : public Worker {
       if (arma_weights[n - 1] == 0) {
         lambda = 1;
       } else if (width > 1) {
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+        if (n > 1) {
+          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+        } else {
+          lambda = arma_weights[n - 1];
+        }
       } else {
         lambda = arma_weights[n - 1];
       }
@@ -647,7 +651,11 @@ struct RollProdOnlineMat : public Worker {
         
         if (width > 1) {
           
-          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+          if (n > 1) {
+            lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+          } else {
+            lambda = arma_weights[n - 1];
+          }
           
           if (!is_na) {
             
@@ -868,7 +876,11 @@ struct RollMeanOnlineMat : public Worker {
       long double sum_x = 0;
       
       if (width > 1) {
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+        if (n > 1) {
+          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+        } else {
+          lambda = arma_weights[n - 1];
+        }
       } else {
         lambda = arma_weights[n - 1];
       }
@@ -1942,7 +1954,12 @@ struct RollQuantileOnlineMat : public Worker {
         
         if (width > 1) {
           
-          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+          if (n > 1) {
+            lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+          } else {
+            lambda = arma_weights[n - 1];
+          }
+          
           sum_lower_w = lambda * sum_lower_w;
           sum_upper_w = lambda * sum_upper_w;
           
@@ -2103,7 +2120,7 @@ struct RollQuantileOnlineMat : public Worker {
             arma_quantile(i, j) = x(i, j);
             
           }
-        
+          
         } else if (!na_restore || !std::isnan(x(i, j))) {
           
           if (n_obs >= min_obs) {
@@ -2351,7 +2368,12 @@ struct RollVarOnlineMat : public Worker {
         
         if (width > 1) {
           
-          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+          if (n > 1) {
+            lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+          } else {
+            lambda = arma_weights[n - 1];
+          }
+          
           lambda_sq = lambda * lambda;
           
           if (!is_na) {
@@ -2639,7 +2661,11 @@ struct RollSdOnlineMat : public Worker {
       long double var_x = 0;
       
       if (width > 1) {
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+        if (n > 1) {
+          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+        } else {
+          lambda = arma_weights[n - 1];
+        }
       } else {
         lambda = arma_weights[n - 1];
       }
@@ -2994,7 +3020,11 @@ struct RollScaleOnlineMat : public Worker {
       long double x_ij = 0;
       
       if (width > 1) {
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+        if (n > 1) {
+          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+        } else {
+          lambda = arma_weights[n - 1];
+        }
       } else {
         lambda = arma_weights[n - 1];
       }
@@ -3420,7 +3450,11 @@ struct RollCovOnlineMatXX : public Worker {
         long double mean_y = 0;
         
         if (width > 1) {
-          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+          if (n > 1) {
+            lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+          } else {
+            lambda = arma_weights[n - 1];
+          }
         } else {
           lambda = arma_weights[n - 1];
         }
@@ -3755,7 +3789,11 @@ struct RollCovOnlineMatXY : public Worker {
         long double mean_y = 0;
         
         if (width > 1) {
-          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+          if (n > 1) {
+            lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+          } else {
+            lambda = arma_weights[n - 1];
+          }
         } else {
           lambda = arma_weights[n - 1];
         }
@@ -4499,7 +4537,12 @@ struct RollCrossProdOnlineMatXX : public Worker {
           
           if (width > 1) {
             
-            lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+            if (n > 1) {
+              lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+            } else {
+              lambda = arma_weights[n - 1];
+            }
+            
             // lambda_sq = lambda * lambda;
             
             if (!is_na) {
@@ -4830,7 +4873,11 @@ struct RollCrossProdOnlineMatXY : public Worker {
         long double mean_y = 0;
         
         if (width > 1) {
-          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+          if (n > 1) {
+            lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+          } else {
+            lambda = arma_weights[n - 1];
+          }
         } else {
           lambda = arma_weights[n - 1];
         }

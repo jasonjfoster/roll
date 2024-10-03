@@ -426,7 +426,11 @@ struct RollSumOnlineVec {
     if (arma_weights[n - 1] == 0) {
       lambda = 1;
     } else if (width > 1) {
-      lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      if (n > 1) {
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      } else {
+        lambda = arma_weights[n - 1];
+      }
     } else {
       lambda = arma_weights[n - 1];
     }
@@ -629,7 +633,11 @@ struct RollProdOnlineVec {
     if (arma_weights[n - 1] == 0) {
       lambda = 1;
     } else if (width > 1) {
-      lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      if (n > 1) {
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      } else {
+        lambda = arma_weights[n - 1];
+      }
     } else {
       lambda = arma_weights[n - 1];
     }
@@ -888,7 +896,11 @@ struct RollMeanOnlineVec {
     long double sum_x = 0;
     
     if (width > 1) {
-      lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      if (n > 1) {
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      } else {
+        lambda = arma_weights[n - 1];
+      }
     } else {
       lambda = arma_weights[n - 1];
     }
@@ -1928,7 +1940,12 @@ struct RollQuantileOnlineVec {
       
       if (width > 1) {
         
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+        if (n > 1) {
+          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+        } else {
+          lambda = arma_weights[n - 1];
+        }
+        
         sum_lower_w = lambda * sum_lower_w;
         sum_upper_w = lambda * sum_upper_w;
         
@@ -2300,7 +2317,11 @@ struct RollVarOnlineVec {
     long double mean_x = 0;
     
     if (width > 1) {
-      lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      if (n > 1) {
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      } else {
+        lambda = arma_weights[n - 1];
+      }
     } else {
       lambda = arma_weights[n - 1];
     }
@@ -2622,7 +2643,11 @@ struct RollSdOnlineVec {
     long double var_x = 0;
     
     if (width > 1) {
-      lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      if (n > 1) {
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      } else {
+        lambda = arma_weights[n - 1];
+      }
     } else {
       lambda = arma_weights[n - 1];
     }
@@ -2956,7 +2981,11 @@ struct RollScaleOnlineVec {
     long double x_ij = 0;
     
     if (width > 1) {
-      lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      if (n > 1) {
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      } else {
+        lambda = arma_weights[n - 1];
+      }
     } else {
       lambda = arma_weights[n - 1];
     }
@@ -3353,7 +3382,11 @@ struct RollCovOnlineVecXX {
     long double mean_x = 0;
     
     if (width > 1) {
-      lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      if (n > 1) {
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      } else {
+        lambda = arma_weights[n - 1];
+      }
     } else {
       lambda = arma_weights[n - 1];
     }
@@ -3631,7 +3664,11 @@ struct RollCovOnlineVecXY {
     long double mean_y = 0;
     
     if (width > 1) {
-      lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      if (n > 1) {
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      } else {
+        lambda = arma_weights[n - 1];
+      }
     } else {
       lambda = arma_weights[n - 1];
     }
@@ -4286,7 +4323,11 @@ struct RollCrossProdOnlineVecXX {
     long double mean_x = 0;
     
     if (width > 1) {
-      lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      if (n > 1) {
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      } else {
+        lambda = arma_weights[n - 1];
+      }
     } else {
       lambda = arma_weights[n - 1];
     }
@@ -4565,7 +4606,11 @@ struct RollCrossProdOnlineVecXY {
     long double mean_y = 0;
     
     if (width > 1) {
-      lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      if (n > 1) {
+        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+      } else {
+        lambda = arma_weights[n - 1];
+      }
     } else {
       lambda = arma_weights[n - 1];
     }

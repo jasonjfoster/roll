@@ -223,33 +223,7 @@ CharacterVector dimnames_lm_y(const List& input, const int& n_cols_y) {
   
 }
 
-IntegerVector any_na_i(const IntegerMatrix& x) {
-  
-  int n_rows_x = x.nrow();
-  int n_cols_x = x.ncol();
-  IntegerVector result(n_rows_x);
-  
-  for (int i = 0; i < n_rows_x; i++) {
-    
-    int any_na = 0;
-    int j = 0;
-    
-    while ((any_na == 0) && (j < n_cols_x)) {
-      if (x(i, j) == NA_INTEGER) {
-        any_na = 1;
-      }
-      j += 1;
-    }
-    
-    result[i] = any_na;
-    
-  }
-  
-  return result;
-  
-}
-
-arma::uvec any_na_i_NEW(const IntegerMatrix& x) {
+arma::uvec any_na_i(const IntegerMatrix& x) {
   
   int n_rows_x = x.nrow();
   int n_cols_x = x.ncol();
@@ -377,7 +351,7 @@ SEXP roll_any(const SEXP& x, const int& width,
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
     if (complete_obs) {
-      arma_any_na = any_na_i_NEW(x);
+      arma_any_na = any_na_i(x);
     } else {
       arma_any_na.fill(0);
     }
@@ -482,7 +456,7 @@ SEXP roll_all(const SEXP& x, const int& width,
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
     if (complete_obs) {
-      arma_any_na = any_na_i_NEW(x);
+      arma_any_na = any_na_i(x);
     } else {
       arma_any_na.fill(0);
     }
