@@ -107,7 +107,7 @@ test_that("equal to online algorithm", {
                                        test_weights[[f]], test_min_obs[c],
                                        test_complete_obs[d], test_na_restore[e],
                                        test_online[2]))
-
+              
               # "'online' is only supported for equal 'weights'"
               expect_equal(roll_median(test_roll_x[[ax]], width,
                                        rep(1, width), test_min_obs[c],

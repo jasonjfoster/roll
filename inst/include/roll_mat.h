@@ -145,7 +145,7 @@ struct RollAnyOfflineMat : public Worker {
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        for (int count = 0; width > count && i >= count; count++) {
+        for (int count = 0; (count < width) && (count <= i); count++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
@@ -319,7 +319,7 @@ struct RollAllOfflineMat : public Worker {
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        for (int count = 0; width > count && i >= count; count++) {
+        for (int count = 0; (count < width) && (count <= i); count++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
@@ -802,7 +802,7 @@ struct RollProdOfflineMat : public Worker {
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        for (int count = 0; width > count && i >= count; count++) {
+        for (int count = 0; (count < width) && (count <= i); count++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
@@ -1207,7 +1207,7 @@ struct RollMinOfflineMat : public Worker {
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        for (int count = 0; width > count && i >= count; count++) {
+        for (int count = 0; (count < width) && (count <= i); count++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
@@ -1388,7 +1388,7 @@ struct RollMaxOfflineMat : public Worker {
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        for (int count = 0; width > count && i >= count; count++) {
+        for (int count = 0; (count < width) && (count <= i); count++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
@@ -1929,7 +1929,7 @@ struct RollQuantileOnlineMat : public Worker {
         // 
         // // number of observations is either the window size or,
         // // for partial results, the number of the current row
-        // for (int count = 0; width > count && i >= count; count++) {
+        // for (int count = 0; (count < width) && (count <= i); count++) {
         //   
         //   // don't include if missing value and 'any_na' argument is 1
         //   // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
@@ -2537,7 +2537,7 @@ struct RollVarOfflineMat : public Worker {
           
           // number of observations is either the window size or,
           // for partial results, the number of the current row
-          for (int count = 0; width > count && i >= count; count++) {
+          for (int count = 0; (count < width) && (count <= i); count++) {
             
             // don't include if missing value and 'any_na' argument is 1
             // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
@@ -2565,7 +2565,7 @@ struct RollVarOfflineMat : public Worker {
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        for (int count = 0; width > count && i >= count; count++) {
+        for (int count = 0; (count < width) && (count <= i); count++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
@@ -5216,7 +5216,7 @@ struct RollCrossProdOfflineMatXX : public Worker {
           
           // number of observations is either the window size or,
           // for partial results, the number of the current row
-          for (int count = 0; width > count && i >= count; count++) {
+          for (int count = 0; (count < width) && (count <= i); count++) {
             
             // don't include if missing value and 'any_na' argument is 1
             // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
@@ -5244,7 +5244,7 @@ struct RollCrossProdOfflineMatXX : public Worker {
           
           // number of observations is either the window size or,
           // for partial results, the number of the current row
-          for (int count = 0; width > count && i >= count; count++) {
+          for (int count = 0; (count < width) && (count <= i); count++) {
             
             // don't include if missing value and 'any_na' argument is 1
             // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
@@ -5283,7 +5283,7 @@ struct RollCrossProdOfflineMatXX : public Worker {
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        for (int count = 0; width > count && i >= count; count++) {
+        for (int count = 0; (count < width) && (count <= i); count++) {
           
           // don't include if missing value and 'any_na' argument is 1
           // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE

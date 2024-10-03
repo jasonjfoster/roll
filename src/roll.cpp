@@ -16,28 +16,6 @@ void check_width(const int& width) {
   
 }
 
-void check_weights_p(const arma::vec& weights) {
-  
-  int n = weights.size();
-  int any_leq = 0;
-  int i = 0;
-  
-  while ((any_leq == 0) && (i < n)) {
-    
-    if (weights[i] <= 0) {
-      any_leq = 1;
-    }
-    
-    i += 1;
-    
-  }
-  
-  if (any_leq > 0) {
-    stop("values of 'weights' must be greater than zero");
-  }
-  
-}
-
 void check_weights_x(const int& n_rows_x, const int& width,
                      const arma::vec& weights) {
   
@@ -75,13 +53,12 @@ bool check_lambda(const arma::vec& weights, const int& n_rows_x,
   // check if exponential-weights
   if (!status_eq) {
     
-    int i = 0;
     int n = weights.size();
     long double lambda = 0;
     long double lambda_prev = 0;
     
     // check if constant ratio
-    while (status_exp && (i <= (n - 2))) {
+    for (int i = 0; (i < n - 1) && status_exp; i++) {
       
       // ratio of weights
       lambda_prev = lambda;
@@ -95,8 +72,6 @@ bool check_lambda(const arma::vec& weights, const int& n_rows_x,
         status_exp = false;
         
       }
-      
-      i += 1;
       
     }
     
@@ -155,46 +130,51 @@ void update_n_obs(int& n_obs, const  bool& is_na,
 List dimnames_lm_x(const List& input, const int& n_cols_x,
                    const bool& intercept) {
   
-  if (intercept && (input.size() > 1)) {
+  CharacterVector result(n_cols_x);
+  
+  if (input.size() > 1) {
     
     CharacterVector dimnames_cols = input[1];
-    CharacterVector result(n_cols_x);
-    result(0) = "(Intercept)";
     
-    std::copy(dimnames_cols.begin(), dimnames_cols.end(), result.begin() + 1);
-    
-    return List::create(input[0], result);
-    
-  } else if (!intercept && (input.size() > 1)) {
-    
-    return List::create(input[0], input[1]);
-    
-  } else if (intercept) {
-    
-    CharacterVector result(n_cols_x);
-    result(0) = "(Intercept)";
-    
-    for (int i = 1; i < n_cols_x; i++) {
+    if (intercept) {
+
+      result(0) = "(Intercept)";
       
-      result[i] = "x";
-      result[i] += i;
+      std::copy(dimnames_cols.begin(), dimnames_cols.end(), result.begin() + 1);
       
+      return List::create(input[0], result);
+      
+    } else {
+      return List::create(input[0], dimnames_cols);
     }
-    
-    return List::create(R_NilValue, result);
     
   } else {
     
-    CharacterVector result(n_cols_x);
-    
-    for (int i = 0; i < n_cols_x; i++) {
+    if (intercept) {
       
-      result[i] = "x";
-      result[i] += i + 1;
+      result(0) = "(Intercept)";
+      
+      for (int i = 1; i < n_cols_x; i++) {
+        
+        result[i] = "x";
+        result[i] += i;
+        
+      }
+      
+      return List::create(R_NilValue, result);
+      
+    } else {
+      
+      for (int i = 0; i < n_cols_x; i++) {
+        
+        result[i] = "x";
+        result[i] += i + 1;
+        
+      }
+      
+      return List::create(R_NilValue, result);
       
     }
-    
-    return List::create(R_NilValue, result);
     
   }
   
@@ -232,13 +212,11 @@ arma::uvec any_na_i(const IntegerMatrix& x) {
   for (int i = 0; i < n_rows_x; i++) {
     
     int any_na = 0;
-    int j = 0;
     
-    while ((any_na == 0) && (j < n_cols_x)) {
+    for (int j = 0; (j < n_cols_x) && (any_na == 0); j++) {
       if (x(i, j) == NA_INTEGER) {
         any_na = 1;
       }
-      j += 1;
     }
     
     result[i] = any_na;
@@ -258,13 +236,11 @@ arma::uvec any_na_x(const NumericMatrix& x) {
   for (int i = 0; i < n_rows_x; i++) {
     
     int any_na = 0;
-    int j = 0;
     
-    while ((any_na == 0) && (j < n_cols_x)) {
+    for (int j = 0; (j < n_cols_x) && (any_na == 0); j++) {
       if (std::isnan(x(i, j))) {
         any_na = 1;
       }
-      j += 1;
     }
     
     result[i] = any_na;
@@ -285,21 +261,17 @@ arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
   for (int i = 0; i < n_rows_xy; i++) {
     
     int any_na = 0;
-    int j = 0;
-    int k = 0;
     
-    while ((any_na == 0) && (j < n_cols_x)) {
+    for (int j = 0; (j < n_cols_x) && (any_na == 0); j++) {
       if (std::isnan(x(i, j))) {
         any_na = 1;
       }
-      j += 1;
     }
     
-    while ((any_na == 0) && (k < n_cols_y)) {
+    for (int k = 0; (k < n_cols_y) && (any_na == 0); k++) {
       if (std::isnan(y(i, k))) {
         any_na = 1;
       }
-      k += 1;
     }
     
     result[i] = any_na;
@@ -921,7 +893,7 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights_p(weights);
+    check_weights_x(n_rows_x, width, weights);
     
     // check 'p' argument for errors
     check_p(p);
@@ -1006,7 +978,7 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights_p(weights);
+    check_weights_x(n_rows_x, width, weights);
     
     // check 'p' argument for errors
     check_p(p);
@@ -1094,7 +1066,7 @@ SEXP roll_quantile(const SEXP& x, const int& width,
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights_p(weights);
+    check_weights_x(n_rows_x, width, weights);
     
     // check 'p' argument for errors
     check_p(p);
@@ -1199,7 +1171,7 @@ SEXP roll_quantile(const SEXP& x, const int& width,
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights_p(weights);
+    check_weights_x(n_rows_x, width, weights);
     
     // check 'p' argument for errors
     check_p(p);
