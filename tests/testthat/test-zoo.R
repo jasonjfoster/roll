@@ -93,11 +93,11 @@ test_that("equivalent to zoo::rollapply", {
         for (g in 1:length(test_p)) {
           
           expect_equal(roll_quantile(test_zoo_x[[ax]], width,
-                                     test_weights[[1]], test_p[[g]],
+                                     test_weights[[1]], test_p[g],
                                      test_min_obs[1], test_complete_obs[2],
                                      test_na_restore[2], test_online[i]),
                        zoo::rollapplyr(test_zoo_x[[ax]], width = width,
-                                       quantile, probs = test_p[[g]],
+                                       quantile, probs = test_p[g],
                                        type = 2, names = FALSE,
                                        partial = TRUE))
 

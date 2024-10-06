@@ -122,11 +122,11 @@ test_that("equal to online algorithm", {
                 
                 # "'online' is only supported for equal 'weights'"
                 expect_equal(roll_quantile(test_roll_x[[ax]],  width,
-                                           rep(1, width), test_p[[g]],
+                                           rep(1, width), test_p[g],
                                            test_min_obs[c], test_complete_obs[d],
                                            test_na_restore[e], test_online[1]),
                              roll_quantile(test_roll_x[[ax]], width,
-                                           rep(1, width), test_p[[g]],
+                                           rep(1, width), test_p[g],
                                            test_min_obs[c], test_complete_obs[d],
                                            test_na_restore[e], test_online[2]))
                 
