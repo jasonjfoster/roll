@@ -625,14 +625,6 @@ struct RollProdOnlineMat : public Worker {
       long double prod_w = 1;
       long double prod_x = 1;
       
-      if (arma_weights[n - 1] == 0) {
-        lambda = 1;
-      } else if (width > 1) {
-        
-      } else {
-        lambda = arma_weights[n - 1];
-      }
-      
       for (int i = 0; i < n_rows_x; i++) {
         
         // w_new = 1;
@@ -5604,6 +5596,7 @@ struct RollLmMatInterceptTRUE : public Worker {
   void operator()(std::size_t begin_slice, std::size_t end_slice) {
     for (std::size_t i = begin_slice; i < end_slice; i++) {
       
+      arma::rowvec no_solution(n_cols_x, arma::fill::value(NA_REAL));
       arma::mat sigma = arma_cov.slice(i);
       arma::mat A = sigma.submat(0, 0, n_cols_x - 2, n_cols_x - 2);
       arma::mat b = sigma.submat(0, n_cols_x - 1, n_cols_x - 2, n_cols_x - 1);
@@ -5626,47 +5619,42 @@ struct RollLmMatInterceptTRUE : public Worker {
           
           // intercept
           arma::mat mean_x = arma_mean.submat(i, 0, i, n_cols_x - 2);
-          arma_coef(i, 0) = arma_mean(i, n_cols_x - 1) -
-            as_scalar(mean_x * coef);
+          arma_coef(i, 0) = arma_mean(i, n_cols_x - 1) - arma::dot(mean_x, coef);
           
           // coefficients
-          arma::mat trans_coef = trans(coef);
-          arma_coef.submat(i, 1, i, n_cols_x - 1) = trans_coef;
+          arma_coef.submat(i, 1, i, n_cols_x - 1) = trans(coef);
           
           // r-squared
           long double var_y = sigma(n_cols_x - 1, n_cols_x - 1);
-          if ((var_y < 0) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {      
+          
+          if (var_y < 0) {
+            arma_rsq[i] = NA_REAL;
+          } if (sqrt(var_y) <= sqrt(arma::datum::eps)) {      
             arma_rsq[i] = NA_REAL;
           } else {
-            arma_rsq[i] = as_scalar(trans_coef * A * coef) / var_y;
+            arma_rsq[i] = arma::dot(coef, A * coef) / var_y;
           }
           
-          // check if matrix is singular
-          arma::mat A_inv(n_cols_x, n_cols_x);
-          bool status_inv = arma::inv(A_inv, A);
           int df_resid = arma_n_obs[i] - n_cols_x;
           
-          if (status_inv && (df_resid > 0)) {
+          if (df_resid > 0) {
+            
+            // use solve to get diag of A_inv without explicit inversion
+            arma::mat I = arma::eye(A.n_rows, A.n_cols);
+            arma::mat A_inv_diag = arma::solve(A, I);
             
             // standard errors
             long double var_resid = (1 - arma_rsq[i]) * var_y / df_resid;
+            
             arma_se(i, 0) = sqrt(var_resid * (1 / arma_sum_w[i] +
-              as_scalar(mean_x * A_inv * trans(mean_x))));
-            arma_se.submat(i, 1, i, n_cols_x - 1) = sqrt(var_resid * trans(diagvec(A_inv)));
+              arma::dot(mean_x, A_inv_diag * trans(mean_x))));
+            arma_se.submat(i, 1, i, n_cols_x - 1) = sqrt(var_resid * trans(diagvec(A_inv_diag)));
             
           } else {
-            
-            arma::rowvec no_solution(n_cols_x);
-            no_solution.fill(NA_REAL);
-            
             arma_se.row(i) = no_solution;
-            
           }
           
         } else {
-          
-          arma::rowvec no_solution(n_cols_x);
-          no_solution.fill(NA_REAL);
           
           arma_coef.row(i) = no_solution;
           arma_rsq[i] = NA_REAL;
@@ -5675,9 +5663,6 @@ struct RollLmMatInterceptTRUE : public Worker {
         }
         
       } else {
-        
-        arma::rowvec no_solution(n_cols_x);
-        no_solution.fill(NA_REAL);
         
         arma_coef.row(i) = no_solution;
         arma_rsq[i] = NA_REAL;
