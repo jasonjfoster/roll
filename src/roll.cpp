@@ -886,8 +886,8 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
     int n = weights.size();
     int n_rows_x = xx.nrow();
     int n_cols_x = xx.ncol();
-    IntegerVector rcpp_any_na(n_rows_x);
-    IntegerMatrix rcpp_idxquantile(n_rows_x, n_cols_x);
+    arma::uvec arma_any_na(n_rows_x);
+    arma::imat arma_idxquantile(n_rows_x, n_cols_x);
     
     // check 'width' argument for errors
     check_width(width);
@@ -906,9 +906,9 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
     if (complete_obs) {
-      rcpp_any_na = any_na_x(xx);
+      arma_any_na = any_na_x(xx);
     } else {
-      rcpp_any_na.fill(0);
+      arma_any_na.fill(0);
     }
     
     // compute rolling index of quantiles
@@ -918,16 +918,16 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
         
         roll::RollIdxMinOnlineMat roll_idxmin_online(xx, n, n_rows_x, n_cols_x, width,
                                                      weights, min_obs,
-                                                     rcpp_any_na, na_restore,
-                                                     rcpp_idxquantile);
+                                                     arma_any_na, na_restore,
+                                                     arma_idxquantile);
         parallelFor(0, n_cols_x, roll_idxmin_online);
         
       } else if (p == 1) {
         
         roll::RollIdxMaxOnlineMat roll_idxmax_online(xx, n, n_rows_x, n_cols_x, width,
                                                      weights, min_obs,
-                                                     rcpp_any_na, na_restore,
-                                                     rcpp_idxquantile);
+                                                     arma_any_na, na_restore,
+                                                     arma_idxquantile);
         parallelFor(0, n_cols_x, roll_idxmax_online);
         
       }
@@ -938,16 +938,16 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
         
         roll::RollIdxMinOfflineMat roll_idxmin_offline(xx, n, n_rows_x, n_cols_x, width,
                                                        weights, min_obs,
-                                                       rcpp_any_na, na_restore,
-                                                       rcpp_idxquantile);
+                                                       arma_any_na, na_restore,
+                                                       arma_idxquantile);
         parallelFor(0, n_rows_x * n_cols_x, roll_idxmin_offline);
         
       } else if (p == 1) {
         
         roll::RollIdxMaxOfflineMat roll_idxmax_offline(xx, n, n_rows_x, n_cols_x, width,
                                                        weights, min_obs,
-                                                       rcpp_any_na, na_restore,
-                                                       rcpp_idxquantile);
+                                                       arma_any_na, na_restore,
+                                                       arma_idxquantile);
         parallelFor(0, n_rows_x * n_cols_x, roll_idxmax_offline);
         
       }
@@ -955,7 +955,7 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
     }
     
     // create and return a matrix or xts object
-    IntegerMatrix result(rcpp_idxquantile);
+    IntegerMatrix result(wrap(arma_idxquantile));
     List dimnames = xx.attr("dimnames");
     result.attr("dimnames") = dimnames;
     result.attr("index") = xx.attr("index");
