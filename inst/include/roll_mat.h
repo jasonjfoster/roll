@@ -3191,13 +3191,12 @@ struct RollScaleOfflineMat : public Worker {
       int i = z / n_cols_x;
       int j = z % n_cols_x;
       
-      long double mean_x = 0;
-      long double var_x = 0;
-      
       // don't compute if missing value and 'na_restore' argument is TRUE
       if (!na_restore || !std::isnan(x(i, j))) {
         
         bool is_na = false;
+        long double mean_x = 0;
+        long double var_x = 0;
         
         if (center) {
           
@@ -4047,15 +4046,14 @@ struct RollCovOfflineMatXX : public Worker {
         floor((sqrt((long double)(4 * n_cols_x * (n_cols_x + 1) - (7 + 8 * z_unique))) - 1) / 2) - 1;
       int j = z_unique - n_cols_x * k + k * (k + 1) / 2;
       
-      long double sumsq_x = 0;
-      long double sumsq_y = 0;
-      long double mean_x = 0;
-      long double mean_y = 0;
-      
       // don't compute if missing value and 'na_restore' argument is TRUE
       if (!na_restore || (!std::isnan(x(i, j)) && !std::isnan(x(i, k)))) {
         
         bool is_na = false;
+        long double sumsq_x = 0;
+        long double sumsq_y = 0;
+        long double mean_x = 0;
+        long double mean_y = 0;
         
         if (center) {
           
