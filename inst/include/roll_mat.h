@@ -3117,6 +3117,8 @@ struct RollScaleOnlineMat : public Worker {
           if (n_obs >= min_obs) {
             
             if (scale) {
+              
+              // don't divide if negative or sqrt is zero
               if (n_obs == 1) {
                 arma_scale(i, j) = NA_REAL;
               } else if (var_x < 0){
@@ -3128,6 +3130,7 @@ struct RollScaleOnlineMat : public Worker {
               } else {
                 arma_scale(i, j) = x_first / sqrt(var_x);
               }
+              
             } else {
               if (center) {
                 arma_scale(i, j) = x_first - mean_x;
@@ -3290,6 +3293,8 @@ struct RollScaleOfflineMat : public Worker {
         if (n_obs >= min_obs) {
           
           if (scale) {
+            
+            // don't divide if negative or sqrt is zero
             if (n_obs == 1) {
               arma_scale(i, j) = NA_REAL;
             } else if (var_x < 0){
@@ -3301,6 +3306,7 @@ struct RollScaleOfflineMat : public Worker {
             } else {
               arma_scale(i, j) = x_first / sqrt(var_x);
             }
+            
           } else {
             if (center) {
               arma_scale(i, j) = x_first - mean_x;
@@ -3564,60 +3570,60 @@ struct RollCovOnlineMatXX : public Worker {
               
             }
             
-          } else {
-            
-            lambda = arma_weights[n - 1];
-            
-            if (!is_na) {
-              
-              w_new = arma_weights[n - 1];
-              x_new = x(i, j);
-              y_new = x(i, k);
-              
-            } else {
-              
-              w_new = 0;
-              x_new = 0;
-              y_new = 0;
-              
-            }
-            
-            sum_w = w_new;
-            sum_x = w_new * x_new;
-            sum_y = w_new * y_new;
-            sumsq_w = w_new * w_new;
-            
-            if (center && (n_obs > 0)) {
-              
-              // compute the mean
-              mean_x = sum_x / sum_w;
-              mean_y = sum_y / sum_w;
-              
-            }
-            
-            if (scale) {
-              
-              // compute the sum of squares
-              if (!is_na) {
-                
-                sumsq_x = w_new * (x_new - mean_x) * (x_new - mean_x);
-                sumsq_y = w_new * (y_new - mean_y) * (y_new - mean_y);
-                
-              } else {
-                
-                sumsq_x = 0;
-                sumsq_y = 0;
-                
-              }
-              
-            }
-            
-            // compute the sum of squares
-            if (!is_na) {
-              sumsq_xy = w_new * (x_new - mean_x) * (y_new - mean_y);
-            } else {
-              sumsq_xy = 0;
-            }
+            // } else {
+            //   
+            //   lambda = arma_weights[n - 1];
+            //   
+            //   if (!is_na) {
+            //     
+            //     w_new = arma_weights[n - 1];
+            //     x_new = x(i, j);
+            //     y_new = x(i, k);
+            //     
+            //   } else {
+            //     
+            //     w_new = 0;
+            //     x_new = 0;
+            //     y_new = 0;
+            //     
+            //   }
+            //   
+            //   sum_w = w_new;
+            //   sum_x = w_new * x_new;
+            //   sum_y = w_new * y_new;
+            //   sumsq_w = w_new * w_new;
+            //   
+            //   if (center && (n_obs > 0)) {
+            //     
+            //     // compute the mean
+            //     mean_x = sum_x / sum_w;
+            //     mean_y = sum_y / sum_w;
+            //     
+            //   }
+            //   
+            //   if (scale) {
+            //     
+            //     // compute the sum of squares
+            //     if (!is_na) {
+            //       
+            //       sumsq_x = w_new * (x_new - mean_x) * (x_new - mean_x);
+            //       sumsq_y = w_new * (y_new - mean_y) * (y_new - mean_y);
+            //       
+            //     } else {
+            //       
+            //       sumsq_x = 0;
+            //       sumsq_y = 0;
+            //       
+            //     }
+            //     
+            //   }
+            //   
+            //   // compute the sum of squares
+            //   if (!is_na) {
+            //     sumsq_xy = w_new * (x_new - mean_x) * (y_new - mean_y);
+            //   } else {
+            //     sumsq_xy = 0;
+            //   }
             
           }
           
@@ -3629,7 +3635,11 @@ struct RollCovOnlineMatXX : public Worker {
               
               if (scale) {
                 
-                // don't compute if negative or sqrt is zero
+                // if (n_obs == 1) {
+                //   arma_cov(j, k, i) = NA_REAL;
+                // }
+                
+                // don't divide if negative or sqrt is zero
                 if ((sumsq_x < 0) || (sumsq_y < 0)) {
                   arma_cov(j, k, i) = NA_REAL;
                 } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
@@ -3968,7 +3978,7 @@ struct RollCovOnlineMatXY : public Worker {
                 
                 if (scale) {
                   
-                  // don't compute if negative or sqrt is zero
+                  // don't divide if negative or sqrt is zero
                   if ((sumsq_x < 0) || (sumsq_y < 0)) {
                     arma_cov(j, k, i) = NA_REAL;
                   } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
@@ -4163,7 +4173,11 @@ struct RollCovOfflineMatXX : public Worker {
           
           if (scale) {
             
-            // don't compute if negative or sqrt is zero
+            // if (n_obs == 1) {
+            //   arma_cov(j, k, i) = NA_REAL;
+            // }
+            
+            // don't divide if negative or sqrt is zero
             if ((sumsq_x < 0) || (sumsq_y < 0)) {
               arma_cov(j, k, i) = NA_REAL;
             } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
@@ -4361,7 +4375,7 @@ struct RollCovOfflineMatXY : public Worker {
             
             if (scale) {
               
-              // don't compute if negative or sqrt is zero
+              // don't divide if negative or sqrt is zero
               if ((sumsq_x < 0) || (sumsq_y < 0)) {
                 arma_cov(j, k, i) = NA_REAL;
               } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
@@ -4711,7 +4725,11 @@ struct RollCrossProdOnlineMatXX : public Worker {
               
               if (scale) {
                 
-                // don't compute if negative or sqrt is zero
+                // if (n_obs == 1) {
+                //   arma_cov(j, k, i) = NA_REAL;
+                // }
+                
+                // don't divide if negative or sqrt is zero
                 if ((sumsq_x < 0) || (sumsq_y < 0)) {
                   arma_cov(j, k, i) = NA_REAL;
                 } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
@@ -5051,7 +5069,7 @@ struct RollCrossProdOnlineMatXY : public Worker {
                 
                 if (scale) {
                   
-                  // don't compute if negative or sqrt is zero
+                  // don't divide if negative or sqrt is zero
                   if ((sumsq_x < 0) || (sumsq_y < 0)) {
                     arma_cov(j, k, i) = NA_REAL;
                   } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
@@ -5269,7 +5287,11 @@ struct RollCrossProdOfflineMatXX : public Worker {
           
           if (scale) {
             
-            // don't compute if negative or sqrt is zero
+            // if (n_obs == 1) {
+            //   arma_cov(j, k, i) = NA_REAL;
+            // }
+            
+            // don't divide if negative or sqrt is zero
             if ((sumsq_x < 0) || (sumsq_y < 0)) {
               arma_cov(j, k, i) = NA_REAL;
             } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
@@ -5468,7 +5490,7 @@ struct RollCrossProdOfflineMatXY : public Worker {
             
             if (scale) {
               
-              // don't compute if negative or sqrt is zero
+              // don't divide if negative or sqrt is zero
               if ((sumsq_x < 0) || (sumsq_y < 0)) {
                 arma_cov(j, k, i) = NA_REAL;
               } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
