@@ -5549,6 +5549,7 @@ struct RollLmMatInterceptTRUE : public Worker {
           // r-squared
           long double var_y = sigma(n_cols_x - 1, n_cols_x - 1);
           
+          // don't divide if negative or sqrt is zero
           if (var_y < 0) {
             arma_rsq[i] = NA_REAL;
           } if (sqrt(var_y) <= sqrt(arma::datum::eps)) {      
@@ -5562,7 +5563,7 @@ struct RollLmMatInterceptTRUE : public Worker {
           if (df_resid > 0) {
             
             // use solve to get diag of A_inv without explicit inversion
-            arma::mat I = arma::eye(A.n_rows, A.n_cols);
+            arma::mat I = arma::eye(n_cols_x - 1, n_cols_x - 1);
             arma::mat A_inv_diag = arma::solve(A, I);
             
             // standard errors
@@ -5627,6 +5628,7 @@ struct RollLmMatInterceptFALSE : public Worker {
   void operator()(std::size_t begin_slice, std::size_t end_slice) {
     for (std::size_t i = begin_slice; i < end_slice; i++) {
       
+      arma::rowvec no_solution(n_cols_x - 1, arma::fill::value(NA_REAL));
       arma::mat sigma = arma_cov.slice(i);
       arma::mat A = sigma.submat(0, 0, n_cols_x - 2, n_cols_x - 2);
       arma::mat b = sigma.submat(0, n_cols_x - 1, n_cols_x - 2, n_cols_x - 1);
@@ -5648,56 +5650,50 @@ struct RollLmMatInterceptFALSE : public Worker {
         if (status_solve && (arma_n_obs[i] >= df_fit)) {
           
           // coefficients
-          arma::mat trans_coef = trans(coef);
-          arma_coef.row(i) = trans_coef;
+          arma_coef.row(i) = trans(coef);
           
           // r-squared
           long double var_y = sigma(n_cols_x - 1, n_cols_x - 1);
-          if ((var_y < 0) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {      
+          
+          // don't divide if negative or sqrt is zero
+          if (var_y < 0) {
+            arma_rsq[i] = NA_REAL;          
+          } else if (sqrt(var_y) <= sqrt(arma::datum::eps)) {      
             arma_rsq[i] = NA_REAL;
           } else {
-            arma_rsq[i] = as_scalar(trans_coef * A * coef) / var_y;
+            arma_rsq[i] = arma::dot(coef, A * coef) / var_y;
           }
           
-          // check if matrix is singular
-          arma::mat A_inv(n_cols_x, n_cols_x);
-          bool status_inv = arma::inv(A_inv, A);
           int df_resid = arma_n_obs[i] - n_cols_x + 1;
           
-          if (status_inv && (df_resid > 0)) {
+          if (df_resid > 0) {
+            
+            // use solve to get diag of A_inv without explicit inversion
+            arma::mat I = arma::eye(n_cols_x - 1, n_cols_x - 1);
+            arma::mat A_inv_diag = arma::solve(A, I);
             
             // standard errors
             long double var_resid = (1 - arma_rsq[i]) * var_y / df_resid;
-            arma_se.row(i) = sqrt(var_resid * trans(diagvec(A_inv)));
+            
+            arma_se.row(i) = sqrt(var_resid * trans(diagvec(A_inv_diag)));
             
           } else {
-            
-            arma::vec no_solution(n_cols_x - 1);
-            no_solution.fill(NA_REAL);
-            
-            arma_se.row(i) = trans(no_solution);
-            
+            arma_se.row(i) = no_solution;
           }
           
         } else {
           
-          arma::vec no_solution(n_cols_x - 1);
-          no_solution.fill(NA_REAL);
-          
-          arma_coef.row(i) = trans(no_solution);
+          arma_coef.row(i) = no_solution;
           arma_rsq[i] = NA_REAL;
-          arma_se.row(i) = trans(no_solution);
+          arma_se.row(i) = no_solution;
           
         }
         
       } else {
         
-        arma::vec no_solution(n_cols_x - 1);
-        no_solution.fill(NA_REAL);
-        
-        arma_coef.row(i) = trans(no_solution);
+        arma_coef.row(i) = no_solution;
         arma_rsq[i] = NA_REAL;
-        arma_se.row(i) = trans(no_solution);
+        arma_se.row(i) = no_solution;
         
       }
       
