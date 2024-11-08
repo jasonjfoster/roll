@@ -434,13 +434,10 @@ struct RollSumOnlineMat : public Worker {
             
           }
           
-          // expanding window
-          if (i < width) {
+          sum_x = lambda * sum_x + w_new * x_new;
             
-            sum_x = lambda * sum_x + w_new * x_new;
-            
-            // rolling window
-          } else {
+          // rolling window
+          if (i >= width) {
             
             if (!is_na_old) {
               
@@ -454,7 +451,7 @@ struct RollSumOnlineMat : public Worker {
               
             }
             
-            sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+            sum_x -= lambda * w_old * x_old;
             
           }
           
@@ -664,14 +661,11 @@ struct RollProdOnlineMat : public Worker {
             w_new /= lambda;
           }
           
-          // expanding window
-          if (i < width) {
-            
-            prod_w *= w_new;
-            prod_x *= x_new;
-            
-            // rolling window
-          } else {
+          prod_w *= w_new;
+          prod_x *= x_new;
+          
+          // rolling window
+          if (i >= width) {
             
             if (!is_na_old) {
               
@@ -688,8 +682,8 @@ struct RollProdOnlineMat : public Worker {
               
             }
             
-            prod_w *= w_new / w_old;
-            prod_x *= x_new / x_old;
+            prod_w /= w_old;
+            prod_x /= x_old;
             
           }
           
@@ -895,14 +889,11 @@ struct RollMeanOnlineMat : public Worker {
             
           }
           
-          // expanding window
-          if (i < width) {
-            
-            sum_w = lambda * sum_w + w_new;
-            sum_x = lambda * sum_x + w_new * x_new;
-            
-            // rolling window
-          } else {
+          sum_w = lambda * sum_w + w_new;
+          sum_x = lambda * sum_x + w_new * x_new;
+          
+          // rolling window
+          if (i >= width) {
             
             if (!is_na_old) {
               
@@ -917,8 +908,8 @@ struct RollMeanOnlineMat : public Worker {
               
             }
             
-            sum_w = lambda * sum_w + w_new - lambda * w_old;
-            sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
+            sum_w -= lambda * w_old;
+            sum_x -= lambda * w_old * x_old;
             
           }
           
@@ -2310,12 +2301,12 @@ struct RollVarOnlineMat : public Worker {
             
           }
           
+          sum_w = lambda * sum_w + w_new;
+          sum_x = lambda * sum_x + w_new * x_new;
+          sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
+          
           // expanding window
           if (i < width) {
-            
-            sum_w = lambda * sum_w + w_new;
-            sum_x = lambda * sum_x + w_new * x_new;
-            sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
             
             if (center && (n_obs > 0)) {
               
@@ -2350,9 +2341,9 @@ struct RollVarOnlineMat : public Worker {
               
             }
             
-            sum_w = lambda * sum_w + w_new - lambda * w_old;
-            sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-            sumsq_w = lambda_sq * sumsq_w + w_new * w_new - lambda_sq * w_old * w_old;
+            sum_w -= lambda * w_old;
+            sum_x -= lambda * w_old * x_old;
+            sumsq_w -= lambda_sq * w_old * w_old;
             
             if (center) {
               
@@ -2616,12 +2607,12 @@ struct RollSdOnlineMat : public Worker {
             
           }
           
+          sum_w = lambda * sum_w + w_new;
+          sum_x = lambda * sum_x + w_new * x_new;
+          sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
+          
           // expanding window
           if (i < width) {
-            
-            sum_w = lambda * sum_w + w_new;
-            sum_x = lambda * sum_x + w_new * x_new;
-            sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
             
             if (center && (n_obs > 0)) {
               
@@ -2658,9 +2649,9 @@ struct RollSdOnlineMat : public Worker {
               
             }
             
-            sum_w = lambda * sum_w + w_new - lambda * w_old;
-            sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-            sumsq_w = lambda_sq * sumsq_w + w_new * w_new - lambda_sq * w_old * w_old;
+            sum_w -= lambda * w_old;
+            sum_x -= lambda * w_old * x_old;
+            sumsq_w -= lambda_sq * w_old * w_old;
             
             if (center && (n_obs > 0)) {
               
@@ -2933,12 +2924,12 @@ struct RollScaleOnlineMat : public Worker {
             
           }
           
+          sum_w = lambda * sum_w + w_new;
+          sum_x = lambda * sum_x + w_new * x_new;
+          sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
+          
           // expanding window
           if (i < width) {
-            
-            sum_w = lambda * sum_w + w_new;
-            sum_x = lambda * sum_x + w_new * x_new;
-            sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
             
             if (center && (n_obs > 0)) {
               
@@ -2981,9 +2972,9 @@ struct RollScaleOnlineMat : public Worker {
               
             }
             
-            sum_w = lambda * sum_w + w_new - lambda * w_old;
-            sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-            sumsq_w = lambda_sq * sumsq_w + w_new * w_new - lambda_sq * w_old * w_old;
+            sum_w -= lambda * w_old;
+            sum_x -= lambda * w_old * x_old;
+            sumsq_w -= lambda_sq * w_old * w_old;
             
             if (center && (n_obs > 0)) {
               
@@ -3380,13 +3371,13 @@ struct RollCovOnlineMatXX : public Worker {
               
             }
             
+            sum_w = lambda * sum_w + w_new;
+            sum_x = lambda * sum_x + w_new * x_new;
+            sum_y = lambda * sum_y + w_new * y_new;
+            sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
+            
             // expanding window
             if (i < width) {
-              
-              sum_w = lambda * sum_w + w_new;
-              sum_x = lambda * sum_x + w_new * x_new;
-              sum_y = lambda * sum_y + w_new * y_new;
-              sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
               
               if (center && (n_obs > 0)) {
                 
@@ -3451,10 +3442,10 @@ struct RollCovOnlineMatXX : public Worker {
                 
               }
               
-              sum_w = lambda * sum_w + w_new - lambda * w_old;
-              sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-              sum_y = lambda * sum_y + w_new * y_new - lambda * w_old * y_old;
-              sumsq_w = lambda_sq * sumsq_w + w_new * w_new - lambda_sq * w_old * w_old;
+              sum_w -= lambda * w_old;
+              sum_x -= lambda * w_old * x_old;
+              sum_y -= lambda * w_old * y_old;
+              sumsq_w -= lambda_sq * w_old * w_old;
               
               if (center && (n_obs > 0)) {
                 
@@ -3731,13 +3722,13 @@ struct RollCovOnlineMatXY : public Worker {
               
             }
             
+            sum_w = lambda * sum_w + w_new;
+            sum_x = lambda * sum_x + w_new * x_new;
+            sum_y = lambda * sum_y + w_new * y_new;
+            sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
+            
             // expanding window
             if (i < width) {
-              
-              sum_w = lambda * sum_w + w_new;
-              sum_x = lambda * sum_x + w_new * x_new;
-              sum_y = lambda * sum_y + w_new * y_new;
-              sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
               
               if (center && (n_obs > 0)) {
                 
@@ -3802,10 +3793,10 @@ struct RollCovOnlineMatXY : public Worker {
                 
               }
               
-              sum_w = lambda * sum_w + w_new - lambda * w_old;
-              sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-              sum_y = lambda * sum_y + w_new * y_new - lambda * w_old * y_old;
-              sumsq_w = lambda_sq * sumsq_w + w_new * w_new - lambda_sq * w_old * w_old;
+              sum_w -= lambda * w_old;
+              sum_x -= lambda * w_old * x_old;
+              sum_y -= lambda * w_old * y_old;
+              sumsq_w -= lambda_sq * w_old * w_old;
               
               if (center && (n_obs > 0)) {
                 
@@ -4479,13 +4470,13 @@ struct RollCrossProdOnlineMatXX : public Worker {
               
             }
             
+            sum_w = lambda * sum_w + w_new;
+            sum_x = lambda * sum_x + w_new * x_new;
+            sum_y = lambda * sum_y + w_new * y_new;
+            // sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
+            
             // expanding window
             if (i < width) {
-              
-              sum_w = lambda * sum_w + w_new;
-              sum_x = lambda * sum_x + w_new * x_new;
-              sum_y = lambda * sum_y + w_new * y_new;
-              // sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
               
               if (center && (n_obs > 0)) {
                 
@@ -4543,10 +4534,10 @@ struct RollCrossProdOnlineMatXX : public Worker {
                 
               }
               
-              sum_w = lambda * sum_w + w_new - lambda * w_old;
-              sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-              sum_y = lambda * sum_y + w_new * y_new - lambda * w_old * y_old;
-              // sumsq_w = lambda_sq * sumsq_w + w_new * w_new - lambda_sq * w_old * w_old;
+              sum_w -= lambda * w_old;
+              sum_x -= lambda * w_old * x_old;
+              sum_y -= lambda * w_old * y_old;
+              // sumsq_w -= lambda_sq * w_old * w_old;
               
               if (center && (n_obs > 0)) {
                 
@@ -4836,13 +4827,13 @@ struct RollCrossProdOnlineMatXY : public Worker {
               
             }
             
+            sum_w = lambda * sum_w + w_new;
+            sum_x = lambda * sum_x + w_new * x_new;
+            sum_y = lambda * sum_y + w_new * y_new;
+            // sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
+            
             // expanding window
             if (i < width) {
-              
-              sum_w = lambda * sum_w + w_new;
-              sum_x = lambda * sum_x + w_new * x_new;
-              sum_y = lambda * sum_y + w_new * y_new;
-              // sumsq_w = lambda_sq * sumsq_w + w_new * w_new;
               
               if (center && (n_obs > 0)) {
                 
@@ -4900,10 +4891,10 @@ struct RollCrossProdOnlineMatXY : public Worker {
                 
               }
               
-              sum_w = lambda * sum_w + w_new - lambda * w_old;
-              sum_x = lambda * sum_x + w_new * x_new - lambda * w_old * x_old;
-              sum_y = lambda * sum_y + w_new * y_new - lambda * w_old * y_old;
-              // sumsq_w = lambda_sq * sumsq_w + w_new * w_new - lambda_sq * w_old * w_old;
+              sum_w -= lambda * w_old;
+              sum_x -= lambda * w_old * x_old;
+              sum_y -= lambda * w_old * y_old;
+              // sumsq_w -= lambda_sq * w_old * w_old;
               
               if (center && (n_obs > 0)) {
                 
