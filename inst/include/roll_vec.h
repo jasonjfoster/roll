@@ -8,9 +8,9 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
-arma::ivec stl_sort_index(arma::vec& x);
-
 namespace roll {
+
+arma::ivec stl_sort_index(arma::vec& x);
 
 // 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollAnyOnlineVec {

@@ -8,13 +8,13 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
+namespace roll {
+
 void update_n_obs(int& n_obs, const  bool& is_na,
                   const bool& is_na_old, const int& i,
                   const int& width);
 
 arma::ivec stl_sort_index(arma::vec& x);
-
-namespace roll {
 
 // 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollAnyOnlineMat : public Worker {
@@ -55,7 +55,7 @@ struct RollAnyOnlineMat : public Worker {
           is_na_old = (arma_any_na[i - width] != 0) || (x(i - width, j) == NA_INTEGER);
         }
         
-        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (!is_na) {
           
@@ -229,7 +229,7 @@ struct RollAllOnlineMat : public Worker {
           is_na_old = (arma_any_na[i - width] != 0) || (x(i - width, j) == NA_INTEGER);
         }
         
-        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (!is_na) {
           
@@ -412,7 +412,7 @@ struct RollSumOnlineMat : public Worker {
           is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
         
-        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (width > 1) {
           
@@ -632,7 +632,7 @@ struct RollProdOnlineMat : public Worker {
           is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
         
-        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (width > 1) {
           
@@ -867,7 +867,7 @@ struct RollMeanOnlineMat : public Worker {
           is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
         
-        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (width > 1) {
           
@@ -1080,7 +1080,7 @@ struct RollMinOnlineMat : public Worker {
           is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
         
-        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (width > 1) {
           
@@ -1261,7 +1261,7 @@ struct RollMaxOnlineMat : public Worker {
           is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
         
-        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (width > 1) {
           
@@ -1442,7 +1442,7 @@ struct RollIdxMinOnlineMat : public Worker {
           is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
         
-        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (width > 1) {
           
@@ -1635,7 +1635,7 @@ struct RollIdxMaxOnlineMat : public Worker {
           is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
         
-        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (width > 1) {
           
@@ -1863,7 +1863,7 @@ struct RollQuantileOnlineMat : public Worker {
           is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
         
-        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (width > 1) {
           
@@ -2277,7 +2277,7 @@ struct RollVarOnlineMat : public Worker {
           is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
         
-        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (width > 1) {
           
@@ -2583,7 +2583,7 @@ struct RollSdOnlineMat : public Worker {
           is_na_old = (arma_any_na[i - width] != 0) || (std::isnan(x(i - width, j)));
         }
         
-        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (width > 1) {
           
@@ -2899,7 +2899,7 @@ struct RollScaleOnlineMat : public Worker {
           
         }
         
-        update_n_obs(n_obs, is_na, is_na_old, i, width);
+        roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
         
         if (width > 1) {
           
@@ -3345,7 +3345,7 @@ struct RollCovOnlineMatXX : public Worker {
             
           }
           
-          update_n_obs(n_obs, is_na, is_na_old, i, width);
+          roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
           
           if (width > 1) {
             
@@ -3696,7 +3696,7 @@ struct RollCovOnlineMatXY : public Worker {
             
           }
           
-          update_n_obs(n_obs, is_na, is_na_old, i, width);
+          roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
           
           if (width > 1) {
             
@@ -4444,7 +4444,7 @@ struct RollCrossProdOnlineMatXX : public Worker {
             
           }
           
-          update_n_obs(n_obs, is_na, is_na_old, i, width);
+          roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
           
           if (width > 1) {
             
@@ -4801,7 +4801,7 @@ struct RollCrossProdOnlineMatXY : public Worker {
             
           }
           
-          update_n_obs(n_obs, is_na, is_na_old, i, width);
+          roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
           
           if (width > 1) {
             

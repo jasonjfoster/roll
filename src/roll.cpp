@@ -101,9 +101,9 @@ void check_lm(const int& n_rows_x, const int& n_rows_y) {
   
 }
 
-void update_n_obs(int& n_obs, const  bool& is_na,
-                  const bool& is_na_old, const int& i,
-                  const int& width) {
+void roll::update_n_obs(int& n_obs, const  bool& is_na,
+                        const bool& is_na_old, const int& i,
+                        const int& width) {
   
   // expanding window
   if (i < width) {
@@ -282,7 +282,7 @@ arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
   
 }
 
-arma::ivec stl_sort_index(arma::vec& x) {
+arma::ivec roll::stl_sort_index(arma::vec& x) {
   
   int n_rows_x = x.size();
   arma::ivec result(n_rows_x);
