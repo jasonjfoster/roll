@@ -10,7 +10,24 @@ using namespace RcppParallel;
 
 namespace roll {
 
-arma::ivec stl_sort_index(arma::vec& x);
+inline arma::ivec stl_sort_index(arma::vec& x) {
+  
+  int n_rows_x = x.size();
+  arma::ivec result(n_rows_x);
+  
+  std::iota(result.begin(), result.end(), 0);
+  
+  auto comparator = [&x](int a, int b) {
+    if (std::isnan(x[a])) return false;
+    if (std::isnan(x[b])) return true;
+    return x[a] < x[b];
+  };
+  
+  std::sort(result.begin(), result.end(), comparator);
+  
+  return result;
+  
+}
 
 // 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollAnyOnlineVec {
