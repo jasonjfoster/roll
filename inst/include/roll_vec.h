@@ -10,6 +10,32 @@ using namespace RcppParallel;
 
 namespace roll {
 
+inline void update_n_obs(int& n_obs, const  bool& is_na,
+                         const bool& is_na_old, const int& i,
+                         const int& width) {
+  
+  // expanding window
+  if (i < width) {
+    
+    // don't include if missing value and 'any_na' argument is 1
+    // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
+    if (!is_na) {
+      n_obs += 1;
+    }
+    
+    // rolling window
+  } else {
+    
+    if (!is_na && is_na_old) {
+      n_obs += 1;
+    } else if (is_na && !is_na_old) {
+      n_obs -= 1;
+    }
+    
+  }
+  
+}
+
 inline arma::ivec stl_sort_index(arma::vec& x) {
   
   int n_rows_x = x.size();
@@ -5296,22 +5322,28 @@ struct RollLmVecInterceptFALSE : public Worker {
           
           // r-squared
           long double var_y = sigma(1, 1);
-          if ((var_y < 0) || (sqrt(var_y) <= sqrt(arma::datum::eps))) {      
+          
+          // don't divide if negative or sqrt is zero
+          if (var_y < 0) {
+            arma_rsq[i] = NA_REAL;
+          } else if (sqrt(var_y) <= sqrt(arma::datum::eps)) {      
             arma_rsq[i] = NA_REAL;
           } else {
             arma_rsq[i] = as_scalar(trans_coef * A * coef) / var_y;
           }
           
-          // check if matrix is singular
-          arma::mat A_inv(1, 1);
-          bool status_inv = arma::inv(A_inv, A);
           int df_resid = arma_n_obs[i] - 2 + 1;
           
-          if (status_inv && (df_resid > 0)) {
+          if (df_resid > 0) {
+            
+            // use solve to get diag of A_inv without explicit inversion
+            long double I = 1;
+            long double A_inv_diag = I / A(0, 0);
             
             // standard errors
             long double var_resid = (1 - arma_rsq[i]) * var_y / df_resid;
-            arma_se[i] = as_scalar(sqrt(var_resid * trans(diagvec(A_inv))));
+            
+            arma_se[i] = sqrt(var_resid * A_inv_diag);
             
           } else {
             

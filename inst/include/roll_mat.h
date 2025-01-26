@@ -10,32 +10,6 @@ using namespace RcppParallel;
 
 namespace roll {
 
-inline void update_n_obs(int& n_obs, const  bool& is_na,
-                         const bool& is_na_old, const int& i,
-                         const int& width) {
-  
-  // expanding window
-  if (i < width) {
-    
-    // don't include if missing value and 'any_na' argument is 1
-    // note: 'any_na' is set to 0 if 'complete_obs' argument is FALSE
-    if (!is_na) {
-      n_obs += 1;
-    }
-    
-    // rolling window
-  } else {
-    
-    if (!is_na && is_na_old) {
-      n_obs += 1;
-    } else if (is_na && !is_na_old) {
-      n_obs -= 1;
-    }
-    
-  }
-  
-}
-
 // 'Worker' function for computing the rolling statistic using an online algorithm
 struct RollAnyOnlineMat : public Worker {
   
