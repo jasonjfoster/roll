@@ -265,74 +265,47 @@ struct RollAllOnlineVec {
   // function call operator that iterates by column
   void operator()() {
     
-    int count = 0;
+    bool is_na = false;
+    bool is_na_old = false;
     int n_obs = 0;
-    int x_new = 0;
-    int x_old = 0;
     int sum_x = 0;
     
     for (int i = 0; i < n_rows_x; i++) {
       
-      if ((x[i] == NA_INTEGER) || (x[i] != 0)) {
-        
-        x_new = 0;
-        
-      } else {
-        
-        x_new = 1;
-        
+      is_na = (x[i] == NA_INTEGER);
+      
+      if (i >= width) {
+        is_na_old = (x[i - width] == NA_INTEGER);
       }
       
-      // expanding window
-      if (i < width) {
+      roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
+      
+      if (!is_na) {
         
-        // don't include if missing value
-        if ((x[i] != NA_INTEGER)) {
-          n_obs += 1;
+        // compute the sum
+        if (x[i] == 0) {
+          sum_x += 1;
         }
-        
-        sum_x = sum_x + x_new;
-        
-        count += 1;
         
       }
       
       // rolling window
       if (i >= width) {
-        
-        // don't include if missing value
-        if ((x[i] != NA_INTEGER) && (x[i - width] == NA_INTEGER)) {
-          
-          n_obs += 1;
-          
-        } else if ((x[i] == NA_INTEGER) && (x[i - width] != NA_INTEGER)) {
-          
-          n_obs -= 1;
-          
+        if (!is_na_old) {
+          if (x[i - width] == 0) {
+            sum_x -= 1;
+          }
         }
-        
-        if ((x[i - width] == NA_INTEGER) || (x[i - width] != 0)) {
-          
-          x_old = 0;
-          
-        } else {
-          
-          x_old = 1;
-          
-        }
-        
-        sum_x = sum_x + x_new - x_old;
-        
       }
       
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && (x[i] != NA_INTEGER))) {
+      if (!na_restore || (x[i] != NA_INTEGER)) {
         
         if (n_obs >= min_obs) {
           
           if (sum_x > 0) {
             rcpp_all[i] = 0;
-          } else if (n_obs == count) {
+          } else if ((i >= width && n_obs == width) || (i < width && n_obs == i + 1)) {
             rcpp_all[i] = 1;
           } else {
             rcpp_all[i] = NA_INTEGER;
@@ -380,19 +353,21 @@ struct RollAllOfflineVec : public Worker {
       // from 1D to 2D array
       int i = z;
       
-      int count = 0;
-      int n_obs = 0;
-      int sum_x = 0;
-      
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && (x[i] != NA_INTEGER))) {
+      if (!na_restore || (x[i] != NA_INTEGER)) {
+        
+        int n_obs = 0;
+        int sum_x = 0;
+        int is_na = false;
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (i >= count)) {
+        for (int count = 0; (count < width) && (count <= i); count++) {
           
           // don't include if missing value
-          if (x[i - count] != NA_INTEGER) {
+          is_na = (x[i - count] == NA_INTEGER);
+          
+          if (!is_na) {
             
             // compute the sum
             if (x[i - count] == 0) {
@@ -403,15 +378,13 @@ struct RollAllOfflineVec : public Worker {
             
           }
           
-          count += 1;
-          
         }
         
         if (n_obs >= min_obs) {
           
           if (sum_x > 0) {
             rcpp_all[i] = 0;
-          } else if (n_obs == count) {
+          } else if ((i >= width && n_obs == width) || (i < width && n_obs == i + 1)) {
             rcpp_all[i] = 1;
           } else {
             rcpp_all[i] = NA_INTEGER;
@@ -4964,32 +4937,32 @@ struct RollCrossProdOfflineVecXX : public Worker {
       // from 1D to 3D array (lower triangle)
       int i = z;
       
-      long double sumsq_x = 0;
-      long double mean_x = 0;
-      
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+      if (!na_restore || !std::isnan(x[i])) {
+        
+        bool is_na = false;
+        long double sumsq_x = 0;
+        long double mean_x = 0;
         
         if (center) {
           
-          int count = 0;
           long double sum_w = 0;
           long double sum_x = 0;
           
           // number of observations is either the window size or,
           // for partial results, the number of the current row
-          while ((width > count) && (i >= count)) {
+          for (int count = 0; (count < width) && (count <= i); count++) {
             
             // don't include if missing value
-            if (!std::isnan(x[i - count])) {
+            is_na = std::isnan(x[i - count]);
+            
+            if (!is_na) {
               
               // compute the sum
               sum_w += arma_weights[n - count - 1];
               sum_x += arma_weights[n - count - 1] * x[i - count];
               
             }
-            
-            count += 1;
             
           }
           
@@ -5000,37 +4973,34 @@ struct RollCrossProdOfflineVecXX : public Worker {
         
         if (scale) {
           
-          int count = 0;
-          
           // number of observations is either the window size or,
           // for partial results, the number of the current row
-          while ((width > count) && (i >= count)) {
+          for (int count = 0; (count < width) && (count <= i); count++) {
             
             // don't include if missing value
-            if (!std::isnan(x[i - count])) {
+            is_na = std::isnan(x[i - count]);
+            
+            if (!is_na) {
               
               // compute the sum of squares with 'center' argument
               if (center) {
                 
                 sumsq_x += arma_weights[n - count - 1] *
-                  pow(x[i - count] - mean_x, (long double)2.0);
+                  (x[i - count] - mean_x) * (x[i - count] - mean_x);
                 
               } else if (!center) {
                 
                 sumsq_x += arma_weights[n - count - 1] *
-                  pow(x[i - count], 2.0);
+                  x[i - count] * x[i - count];
                 
               }
               
             }
             
-            count += 1;
-            
           }
           
         }
         
-        int count = 0;
         int n_obs = 0;
         long double sum_w = 0;
         // long double sumsq_w = 0;
@@ -5038,28 +5008,32 @@ struct RollCrossProdOfflineVecXX : public Worker {
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (i >= count)) {
+        for (int count = 0; (count < width) && (count <= i); count++) {
           
           // don't include if missing value
-          if (!std::isnan(x[i - count])) {
+          is_na = std::isnan(x[i - count]);
+          
+          if (!is_na) {
             
             sum_w += arma_weights[n - count - 1];
-            // sumsq_w += pow(arma_weights[n - count - 1], 2.0);
+            // sumsq_w += arma_weights[n - count - 1] * arma_weights[n - count - 1];
             
             // compute the sum of squares with 'center' argument
             if (center) {
+              
               sumsq_xy += arma_weights[n - count - 1] *
-                pow(x[i - count] - mean_x, (long double)2.0);
+                (x[i - count] - mean_x) * (x[i - count] - mean_x);
+              
             } else if (!center) {
+              
               sumsq_xy += arma_weights[n - count - 1] *
-                pow(x[i - count], 2.0);
+                x[i - count] * x[i - count];
+              
             }
             
             n_obs += 1;
             
           }
-          
-          count += 1;
           
         }
         
@@ -5068,8 +5042,12 @@ struct RollCrossProdOfflineVecXX : public Worker {
           
           if (scale) {
             
-            // don't compute if negative or sqrt is zero
-            if ((sumsq_x < 0)) {
+            // if (n_obs == 1) {
+            //   arma_cov[i] = NA_REAL;
+            // }
+            
+            // don't divide if negative or sqrt is zero
+            if (sumsq_x < 0) {
               arma_cov[i] = NA_REAL;             
             } else if (sqrt(sumsq_x) <= sqrt(arma::datum::eps)) {
               arma_cov[i] = NA_REAL;
@@ -5133,137 +5111,141 @@ struct RollCrossProdOfflineVecXY : public Worker {
       // from 1D to 3D array
       int i = z;
       
-      long double sumsq_x = 0;
-      long double sumsq_y = 0;
-      long double mean_x = 0;
-      long double mean_y = 0;
-      
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && !std::isnan(x[i]) &&
-          !std::isnan(y[i]))) {
+      if (!na_restore || (!std::isnan(x[i]) && !std::isnan(y[i]))) {
+        
+        bool is_na = false;
+        long double sumsq_x = 0;
+        long double sumsq_y = 0;
+        long double mean_x = 0;
+        long double mean_y = 0;
+        
+        if (center) {
           
-          if (center) {
-            
-            int count = 0;
-            long double sum_w = 0;
-            long double sum_x = 0;
-            long double sum_y = 0;
-            
-            // number of observations is either the window size or,
-            // for partial results, the number of the current row
-            while ((width > count) && (i >= count)) {
-              
-              // don't include if missing value
-              if (!std::isnan(x[i - count]) && !std::isnan(y[i - count])) {
-                
-                // compute the sum
-                sum_w += arma_weights[n - count - 1];
-                sum_x += arma_weights[n - count - 1] * x[i - count];
-                sum_y += arma_weights[n - count - 1] * y[i - count];
-                
-              }
-              
-              count += 1;
-              
-            }
-            
-            // compute the mean
-            mean_x = sum_x / sum_w;
-            mean_y = sum_y / sum_w;
-            
-          }
-          
-          if (scale) {
-            
-            int count = 0;
-            
-            // number of observations is either the window size or,
-            // for partial results, the number of the current row
-            while ((width > count) && (i >= count)) {
-              
-              // don't include if missing value
-              if (!std::isnan(x[i - count]) && !std::isnan(y[i - count])) {
-                
-                // compute the sum of squares with 'center' argument
-                if (center) {
-                  
-                  sumsq_x += arma_weights[n - count - 1] *
-                    pow(x[i - count] - mean_x, (long double)2.0);
-                  sumsq_y += arma_weights[n - count - 1] *
-                    pow(y[i - count] - mean_y, (long double)2.0);
-                  
-                } else if (!center) {
-                  
-                  sumsq_x += arma_weights[n - count - 1] *
-                    pow(x[i - count], 2.0);
-                  sumsq_y += arma_weights[n - count - 1] *
-                    pow(y[i - count], 2.0);
-                  
-                }
-                
-              }
-              
-              count += 1;
-              
-            }
-            
-          }
-          
-          int count = 0;
-          int n_obs = 0;
           long double sum_w = 0;
-          // long double sumsq_w = 0;
-          long double sumsq_xy = 0;
+          long double sum_x = 0;
+          long double sum_y = 0;
           
           // number of observations is either the window size or,
           // for partial results, the number of the current row
-          while ((width > count) && (i >= count)) {
+          for (int count = 0; (count < width) && (count <= i); count++) {
             
             // don't include if missing value
-            if (!std::isnan(x[i - count]) && !std::isnan(y[i - count])) {
+            is_na = std::isnan(x[i - count]) || std::isnan(y[i - count]);
+            
+            if (!is_na) {
               
+              // compute the sum
               sum_w += arma_weights[n - count - 1];
-              // sumsq_w += pow(arma_weights[n - count - 1], 2.0);
+              sum_x += arma_weights[n - count - 1] * x[i - count];
+              sum_y += arma_weights[n - count - 1] * y[i - count];
+              
+            }
+            
+          }
+          
+          // compute the mean
+          mean_x = sum_x / sum_w;
+          mean_y = sum_y / sum_w;
+          
+        }
+        
+        if (scale) {
+          
+          // number of observations is either the window size or,
+          // for partial results, the number of the current row
+          for (int count = 0; (count < width) && (count <= i); count++) {
+            
+            // don't include if missing value
+            is_na = std::isnan(x[i - count]) || std::isnan(y[i - count]);
+            
+            if (!is_na) {
               
               // compute the sum of squares with 'center' argument
               if (center) {
-                sumsq_xy += arma_weights[n - count - 1] *
-                  (x[i - count] - mean_x) * (y[i - count] - mean_y);
+                
+                sumsq_x += arma_weights[n - count - 1] *
+                  (x[i - count] - mean_x) * (x[i - count] - mean_x);
+                sumsq_y += arma_weights[n - count - 1] *
+                  (y[i - count] - mean_y) * (y[i - count] - mean_y);
+                
               } else if (!center) {
-                sumsq_xy += arma_weights[n - count - 1] *
-                  x[i - count] * y[i - count];
+                
+                sumsq_x += arma_weights[n - count - 1] *
+                  x[i - count] * x[i - count];
+                sumsq_y += arma_weights[n - count - 1] *
+                  y[i - count] * y[i - count];
+                
               }
-              
-              n_obs += 1;
               
             }
             
-            count += 1;
-            
           }
           
-          // if ((n_obs > 1) && (n_obs >= min_obs)) {
-          if (n_obs >= min_obs) {
+        }
+        
+        int n_obs = 0;
+        long double sum_w = 0;
+        // long double sumsq_w = 0;
+        long double sumsq_xy = 0;
+        
+        // number of observations is either the window size or,
+        // for partial results, the number of the current row
+        for (int count = 0; (count < width) && (count <= i); count++) {
+          
+          // don't include if missing value
+          is_na = std::isnan(x[i - count]) || std::isnan(y[i - count]);
+          
+          if (!is_na) {
             
-            if (scale) {
+            sum_w += arma_weights[n - count - 1];
+            // sumsq_w += arma_weights[n - count - 1] * arma_weights[n - count - 1];
+            
+            // compute the sum of squares with 'center' argument
+            if (center) {
               
-              // don't compute if negative or sqrt is zero
-              if ((sumsq_x < 0) || (sumsq_y < 0)) {
-                arma_cov[i] = NA_REAL;
-              } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
-                arma_cov[i] = NA_REAL;
-              } else {
-                arma_cov[i] = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
-              }
+              sumsq_xy += arma_weights[n - count - 1] *
+                (x[i - count] - mean_x) * (y[i - count] - mean_y);
               
-            } else if (!scale) {
-              arma_cov[i] = sumsq_xy; // / (sum_w - sumsq_w / sum_w);
+            } else if (!center) {
+              
+              sumsq_xy += arma_weights[n - count - 1] *
+                x[i - count] * y[i - count];
+              
             }
             
-          } else {
-            arma_cov[i] = NA_REAL;
+            n_obs += 1;
+            
           }
           
+        }
+        
+        // if ((n_obs > 1) && (n_obs >= min_obs)) {
+        if (n_obs >= min_obs) {
+          
+          if (scale) {
+            
+            // if (n_obs == 1) {
+            //   arma_cov[i] = NA_REAL;
+            // }
+            
+            // don't divide if negative or sqrt is zero
+            if ((sumsq_x < 0) || (sumsq_y < 0)) {
+              arma_cov[i] = NA_REAL;
+            } else if ((sqrt(sumsq_x) <= sqrt(arma::datum::eps)) || (sqrt(sumsq_y) <= sqrt(arma::datum::eps))) {
+              arma_cov[i] = NA_REAL;
+            } else {
+              arma_cov[i] = sumsq_xy / (sqrt(sumsq_x) * sqrt(sumsq_y));
+            }
+            
+          } else if (!scale) {
+            arma_cov[i] = sumsq_xy; // / (sum_w - sumsq_w / sum_w);
+          }
+          
+        } else {
+          arma_cov[i] = NA_REAL;
+        }
+        
       } else {
         
         // can be either NA or NaN

@@ -40,6 +40,7 @@ x <- rnorm(n)
 y <- rnorm(n)
 weights <- 0.9 ^ (n:1)
 ```
+
 Then, to compute rolling and expanding means, use the `roll_mean` function:
 
 ``` r
