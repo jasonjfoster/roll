@@ -1481,69 +1481,40 @@ struct RollIdxMinOnlineVec {
   const arma::vec arma_weights;
   const int min_obs;
   const bool na_restore;
-  RVector<int> rcpp_idxmin;     // destination (pass by reference)
+  arma::imat& arma_idxmin;      // destination (pass by reference)
   
   // initialize with source and destination
   RollIdxMinOnlineVec(const NumericVector x, const int n,
                       const int n_rows_x, const int width,
                       const arma::vec arma_weights, const int min_obs,
-                      const bool na_restore, IntegerVector rcpp_idxmin)
+                      const bool na_restore, arma::imat& arma_idxmin)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
-      na_restore(na_restore), rcpp_idxmin(rcpp_idxmin) { }
+      na_restore(na_restore), arma_idxmin(arma_idxmin) { }
   
   // function call operator that iterates by index
   void operator()() {
     
     int n_obs = 0;
     int idxmin_x = 0;
+    bool is_na = false;
+    bool is_na_old = false;
     std::deque<int> deck(width);
     
     for (int i = 0; i < n_rows_x; i++) {
       
-      // expanding window
-      if (i < width) {
-        
-        // don't include if missing value
-        if (!std::isnan(x[i])) {
-          n_obs += 1;
-        }
-        
-        if (!std::isnan(x[i])) {
-          
-          while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] < x[deck.back()]))) {
-            deck.pop_back();
-          }
-          
-          deck.push_back(i);
-          
-        }
-        
-        if (width > 1) {
-          idxmin_x = deck.front() + 1;
-        } else {
-          idxmin_x = 1;
-        }
-        
+      is_na = std::isnan(x[i]);
+      
+      if (i >= width) {
+        is_na_old = std::isnan(x[i - width]);
       }
       
-      // rolling window
-      if (i >= width) {
+      roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
+      
+      if (width > 1) {
         
-        // don't include if missing value
-        if (!std::isnan(x[i]) && std::isnan(x[i - width])) {
-          
-          n_obs += 1;
-          
-        } else if (std::isnan(x[i]) && !std::isnan(x[i - width])) {
-          
-          n_obs -= 1;
-          
-        }
-        
-        if (!std::isnan(x[i])) {
-          
+        if (!is_na) {
           while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] < x[deck.back()]))) {
             deck.pop_back();
           }
@@ -1552,31 +1523,38 @@ struct RollIdxMinOnlineVec {
           
         }
         
-        while (!deck.empty() && (deck.front() <= i - width)) {
-          deck.pop_front();
+        // rolling window
+        if (i >= width) {
+          while (!deck.empty() && (deck.front() <= i - width)) {
+            deck.pop_front();
+          }
         }
         
-        if (width > 1) {
-          idxmin_x = width - (i - deck.front());
-        } else {
-          idxmin_x = 1;
-        }
+        idxmin_x = deck.front();
         
+      } else {
+        idxmin_x = i;
       }
       
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+      if (!na_restore || !std::isnan(x[i])) {
         
         if (n_obs >= min_obs) {
-          rcpp_idxmin[i] = idxmin_x;
+          
+          if (i < width) {
+            arma_idxmin[i] = idxmin_x + 1;
+          } else if (i >= width) {
+            arma_idxmin[i] = width - (i - idxmin_x);
+          }
+          
         } else {
-          rcpp_idxmin[i] = NA_INTEGER;
+          arma_idxmin[i] = NA_INTEGER;
         }
         
       } else {
         
         // can be either NA or NaN
-        rcpp_idxmin[i] = (int)x[i];
+        arma_idxmin[i] = (int)x[i];
         
       }
       
@@ -1596,17 +1574,17 @@ struct RollIdxMinOfflineVec : public Worker {
   const arma::vec arma_weights;
   const int min_obs;
   const bool na_restore;
-  RVector<int> rcpp_idxmin;     // destination (pass by reference)
+  arma::imat& arma_idxmin;      // destination (pass by reference)
   
   // initialize with source and destination
   RollIdxMinOfflineVec(const NumericVector x, const int n,
                        const int n_rows_x, const int width,
                        const arma::vec arma_weights, const int min_obs,
-                       const bool na_restore, IntegerVector rcpp_idxmin)
+                       const bool na_restore, arma::imat& arma_idxmin)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
-      na_restore(na_restore), rcpp_idxmin(rcpp_idxmin) { }
+      na_restore(na_restore), arma_idxmin(arma_idxmin) { }
   
   // function call operator that iterates by index
   void operator()(std::size_t begin_index, std::size_t end_index) {
@@ -1615,19 +1593,21 @@ struct RollIdxMinOfflineVec : public Worker {
       // from 1D to 2D array
       int i = z;
       
-      int count = 0;
-      int n_obs = 0;
-      int idxmin_x = i;
-      
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+      if (!na_restore || !std::isnan(x[i])) {
+        
+        int n_obs = 0;
+        int idxmin_x = i;
+        bool is_na = false;
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (i >= count)) {
+        for (int count = 0; (count < width) && (count <= i); count++) {
           
           // don't include if missing value
-          if (!std::isnan(x[i - count])) {
+          is_na = std::isnan(x[i - count]);
+          
+          if (!is_na) {
             
             // last element of sorted array
             // note: 'weights' must be greater than 0
@@ -1639,26 +1619,24 @@ struct RollIdxMinOfflineVec : public Worker {
             
           }
           
-          count += 1;
-          
         }
         
-        if ((n_obs >= min_obs)) {
+        if (n_obs >= min_obs) {
           
           if (i < width) {
-            rcpp_idxmin[i] = idxmin_x + 1;
+            arma_idxmin[i] = idxmin_x + 1;
           } else if (i >= width) {
-            rcpp_idxmin[i] = width - (i - idxmin_x);
+            arma_idxmin[i] = width - (i - idxmin_x);
           }
           
         } else {
-          rcpp_idxmin[i] = NA_INTEGER;
+          arma_idxmin[i] = NA_INTEGER;
         }
         
       } else {
         
         // can be either NA or NaN
-        rcpp_idxmin[i] = (int)x[i];
+        arma_idxmin[i] = (int)x[i];
         
       }
       
@@ -1677,68 +1655,40 @@ struct RollIdxMaxOnlineVec {
   const arma::vec arma_weights;
   const int min_obs;
   const bool na_restore;
-  RVector<int> rcpp_idxmax;     // destination (pass by reference)
+  arma::imat& arma_idxmax;      // destination (pass by reference)
   
   // initialize with source and destination
   RollIdxMaxOnlineVec(const NumericVector x, const int n,
                       const int n_rows_x, const int width,
                       const arma::vec arma_weights, const int min_obs,
-                      const bool na_restore, IntegerVector rcpp_idxmax)
+                      const bool na_restore, arma::imat& arma_idxmax)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
-      na_restore(na_restore), rcpp_idxmax(rcpp_idxmax) { }
+      na_restore(na_restore), arma_idxmax(arma_idxmax) { }
   
   // function call operator that iterates by index
   void operator()() {
     
     int n_obs = 0;
+    bool is_na = false;
+    bool is_na_old = false;
     int idxmax_x = 0;
     std::deque<int> deck(width);
     
     for (int i = 0; i < n_rows_x; i++) {
       
-      // expanding window
-      if (i < width) {
-        
-        // don't include if missing value
-        if (!std::isnan(x[i])) {
-          n_obs += 1;
-        }
-        
-        if (!std::isnan(x[i])) {
-          
-          while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] > x[deck.back()]))) {
-            deck.pop_back();
-          }
-          
-          deck.push_back(i);
-          
-        }
-        
-        if (width > 1) {
-          idxmax_x = deck.front() + 1;
-        } else {
-          idxmax_x = 1;
-        }
-        
+      is_na = std::isnan(x[i]);
+      
+      if (i >= width) {
+        is_na_old = std::isnan(x[i - width]);
       }
       
-      // rolling window
-      if (i >= width) {
+      roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
+      
+      if (width > 1) {
         
-        // don't include if missing value
-        if (!std::isnan(x[i]) && std::isnan(x[i - width])) {
-          
-          n_obs += 1;
-          
-        } else if (std::isnan(x[i]) && !std::isnan(x[i - width])) {
-          
-          n_obs -= 1;
-          
-        }
-        
-        if (!std::isnan(x[i])) {
+        if (!is_na) {
           
           while (!deck.empty() && (std::isnan(x[deck.back()]) || (x[i] > x[deck.back()]))) {
             deck.pop_back();
@@ -1748,31 +1698,38 @@ struct RollIdxMaxOnlineVec {
           
         }
         
-        while (!deck.empty() && (deck.front() <= i - width)) {
-          deck.pop_front();
+        // rolling window
+        if (i >= width) {
+          while (!deck.empty() && (deck.front() <= i - width)) {
+            deck.pop_front();
+          }
         }
         
-        if (width > 1) {
-          idxmax_x = width - (i - deck.front());
-        } else {
-          idxmax_x = 1;
-        }
+        idxmax_x = deck.front();
         
+      } else {
+        idxmax_x = i;
       }
       
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+      if (!na_restore || !std::isnan(x[i])) {
         
         if (n_obs >= min_obs) {
-          rcpp_idxmax[i] = idxmax_x;
+          
+          if (i < width) {
+            arma_idxmax[i] = idxmax_x + 1;
+          } else if (i >= width) {
+            arma_idxmax[i] = width - (i - idxmax_x);
+          }
+          
         } else {
-          rcpp_idxmax[i] = NA_INTEGER;
+          arma_idxmax[i] = NA_INTEGER;
         }
         
       } else {
         
         // can be either NA or NaN
-        rcpp_idxmax[i] = (int)x[i];
+        arma_idxmax[i] = (int)x[i];
         
       }
       
@@ -1792,17 +1749,17 @@ struct RollIdxMaxOfflineVec : public Worker {
   const arma::vec arma_weights;
   const int min_obs;
   const bool na_restore;
-  RVector<int> rcpp_idxmax;     // destination (pass by reference)
+  arma::imat& arma_idxmax;      // destination (pass by reference)
   
   // initialize with source and destination
   RollIdxMaxOfflineVec(const NumericVector x, const int n,
                        const int n_rows_x, const int width,
                        const arma::vec arma_weights, const int min_obs,
-                       const bool na_restore, IntegerVector rcpp_idxmax)
+                       const bool na_restore, arma::imat& arma_idxmax)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
-      na_restore(na_restore), rcpp_idxmax(rcpp_idxmax) { }
+      na_restore(na_restore), arma_idxmax(arma_idxmax) { }
   
   // function call operator that iterates by index
   void operator()(std::size_t begin_index, std::size_t end_index) {
@@ -1811,19 +1768,21 @@ struct RollIdxMaxOfflineVec : public Worker {
       // from 1D to 2D array
       int i = z;
       
-      int count = 0;
-      int n_obs = 0;
-      int idxmax_x = i;
-      
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+      if (!na_restore || !std::isnan(x[i])) {
+        
+        int n_obs = 0;
+        int idxmax_x = i;
+        bool is_na = false;
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (i >= count)) {
+        for (int count = 0; (count < width) && (count <= i); count++) {
           
           // don't include if missing value
-          if (!std::isnan(x[i - count])) {
+          is_na = std::isnan(x[i - count]);
+          
+          if (!is_na) {
             
             // first element of sorted array
             // note: 'weights' must be greater than 0
@@ -1835,26 +1794,24 @@ struct RollIdxMaxOfflineVec : public Worker {
             
           }
           
-          count += 1;
-          
         }
         
-        if ((n_obs >= min_obs)) {
+        if (n_obs >= min_obs) {
           
           if (i < width) {
-            rcpp_idxmax[i] = idxmax_x + 1;
+            arma_idxmax[i] = idxmax_x + 1;
           } else if (i >= width) {
-            rcpp_idxmax[i] = width - (i - idxmax_x);
+            arma_idxmax[i] = width - (i - idxmax_x);
           }
           
         } else {
-          rcpp_idxmax[i] = NA_INTEGER;
+          arma_idxmax[i] = NA_INTEGER;
         }
         
       } else {
         
         // can be either NA or NaN
-        rcpp_idxmax[i] = (int)x[i];
+        arma_idxmax[i] = (int)x[i];
         
       }
       

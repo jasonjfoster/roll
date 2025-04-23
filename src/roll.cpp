@@ -927,7 +927,7 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
     NumericVector xx(x);
     int n = weights.size();
     int n_rows_x = xx.size();
-    IntegerVector rcpp_idxquantile(n_rows_x);
+    arma::ivec arma_idxquantile(n_rows_x);
     
     // check 'width' argument for errors
     check_width(width);
@@ -951,7 +951,7 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
         roll::RollIdxMinOnlineVec roll_idxmin_online(xx, n, n_rows_x, width,
                                                      weights, min_obs,
                                                      na_restore,
-                                                     rcpp_idxquantile);
+                                                     arma_idxquantile);
         roll_idxmin_online();
         
       } else if (p == 1) {
@@ -959,7 +959,7 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
         roll::RollIdxMaxOnlineVec roll_idxmax_online(xx, n, n_rows_x, width,
                                                      weights, min_obs,
                                                      na_restore,
-                                                     rcpp_idxquantile);
+                                                     arma_idxquantile);
         roll_idxmax_online();
         
       }
@@ -971,7 +971,7 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
         roll::RollIdxMinOfflineVec roll_idxmin_offline(xx, n, n_rows_x, width,
                                                        weights, min_obs,
                                                        na_restore,
-                                                       rcpp_idxquantile);
+                                                       arma_idxquantile);
         parallelFor(0, n_rows_x, roll_idxmin_offline);
         
       } else if (p == 1) {
@@ -979,7 +979,7 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
         roll::RollIdxMaxOfflineVec roll_idxmax_offline(xx, n, n_rows_x, width,
                                                        weights, min_obs,
                                                        na_restore,
-                                                       rcpp_idxquantile);
+                                                       arma_idxquantile);
         parallelFor(0, n_rows_x, roll_idxmax_offline);
         
       }
@@ -987,7 +987,7 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
     }
     
     // create and return a vector object
-    IntegerVector result(rcpp_idxquantile);
+    IntegerVector result(wrap(arma_idxquantile));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
     if (names.size() > 0) {
