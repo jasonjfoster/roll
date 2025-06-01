@@ -1481,13 +1481,13 @@ struct RollIdxMinOnlineVec {
   const arma::vec arma_weights;
   const int min_obs;
   const bool na_restore;
-  arma::imat& arma_idxmin;      // destination (pass by reference)
+  arma::ivec& arma_idxmin;      // destination (pass by reference)
   
   // initialize with source and destination
   RollIdxMinOnlineVec(const NumericVector x, const int n,
                       const int n_rows_x, const int width,
                       const arma::vec arma_weights, const int min_obs,
-                      const bool na_restore, arma::imat& arma_idxmin)
+                      const bool na_restore, arma::ivec& arma_idxmin)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
@@ -1574,13 +1574,13 @@ struct RollIdxMinOfflineVec : public Worker {
   const arma::vec arma_weights;
   const int min_obs;
   const bool na_restore;
-  arma::imat& arma_idxmin;      // destination (pass by reference)
+  arma::ivec& arma_idxmin;      // destination (pass by reference)
   
   // initialize with source and destination
   RollIdxMinOfflineVec(const NumericVector x, const int n,
                        const int n_rows_x, const int width,
                        const arma::vec arma_weights, const int min_obs,
-                       const bool na_restore, arma::imat& arma_idxmin)
+                       const bool na_restore, arma::ivec& arma_idxmin)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
@@ -1655,13 +1655,13 @@ struct RollIdxMaxOnlineVec {
   const arma::vec arma_weights;
   const int min_obs;
   const bool na_restore;
-  arma::imat& arma_idxmax;      // destination (pass by reference)
+  arma::ivec& arma_idxmax;      // destination (pass by reference)
   
   // initialize with source and destination
   RollIdxMaxOnlineVec(const NumericVector x, const int n,
                       const int n_rows_x, const int width,
                       const arma::vec arma_weights, const int min_obs,
-                      const bool na_restore, arma::imat& arma_idxmax)
+                      const bool na_restore, arma::ivec& arma_idxmax)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
@@ -1671,9 +1671,9 @@ struct RollIdxMaxOnlineVec {
   void operator()() {
     
     int n_obs = 0;
+    int idxmax_x = 0;
     bool is_na = false;
     bool is_na_old = false;
-    int idxmax_x = 0;
     std::deque<int> deck(width);
     
     for (int i = 0; i < n_rows_x; i++) {
@@ -1749,13 +1749,13 @@ struct RollIdxMaxOfflineVec : public Worker {
   const arma::vec arma_weights;
   const int min_obs;
   const bool na_restore;
-  arma::imat& arma_idxmax;      // destination (pass by reference)
+  arma::ivec& arma_idxmax;      // destination (pass by reference)
   
   // initialize with source and destination
   RollIdxMaxOfflineVec(const NumericVector x, const int n,
                        const int n_rows_x, const int width,
                        const arma::vec arma_weights, const int min_obs,
-                       const bool na_restore, arma::imat& arma_idxmax)
+                       const bool na_restore, arma::ivec& arma_idxmax)
     : x(x), n(n),
       n_rows_x(n_rows_x), width(width),
       arma_weights(arma_weights), min_obs(min_obs),
