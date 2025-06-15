@@ -2888,9 +2888,7 @@ struct RollScaleOnlineMat : public Worker {
         is_na = (arma_any_na[i] != 0) || std::isnan(x(i, j));
         
         if (i >= width) {
-          
           is_na_old = (arma_any_na[i - width] != 0) || std::isnan(x(i - width, j));
-          
         }
         
         roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
@@ -3189,11 +3187,15 @@ struct RollScaleOfflineMat : public Worker {
               
               // compute the sum of squares with 'center' argument
               if (center) {
+                
                 sumsq_x += arma_weights[n - count - 1] *
                   (x(i - count, j) - mean_x) * (x(i - count, j) - mean_x);
+                
               } else if (!center) {
+                
                 sumsq_x += arma_weights[n - count - 1] *
                   x(i - count, j) * x(i - count, j);
+                
               }
               
             }
