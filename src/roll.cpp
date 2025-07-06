@@ -1120,7 +1120,7 @@ SEXP roll_quantile(const SEXP& x, const int& width,
     NumericVector xx(x);
     int n = weights.size();
     int n_rows_x = xx.size();
-    NumericVector rcpp_quantile(n_rows_x);
+    arma::vec arma_quantile(n_rows_x);
     
     // check 'width' argument for errors
     check_width(width);
@@ -1144,7 +1144,7 @@ SEXP roll_quantile(const SEXP& x, const int& width,
         roll::RollMinOnlineVec roll_min_online(xx, n, n_rows_x, width,
                                                weights, min_obs,
                                                na_restore,
-                                               rcpp_quantile);
+                                               arma_quantile);
         roll_min_online();
         
       } else if (p == 1) {
@@ -1152,7 +1152,7 @@ SEXP roll_quantile(const SEXP& x, const int& width,
         roll::RollMaxOnlineVec roll_max_online(xx, n, n_rows_x, width,
                                                weights, min_obs,
                                                na_restore,
-                                               rcpp_quantile);
+                                               arma_quantile);
         roll_max_online();
         
       } else {
@@ -1164,7 +1164,7 @@ SEXP roll_quantile(const SEXP& x, const int& width,
         roll::RollQuantileOnlineVec roll_quantile_online(xx, n, n_rows_x, width,
                                                          weights, p, min_obs,
                                                          na_restore,
-                                                         rcpp_quantile);
+                                                         arma_quantile);
         roll_quantile_online();
         
       }
@@ -1176,7 +1176,7 @@ SEXP roll_quantile(const SEXP& x, const int& width,
         roll::RollMinOfflineVec roll_min_offline(xx, n, n_rows_x, width,
                                                  weights, min_obs,
                                                  na_restore,
-                                                 rcpp_quantile);
+                                                 arma_quantile);
         parallelFor(0, n_rows_x, roll_min_offline);
         
       } else if (p == 1) {
@@ -1184,7 +1184,7 @@ SEXP roll_quantile(const SEXP& x, const int& width,
         roll::RollMaxOfflineVec roll_max_offline(xx, n, n_rows_x, width,
                                                  weights, min_obs,
                                                  na_restore,
-                                                 rcpp_quantile);
+                                                 arma_quantile);
         parallelFor(0, n_rows_x, roll_max_offline);
         
       } else {
@@ -1192,15 +1192,14 @@ SEXP roll_quantile(const SEXP& x, const int& width,
         roll::RollQuantileOfflineVec roll_quantile_offline(xx, n, n_rows_x, width,
                                                            weights, 1 - p, min_obs,
                                                            na_restore,
-                                                           rcpp_quantile);
+                                                           arma_quantile);
         parallelFor(0, n_rows_x, roll_quantile_offline);
         
       }
       
     }
-    
-    // create and return a vector object
-    NumericVector result(rcpp_quantile);
+      
+    NumericVector result(wrap(arma_quantile));
     result.attr("dim") = R_NilValue;
     List names = xx.attr("names");
     if (names.size() > 0) {
