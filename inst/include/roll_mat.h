@@ -2673,9 +2673,7 @@ struct RollSdOnlineMat : public Worker {
                 lambda * w_old * (x_old - mean_x) * (x_old - mean_prev_x);
               
             } else if (is_na && is_na_old) {
-              
               sumsq_x = lambda * sumsq_x;
-              
             }
             
           }
@@ -2683,7 +2681,7 @@ struct RollSdOnlineMat : public Worker {
         }
         
         // don't compute if missing value and 'na_restore' argument is TRUE
-        if ((!na_restore) || (na_restore && !std::isnan(x(i, j)))) {
+        if (!na_restore || !std::isnan(x(i, j))) {
           
           if ((n_obs > 1) && (n_obs >= min_obs)) {
             arma_sd(i, j) = sqrt(sumsq_x / (sum_w - sumsq_w / sum_w));
