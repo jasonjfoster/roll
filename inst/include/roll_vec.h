@@ -631,100 +631,45 @@ struct RollProdOnlineVec {
   void operator()() {
     
     int n_obs = 0;
+    int n_obs_prev = 0;
     int n_zero = 0;
+    bool is_na = false;
+    bool is_na_old = false;
     long double lambda = 0;
-    long double n_new = 0;
-    long double n_old = 0;
-    long double n_exp = 0;
-    long double w_new = 0;
+    long double w_new = 1;
     long double w_old = 0;
     long double x_new = 0;
     long double x_old = 0;
     long double prod_w = 1;
     long double prod_x = 1;
     
-    if (arma_weights[n - 1] == 0) {
-      lambda = 1;
-    } else if (width > 1) {
-      if (n > 1) {
-        lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
-      } else {
-        lambda = arma_weights[n - 1];
-      }
-    } else {
-      lambda = arma_weights[n - 1];
-    }
-    
     for (int i = 0; i < n_rows_x; i++) {
       
-      // expanding window
-      if (i < width) {
-        
-        // don't include if missing value
-        if (!std::isnan(x[i])) {
-          n_obs += 1;
-        }
-        
-        if (std::isnan(x[i])) {
-          
-          n_new = n_obs;
-          w_new = 1;
-          x_new = 1;
-          
-        } else {
-          
-          n_new = n_obs - 1;
-          w_new = arma_weights[n - 1];
-          
-          if (x[i] == 0) {
-            
-            x_new = 1;
-            n_zero += 1;
-            
-          } else {
-            x_new = x[i];
-          }
-          
-        }
-        
-        if (n_new == 0) {
-          n_exp = 1;
-        } else if (n_new > n_old) {
-          n_exp = n_exp * lambda;
-        } else if (n_new < n_old) {
-          n_exp = n_exp / lambda;
-        }
-        
-        n_old = n_new;
-        prod_w *= w_new * n_exp;
-        prod_x *= x_new;
-        
+      // w_new = 1;
+      w_old = 1;
+      x_new = 1;
+      x_old = 1;
+      n_obs_prev = n_obs;
+      
+      is_na = std::isnan(x[i]);
+      
+      if (i >= width) {
+        is_na_old = std::isnan(x[i - width]);
       }
       
-      // rolling window
-      if (i >= width) {
+      roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
+      
+      if (width > 1) {
         
-        // don't include if missing value
-        if (!std::isnan(x[i]) && std::isnan(x[i - width])) {
-          
-          n_obs += 1;
-          
-        } else if (std::isnan(x[i]) && !std::isnan(x[i - width])) {
-          
-          n_obs -= 1;
-          
+        if (n > 1) {
+          lambda = arma_weights[n - 2] / arma_weights[n - 1]; // check already passed
+        } else {
+          lambda = arma_weights[n - 1];
         }
         
-        if (std::isnan(x[i])) {
+        if (!is_na) {
           
-          n_new = n_obs;
-          w_new = 1;
-          x_new = 1;
-          
-        } else {
-          
-          n_new = n_obs - 1;
-          w_new = arma_weights[n - 1];
+          w_new = arma_weights[n - n_obs];
           
           if (x[i] == 0) {
             
@@ -737,46 +682,64 @@ struct RollProdOnlineVec {
           
         }
         
-        if (std::isnan(x[i - width])) {
+        if (n_obs < n_obs_prev) {
+          w_new /= lambda;
+        }
+        
+        prod_w *= w_new;
+        prod_x *= x_new;
+        
+        // rolling window
+        if (i >= width) {
           
-          w_old = 1;
-          x_old = 1;
-          
-        } else {
-          
-          if (x[i - width] == 0) {
+          if (!is_na_old) {
             
-            x_old = 1;
-            n_zero -= 1;
-            
-          } else {
-            x_old = x[i - width];
-          }
-          
-          if (arma_weights[n - width] == 0) {
-            w_old = 1;
-          } else {
             w_old = arma_weights[n - width];
+            
+            if (x[i - width] == 0) {
+              
+              x_old = 1;
+              n_zero -= 1;
+              
+            } else {
+              x_old = x[i - width];
+            }
+            
+          }
+          
+          prod_w /= w_old;
+          prod_x /= x_old;
+          
+        }
+        
+      } else {
+        
+        
+        if (!is_na) {
+          
+          w_new = arma_weights[n - 1];
+          
+          if (x[i] == 0) {
+            
+            x_new = 1;
+            n_zero = 1;
+            
+          } else {
+            
+            x_new = x[i];
+            n_zero = 0;
+            
           }
           
         }
         
-        if (n_new == 0) {
-          n_exp = 1;
-        } else if (n_new > n_old) {
-          n_exp = n_exp * lambda;
-        } else if (n_new < n_old) {
-          n_exp = n_exp / lambda;
-        }
-        
-        n_old = n_new;
-        prod_w *= w_new * n_exp / w_old;
-        prod_x *= x_new / x_old;
+        prod_w = w_new;
+        prod_x = x_new;
         
       }
       
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+      if (!na_restore || !std::isnan(x[i])) {
         
         if (n_obs >= min_obs) {
           
@@ -832,27 +795,27 @@ struct RollProdOfflineVec : public Worker {
       // from 1D to 2D array
       int i = z;
       
-      int count = 0;
-      int n_obs = 0;
-      long double prod_x = 1;
-      
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && !std::isnan(x[i]))) {
+      if (!na_restore || !std::isnan(x[i])) {
+        
+        int n_obs = 0;
+        bool is_na = false;
+        long double prod_x = 1;
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (i >= count)) {
+        for (int count = 0; (count < width) && (count <= i); count++) {
           
           // don't include if missing value
-          if (!std::isnan(x[i - count])) {
+          is_na = std::isnan(x[i - count]);
+          
+          if (!is_na) {
             
             // compute the product
             prod_x *= arma_weights[n - count - 1] * x[i - count];
             n_obs += 1;
             
           }
-          
-          count += 1;
           
         }
         
