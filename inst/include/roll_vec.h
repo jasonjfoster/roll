@@ -76,74 +76,47 @@ struct RollAnyOnlineVec {
   // function call operator that iterates by column
   void operator()() {
     
-    int count = 0;
+    bool is_na = false;
+    bool is_na_old = false;
     int n_obs = 0;
-    int x_new = 0;
-    int x_old = 0;
     int sum_x = 0;
     
     for (int i = 0; i < n_rows_x; i++) {
       
-      if ((x[i] == NA_INTEGER) || (x[i] == 0)) {
-        
-        x_new = 0;
-        
-      } else {
-        
-        x_new = 1;
-        
+      is_na = (x[i] == NA_INTEGER);
+      
+      if (i >= width) {
+        is_na_old = (x[i - width] == NA_INTEGER);
       }
       
-      // expanding window
-      if (i < width) {
+      roll::update_n_obs(n_obs, is_na, is_na_old, i, width);
+      
+      if (!is_na) {
         
-        // don't include if missing value
-        if (x[i] != NA_INTEGER) {
-          n_obs += 1;
+        // compute the sum
+        if (x[i] != 0) {
+          sum_x += 1;
         }
-        
-        sum_x = sum_x + x_new;
-        
-        count += 1;
         
       }
       
       // rolling window
       if (i >= width) {
-        
-        // don't include if missing value
-        if ((x[i] != NA_INTEGER) && (x[i - width] == NA_INTEGER)) {
-          
-          n_obs += 1;
-          
-        } else if ((x[i] == NA_INTEGER) && (x[i - width] != NA_INTEGER)) {
-          
-          n_obs -= 1;
-          
+        if (!is_na_old) {
+          if(x[i - width] != 0) {
+            sum_x -= 1;
+          }
         }
-        
-        if ((x[i - width] == NA_INTEGER) || (x[i - width] == 0)) {
-          
-          x_old = 0;
-          
-        } else {
-          
-          x_old = 1;
-          
-        }
-        
-        sum_x = sum_x + x_new - x_old;
-        
       }
       
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && (x[i] != NA_INTEGER))) {
+      if (!na_restore || x[i] != NA_INTEGER) {
         
         if (n_obs >= min_obs) {
           
           if (sum_x > 0) {
             rcpp_any[i] = 1;
-          } else if (n_obs == count) {
+          } else if ((i >= width && n_obs == width) || (i < width && n_obs == i + 1)) {
             rcpp_any[i] = 0;
           } else {
             rcpp_any[i] = NA_INTEGER;
@@ -191,19 +164,21 @@ struct RollAnyOfflineVec : public Worker {
       // from 1D to 2D array
       int i = z;
       
-      int count = 0;
-      int n_obs = 0;
-      int sum_x = 0;
-      
       // don't compute if missing value and 'na_restore' argument is TRUE
-      if ((!na_restore) || (na_restore && (x[i] != NA_INTEGER))) {
+      if (!na_restore || x[i] != NA_INTEGER) {
+        
+        int n_obs = 0;
+        int sum_x = 0;
+        bool is_na = false;
         
         // number of observations is either the window size or,
         // for partial results, the number of the current row
-        while ((width > count) && (i >= count)) {
+        for (int count = 0; (count < width) && (count <= i); count++) {
           
           // don't include if missing value
-          if (x[i - count] != NA_INTEGER) {
+          is_na = (x[i - count] == NA_INTEGER);
+          
+          if (!is_na) {
             
             // compute the sum
             if (x[i - count] == 1) {
@@ -214,15 +189,13 @@ struct RollAnyOfflineVec : public Worker {
             
           }
           
-          count += 1;
-          
         }
         
         if (n_obs >= min_obs) {
           
           if (sum_x > 0) {
             rcpp_any[i] = 1;
-          } else if (n_obs == count) {
+          } else if ((i >= width && n_obs == width) || (i < width && n_obs == i + 1)) {
             rcpp_any[i] = 0;
           } else {
             rcpp_any[i] = NA_INTEGER;
@@ -2653,7 +2626,6 @@ struct RollSdOfflineVec : public Worker {
         
         if (center) {
           
-          int count = 0;
           long double sum_w = 0;
           long double sum_x = 0;
           
