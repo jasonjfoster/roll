@@ -429,7 +429,7 @@ struct RollSumOnlineMat : public Worker {
           }
           
           sum_x = lambda * sum_x + w_new * x_new;
-            
+          
           // rolling window
           if (i >= width) {
             
