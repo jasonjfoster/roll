@@ -1,7 +1,7 @@
 Package: roll
 Type: Package
 Title: Rolling and Expanding Statistics
-Version: 1.1.8
+Version: 1.2.0
 Date: YYYY-MM-DD
 Authors@R: person("Jason", "Foster", , "jason.j.foster@gmail.com", c("aut", "cre"))
 Description: Fast and efficient computation of rolling and expanding statistics for time-series data.

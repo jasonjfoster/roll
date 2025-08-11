@@ -20,7 +20,7 @@ void check_weights_x(const int& n_rows_x, const int& width,
                      const arma::vec& weights) {
   
   if ((int)weights.size() < std::min(width, n_rows_x)) {
-    stop("length of 'weights' must equal either the number of rows in 'x' or 'width'");
+    stop("length of 'weights' must be greater than or equal to the number of rows in 'x' or 'width'");
   }
   
 }
@@ -29,7 +29,7 @@ void check_weights_xy(const int& n_rows_xy, const int& width,
                       const arma::vec& weights) {
   
   if ((int)weights.size() < std::min(width, n_rows_xy)) {
-    stop("length of 'weights' must equal either the number of rows in 'x' (and 'y', if applicable) or 'width'");
+    stop("length of 'weights' must be greater than or equal to the number of rows in 'x' (and 'y', if applicable) or 'width'");
   }
   
 }
@@ -38,7 +38,7 @@ void check_weights_lm(const int& n_rows_xy, const int& width,
                       const arma::vec& weights) {
   
   if ((int)weights.size() < std::min(width, n_rows_xy)) {
-    stop("length of 'weights' must equal either the number of rows in 'x' (and 'y') or 'width'");
+    stop("length of 'weights' must greater than or equal to the number of rows in 'x' (and 'y') or 'width'");
   }
   
 }
@@ -842,7 +842,7 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
     int n_rows_x = xx.nrow();
     int n_cols_x = xx.ncol();
     arma::uvec arma_any_na(n_rows_x);
-    arma::imat arma_idxquantile(n_rows_x, n_cols_x);
+    arma::imat arma_idxquantile(n_rows_x, n_cols_x); // unsigned int coerce NA to int
     
     // check 'width' argument for errors
     check_width(width);
@@ -927,7 +927,7 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
     NumericVector xx(x);
     int n = weights.size();
     int n_rows_x = xx.size();
-    arma::ivec arma_idxquantile(n_rows_x);
+    arma::ivec arma_idxquantile(n_rows_x); // unsigned int coerce NA to int
     
     // check 'width' argument for errors
     check_width(width);

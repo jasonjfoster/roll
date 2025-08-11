@@ -1,6 +1,6 @@
 # roll
 
-## Version 1.1.8
+## Version 1.2.0
 
 * Implemented efficient algorithms for `roll_median` and `roll_quantile` functions
 
