@@ -2262,6 +2262,7 @@ struct RollVarOnlineMat : public Worker {
       long double sumsq_x = 0;
       long double mean_prev_x = 0;
       long double mean_x = 0;
+      long double var_x = 0;
       
       for (int i = 0; i < n_rows_x; i++) {
         
@@ -2372,11 +2373,21 @@ struct RollVarOnlineMat : public Worker {
           
         }
         
+        var_x = sumsq_x / (sum_w - sumsq_w / sum_w);
+        
         // don't compute if missing value and 'na_restore' argument is TRUE
         if (!na_restore || !std::isnan(x(i, j))) {
           
           if ((n_obs > 1) && (n_obs >= min_obs)) {
-            arma_var(i, j) = sumsq_x / (sum_w - sumsq_w / sum_w);
+            
+            if (var_x > arma::datum::eps) {
+              arma_var(i, j) = var_x;
+            } else if (var_x > -arma::datum::eps) {
+              arma_var(i, j) = 0;
+            } else { 
+              arma_var(i, j) = NA_REAL;
+            }
+            
           } else {
             arma_var(i, j) = NA_REAL;
           }
@@ -2430,6 +2441,7 @@ struct RollVarOfflineMat : public Worker {
       // from 1D to 2D array
       int i = z / n_cols_x;
       int j = z % n_cols_x;
+      long double var_x = 0;
       
       // don't compute if missing value and 'na_restore' argument is TRUE
       if (!na_restore || !std::isnan(x(i, j))) {
@@ -2502,8 +2514,18 @@ struct RollVarOfflineMat : public Worker {
           
         }
         
+        var_x = sumsq_x / (sum_w - sumsq_w / sum_w);
+        
         if ((n_obs > 1) && (n_obs >= min_obs)) {
-          arma_var(i, j) = sumsq_x / (sum_w - sumsq_w / sum_w);
+          
+          if (var_x > arma::datum::eps) {
+            arma_var(i, j) = var_x;
+          } else if (var_x > -arma::datum::eps) {
+            arma_var(i, j) = 0;
+          } else { 
+            arma_var(i, j) = NA_REAL;
+          }
+          
         } else {
           arma_var(i, j) = NA_REAL;
         }
@@ -2568,6 +2590,7 @@ struct RollSdOnlineMat : public Worker {
       long double sumsq_x = 0;
       long double mean_prev_x = 0;
       long double mean_x = 0;
+      long double var_x = 0;
       
       for (int i = 0; i < n_rows_x; i++) {
         
@@ -2680,11 +2703,21 @@ struct RollSdOnlineMat : public Worker {
           
         }
         
+        var_x = sumsq_x / (sum_w - sumsq_w / sum_w);
+        
         // don't compute if missing value and 'na_restore' argument is TRUE
         if (!na_restore || !std::isnan(x(i, j))) {
           
           if ((n_obs > 1) && (n_obs >= min_obs)) {
-            arma_sd(i, j) = sqrt(sumsq_x / (sum_w - sumsq_w / sum_w));
+            
+            if (var_x > arma::datum::eps) {
+              arma_sd(i, j) = sqrt(var_x);
+            } else if (var_x > -arma::datum::eps) {
+              arma_sd(i, j) = 0;
+            } else { 
+              arma_sd(i, j) = NA_REAL;
+            }
+            
           } else {
             arma_sd(i, j) = NA_REAL;
           }
@@ -2739,6 +2772,7 @@ struct RollSdOfflineMat : public Worker {
       // from 1D to 2D array
       int i = z / n_cols_x;
       int j = z % n_cols_x;
+      long double var_x = 0;
       
       // don't compute if missing value and 'na_restore' argument is TRUE
       if (!na_restore || !std::isnan(x(i, j))) {
@@ -2811,8 +2845,18 @@ struct RollSdOfflineMat : public Worker {
           
         }
         
+        var_x = sumsq_x / (sum_w - sumsq_w / sum_w);
+        
         if ((n_obs > 1) && (n_obs >= min_obs)) {
-          arma_sd(i, j) = sqrt(sumsq_x / (sum_w - sumsq_w / sum_w));
+          
+          if (var_x > arma::datum::eps) {
+            arma_sd(i, j) = sqrt(var_x);
+          } else if (var_x > -arma::datum::eps) {
+            arma_sd(i, j) = 0;
+          } else { 
+            arma_sd(i, j) = NA_REAL;
+          }
+          
         } else {
           arma_sd(i, j) = NA_REAL;
         }
