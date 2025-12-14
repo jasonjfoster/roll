@@ -1,5 +1,9 @@
 # roll
 
+## Version 1.2.1
+
+* Fixed an issue related to floating point arithmetic ([#51](https://github.com/jasonjfoster/roll/issues/51))
+
 ## Version 1.2.0
 
 * Implemented efficient algorithms for `roll_median` and `roll_quantile` functions

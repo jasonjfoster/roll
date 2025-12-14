@@ -38,7 +38,7 @@ void check_weights_lm(const int& n_rows_xy, const int& width,
                       const arma::vec& weights) {
   
   if ((int)weights.size() < std::min(width, n_rows_xy)) {
-    stop("length of 'weights' must greater than or equal to the number of rows in 'x' (and 'y') or 'width'");
+    stop("length of 'weights' must be greater than or equal to the number of rows in 'x' (and 'y') or 'width'");
   }
   
 }
