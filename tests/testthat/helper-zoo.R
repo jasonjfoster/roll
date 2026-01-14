@@ -175,24 +175,24 @@ rollapplyr_lm <- function(x, y, width, intercept) {
       }
       
       summary_fit <- summary(fit)
-      summary_fit_coef <- coef(summary_fit)[ , "Estimate"]
+      summary_fit_coef <- coef(summary_fit)
+      df_fit <- n_cols_x
       
-      if (nrow(coef(summary_fit)) == n_cols_x) {
+      if (nrow(summary_fit_coef) == n_cols_x) {
         
-        result[["coefficients"]][i, ] <- summary_fit_coef
+        result[["coefficients"]][i, ] <- summary_fit_coef[ , "Estimate"]
+
+        var_y <- crossprod(y_subset)
+        rsq <- summary_fit$r.squared
+
+        if (!is.na(var_y) && (var_y > .Machine$double.eps)) {
+          result[["r.squared"]][i, ] <- rsq
+        }
         
-        # "In summary.lm(fit) : essentially perfect fit: summary may be unreliable"
-        if (!(isTRUE(all.equal(as.numeric(rep(summary_fit_coef[1], length(y_subset))), as.numeric(y_subset))) &&
-              isTRUE(all.equal(as.numeric(summary_fit_coef[-1]), rep(0, length(summary_fit_coef[-1])))))) {
-          
-          result[["r.squared"]][i, ] <- summary_fit$r.squared
+        df_resid <- nrow(data) - n_cols_x # fit$df.residual
+
+        if (!is.na(rsq) && !is.na(df_resid) && (df_resid > 0)) {
           result[["std.error"]][i, ] <- coef(summary_fit)[ , "Std. Error"]
-          
-        } else {
-          
-          result[["r.squared"]][i, ] <- as.numeric(NA)
-          result[["std.error"]][i, ] <- as.numeric(NA)
-          
         }
         
       }
@@ -258,24 +258,24 @@ rollapplyr_lm <- function(x, y, width, intercept) {
       }
       
       summary_fit <- summary(fit)
-      summary_fit_coef <- coef(summary_fit)[ , "Estimate"]
+      summary_fit_coef <- coef(summary_fit)
+      df_fit <- n_cols_x
       
-      if (nrow(coef(summary_fit)) == n_cols_x) {
+      if (nrow(summary_fit_coef) == df_fit) {
         
-        result[["coefficients"]][i] <- summary_fit_coef
+        result[["coefficients"]][i] <- summary_fit_coef[ , "Estimate"]
+
+        var_y <- crossprod(y_subset)
+        rsq <- summary_fit$r.squared
+
+        if (!is.na(var_y) && (var_y > .Machine$double.eps)) {
+          result[["r.squared"]][i] <- rsq
+        }
         
-        # "In summary.lm(fit) : essentially perfect fit: summary may be unreliable"
-        if (!(isTRUE(all.equal(as.numeric(rep(summary_fit_coef[1], length(y_subset))), as.numeric(y_subset))) &&
-              isTRUE(all.equal(as.numeric(summary_fit_coef[-1]), rep(0, length(summary_fit_coef[-1])))))) {
-          
-          result[["r.squared"]][i] <- summary_fit$r.squared
+        df_resid <- nrow(data) - n_cols_x # fit$df.residual
+
+        if (!is.na(rsq) && !is.na(df_resid) && (df_resid > 0)) {
           result[["std.error"]][i] <- coef(summary_fit)[ , "Std. Error"]
-          
-        } else {
-          
-          result[["r.squared"]][i] <- as.numeric(NA)
-          result[["std.error"]][i] <- as.numeric(NA)
-          
         }
         
       }

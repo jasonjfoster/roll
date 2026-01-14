@@ -5542,7 +5542,6 @@ struct RollLmMatInterceptTRUE : public Worker {
   void operator()(std::size_t begin_slice, std::size_t end_slice) {
     for (std::size_t i = begin_slice; i < end_slice; i++) {
       
-      arma::rowvec no_solution(n_cols_x, arma::fill::value(NA_REAL));
       arma::mat sigma = arma_cov.slice(i);
       arma::mat A = sigma.submat(0, 0, n_cols_x - 2, n_cols_x - 2);
       arma::mat b = sigma.submat(0, n_cols_x - 1, n_cols_x - 2, n_cols_x - 1);
@@ -5596,22 +5595,22 @@ struct RollLmMatInterceptTRUE : public Worker {
             arma_se.submat(i, 1, i, n_cols_x - 1) = sqrt(var_resid * trans(diagvec(A_inv_diag)));
             
           } else {
-            arma_se.row(i) = no_solution;
+            arma_se.row(i).fill(NA_REAL);
           }
           
         } else {
           
-          arma_coef.row(i) = no_solution;
+          arma_coef.row(i).fill(NA_REAL);
           arma_rsq[i] = NA_REAL;
-          arma_se.row(i) = no_solution;
+          arma_se.row(i).fill(NA_REAL);
           
         }
         
       } else {
         
-        arma_coef.row(i) = no_solution;
+        arma_coef.row(i).fill(NA_REAL);
         arma_rsq[i] = NA_REAL;
-        arma_se.row(i) = no_solution;
+        arma_se.row(i).fill(NA_REAL);
         
       }
       
@@ -5650,7 +5649,6 @@ struct RollLmMatInterceptFALSE : public Worker {
   void operator()(std::size_t begin_slice, std::size_t end_slice) {
     for (std::size_t i = begin_slice; i < end_slice; i++) {
       
-      arma::rowvec no_solution(n_cols_x - 1, arma::fill::value(NA_REAL));
       arma::mat sigma = arma_cov.slice(i);
       arma::mat A = sigma.submat(0, 0, n_cols_x - 2, n_cols_x - 2);
       arma::mat b = sigma.submat(0, n_cols_x - 1, n_cols_x - 2, n_cols_x - 1);
@@ -5698,22 +5696,22 @@ struct RollLmMatInterceptFALSE : public Worker {
             arma_se.row(i) = sqrt(var_resid * trans(diagvec(A_inv_diag)));
             
           } else {
-            arma_se.row(i) = no_solution;
+            arma_se.row(i).fill(NA_REAL);
           }
           
         } else {
           
-          arma_coef.row(i) = no_solution;
+          arma_coef.row(i).fill(NA_REAL);
           arma_rsq[i] = NA_REAL;
-          arma_se.row(i) = no_solution;
+          arma_se.row(i).fill(NA_REAL);
           
         }
         
       } else {
         
-        arma_coef.row(i) = no_solution;
+        arma_coef.row(i).fill(NA_REAL);
         arma_rsq[i] = NA_REAL;
-        arma_se.row(i) = no_solution;
+        arma_se.row(i).fill(NA_REAL);
         
       }
       
