@@ -192,7 +192,7 @@ rollapplyr_lm <- function(x, y, width, intercept) {
         df_resid <- nrow(data) - n_cols_x # fit$df.residual
 
         if (!is.na(rsq) && !is.na(df_resid) && (df_resid > 0)) {
-          result[["std.error"]][i, ] <- coef(summary_fit)[ , "Std. Error"]
+          result[["std.error"]][i, ] <- summary_fit_coef[ , "Std. Error"]
         }
         
       }
@@ -275,7 +275,7 @@ rollapplyr_lm <- function(x, y, width, intercept) {
         df_resid <- nrow(data) - n_cols_x # fit$df.residual
 
         if (!is.na(rsq) && !is.na(df_resid) && (df_resid > 0)) {
-          result[["std.error"]][i] <- coef(summary_fit)[ , "Std. Error"]
+          result[["std.error"]][i] <- summary_fit_coef[ , "Std. Error"]
         }
         
       }
