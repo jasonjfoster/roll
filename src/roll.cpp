@@ -1,5 +1,4 @@
 #include "roll.h"
-#include "roll_check.h"
 
 List dimnames_lm_x(const List& input, const int& n_cols_x,
                    const bool& intercept) {
@@ -170,11 +169,11 @@ SEXP roll_any(const SEXP& x, const int& width,
     IntegerMatrix rcpp_any(n_rows_x, n_cols_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
@@ -222,11 +221,11 @@ SEXP roll_any(const SEXP& x, const int& width,
     IntegerVector rcpp_any(n_rows_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // compute rolling any
     if (online) {
@@ -275,11 +274,11 @@ SEXP roll_all(const SEXP& x, const int& width,
     IntegerMatrix rcpp_all(n_rows_x, n_cols_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
@@ -327,11 +326,11 @@ SEXP roll_all(const SEXP& x, const int& width,
     IntegerVector rcpp_all(n_rows_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // compute rolling all
     if (online) {
@@ -382,16 +381,16 @@ SEXP roll_sum(const SEXP& x, const int& width,
     arma::mat arma_sum(n_rows_x, n_cols_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
-    bool status = check_lambda(weights, n_rows_x, width, online);
+    roll::check_weights(n_rows_x, width, weights, "'x'");
+    bool status = roll::check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
@@ -441,16 +440,16 @@ SEXP roll_sum(const SEXP& x, const int& width,
     arma::vec arma_sum(n_rows_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
-    bool status = check_lambda(weights, n_rows_x, width, online);
+    roll::check_weights(n_rows_x, width, weights, "'x'");
+    bool status = roll::check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // compute rolling sums
     if (status && online) {
@@ -503,16 +502,16 @@ SEXP roll_prod(const SEXP& x, const int& width,
     arma::mat arma_prod(n_rows_x, n_cols_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
-    bool status = check_lambda(weights, n_rows_x, width, online);
+    roll::check_weights(n_rows_x, width, weights, "'x'");
+    bool status = roll::check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
@@ -562,16 +561,16 @@ SEXP roll_prod(const SEXP& x, const int& width,
     arma::vec arma_prod(n_rows_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
-    bool status = check_lambda(weights, n_rows_x, width, online);
+    roll::check_weights(n_rows_x, width, weights, "'x'");
+    bool status = roll::check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // compute rolling products
     if (status && online) {
@@ -624,16 +623,16 @@ SEXP roll_mean(const SEXP& x, const int& width,
     arma::mat arma_mean(n_rows_x, n_cols_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
-    bool status = check_lambda(weights, n_rows_x, width, online);
+    roll::check_weights(n_rows_x, width, weights, "'x'");
+    bool status = roll::check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
@@ -683,16 +682,16 @@ SEXP roll_mean(const SEXP& x, const int& width,
     arma::vec arma_mean(n_rows_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
-    bool status = check_lambda(weights, n_rows_x, width, online);
+    roll::check_weights(n_rows_x, width, weights, "'x'");
+    bool status = roll::check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // compute rolling means
     if (status && online) {
@@ -745,18 +744,18 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
     arma::imat arma_idxquantile(n_rows_x, n_cols_x); // unsigned int coerce NA to int
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
+    roll::check_weights(n_rows_x, width, weights, "'x'");
     
     // check 'p' argument for errors
-    check_bounds_double(p, 0, 1, "p");
+    roll::check_bounds_double(p, 0, 1, "p");
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
@@ -830,18 +829,18 @@ SEXP roll_idxquantile(const SEXP& x, const int& width,
     arma::ivec arma_idxquantile(n_rows_x); // unsigned int coerce NA to int
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
+    roll::check_weights(n_rows_x, width, weights, "'x'");
     
     // check 'p' argument for errors
-    check_bounds_double(p, 0, 1, "p");
+    roll::check_bounds_double(p, 0, 1, "p");
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // compute rolling index of quantiles
     if (online) {
@@ -918,18 +917,18 @@ SEXP roll_quantile(const SEXP& x, const int& width,
     arma::mat arma_quantile(n_rows_x, n_cols_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
+    roll::check_weights(n_rows_x, width, weights, "'x'");
     
     // check 'p' argument for errors
-    check_bounds_double(p, 0, 1, "p");
+    roll::check_bounds_double(p, 0, 1, "p");
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
@@ -1023,18 +1022,18 @@ SEXP roll_quantile(const SEXP& x, const int& width,
     arma::vec arma_quantile(n_rows_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
+    roll::check_weights(n_rows_x, width, weights, "'x'");
     
     // check 'p' argument for errors
-    check_bounds_double(p, 0, 1, "p");
+    roll::check_bounds_double(p, 0, 1, "p");
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // compute rolling quantiles
     if (online) {
@@ -1130,16 +1129,16 @@ SEXP roll_var(const SEXP& x, const int& width,
     arma::mat arma_var(n_rows_x, n_cols_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
-    bool status = check_lambda(weights, n_rows_x, width, online);
+    roll::check_weights(n_rows_x, width, weights, "'x'");
+    bool status = roll::check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
@@ -1189,16 +1188,16 @@ SEXP roll_var(const SEXP& x, const int& width,
     arma::vec arma_var(n_rows_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
-    bool status = check_lambda(weights, n_rows_x, width, online);
+    roll::check_weights(n_rows_x, width, weights, "'x'");
+    bool status = roll::check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // compute rolling variances
     if (status && online) {
@@ -1251,16 +1250,16 @@ SEXP roll_sd(const SEXP& x, const int& width,
     arma::mat arma_sd(n_rows_x, n_cols_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
-    bool status = check_lambda(weights, n_rows_x, width, online);
+    roll::check_weights(n_rows_x, width, weights, "'x'");
+    bool status = roll::check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
@@ -1310,16 +1309,16 @@ SEXP roll_sd(const SEXP& x, const int& width,
     arma::vec arma_sd(n_rows_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
-    bool status = check_lambda(weights, n_rows_x, width, online);
+    roll::check_weights(n_rows_x, width, weights, "'x'");
+    bool status = roll::check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // compute rolling standard deviations
     if (status && online) {
@@ -1373,16 +1372,16 @@ SEXP roll_scale(const SEXP& x, const int& width,
     arma::mat arma_scale(n_rows_x, n_cols_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
-    bool status = check_lambda(weights, n_rows_x, width, online);
+    roll::check_weights(n_rows_x, width, weights, "'x'");
+    bool status = roll::check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'false',
     // otherwise check argument for errors
@@ -1432,16 +1431,16 @@ SEXP roll_scale(const SEXP& x, const int& width,
     arma::vec arma_scale(n_rows_x);
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_x, width, weights, "'x'");
-    bool status = check_lambda(weights, n_rows_x, width, online);
+    roll::check_weights(n_rows_x, width, weights, "'x'");
+    bool status = roll::check_lambda(weights, n_rows_x, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // compute rolling centering and scaling
     if (status && online) {
@@ -1497,19 +1496,19 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     arma::cube arma_cov(n_cols_x, n_cols_y, n_rows_xy);
     
     // check 'x' and 'y' arguments for errors
-    check_rows_equal(n_rows_xy, yy.nrow(), "x", "y");
+    roll::check_rows_equal(n_rows_xy, yy.nrow(), "x", "y");
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
-    bool status = check_lambda(weights, n_rows_xy, width, online);
+    roll::check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
+    bool status = roll::check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'true',
     // otherwise check argument for errors
@@ -1599,19 +1598,19 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     arma::cube arma_cov(n_cols_x, n_cols_y, n_rows_xy);
     
     // check 'x' and 'y' arguments for errors
-    check_rows_equal(n_rows_xy, yyy.nrow(), "x", "y");
+    roll::check_rows_equal(n_rows_xy, yyy.nrow(), "x", "y");
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
-    bool status = check_lambda(weights, n_rows_xy, width, online);
+    roll::check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
+    bool status = roll::check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'true',
     // otherwise check argument for errors
@@ -1671,19 +1670,19 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     arma::cube arma_cov(n_cols_x, n_cols_y, n_rows_xy);
     
     // check 'x' and 'y' arguments for errors
-    check_rows_equal(n_rows_xy, yy.nrow(), "x", "y");
+    roll::check_rows_equal(n_rows_xy, yy.nrow(), "x", "y");
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
-    bool status = check_lambda(weights, n_rows_xy, width, online);
+    roll::check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
+    bool status = roll::check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'true',
     // otherwise check argument for errors
@@ -1738,19 +1737,19 @@ SEXP roll_cov_z(const SEXP& x, const SEXP& y,
     arma::vec arma_cov(n_rows_xy);
     
     // check 'x' and 'y' arguments for errors
-    check_rows_equal(n_rows_xy, yy.size(), "x", "y");
+    roll::check_rows_equal(n_rows_xy, yy.size(), "x", "y");
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
-    bool status = check_lambda(weights, n_rows_xy, width, online);
+    roll::check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
+    bool status = roll::check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // compute rolling covariances
     if (status && online) {
@@ -1852,19 +1851,19 @@ SEXP roll_crossprod_z(const SEXP& x, const SEXP& y,
     arma::cube arma_crossprod(n_cols_x, n_cols_y, n_rows_xy);
     
     // check 'x' and 'y' arguments for errors
-    check_rows_equal(n_rows_xy, yy.nrow(), "x", "y");
+    roll::check_rows_equal(n_rows_xy, yy.nrow(), "x", "y");
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
-    bool status = check_lambda(weights, n_rows_xy, width, online);
+    roll::check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
+    bool status = roll::check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'true',
     // otherwise check argument for errors
@@ -1956,19 +1955,19 @@ SEXP roll_crossprod_z(const SEXP& x, const SEXP& y,
     arma::cube arma_crossprod(n_cols_x, n_cols_y, n_rows_xy);
     
     // check 'x' and 'y' arguments for errors
-    check_rows_equal(n_rows_xy, yyy.nrow(), "x", "y");
+    roll::check_rows_equal(n_rows_xy, yyy.nrow(), "x", "y");
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
-    bool status = check_lambda(weights, n_rows_xy, width, online);
+    roll::check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
+    bool status = roll::check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'true',
     // otherwise check argument for errors
@@ -2028,19 +2027,19 @@ SEXP roll_crossprod_z(const SEXP& x, const SEXP& y,
     arma::cube arma_crossprod(n_cols_x, n_cols_y, n_rows_xy);
     
     // check 'x' and 'y' arguments for errors
-    check_rows_equal(n_rows_xy, yy.nrow(), "x", "y");
+    roll::check_rows_equal(n_rows_xy, yy.nrow(), "x", "y");
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
-    bool status = check_lambda(weights, n_rows_xy, width, online);
+    roll::check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
+    bool status = roll::check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // default 'complete_obs' argument is 'true',
     // otherwise check argument for errors
@@ -2095,19 +2094,19 @@ SEXP roll_crossprod_z(const SEXP& x, const SEXP& y,
     arma::vec arma_crossprod(n_rows_xy);
     
     // check 'x' and 'y' arguments for errors
-    check_rows_equal(n_rows_xy, yy.size(), "x", "y");
+    roll::check_rows_equal(n_rows_xy, yy.size(), "x", "y");
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
-    bool status = check_lambda(weights, n_rows_xy, width, online);
+    roll::check_weights(n_rows_xy, width, weights, "'x' (and 'y', if applicable)");
+    bool status = roll::check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // compute rolling crossproducts
     if (status && online) {
@@ -2208,19 +2207,19 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
     List result(3);
     
     // check 'x' and 'y' arguments for errors
-    check_rows_equal(n_rows_xy, y.size(), "x", "y");
+    roll::check_rows_equal(n_rows_xy, y.size(), "x", "y");
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_xy, width, weights, "'x' (and 'y')");
-    bool status = check_lambda(weights, n_rows_xy, width, online);
+    roll::check_weights(n_rows_xy, width, weights, "'x' (and 'y')");
+    bool status = roll::check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // cbind x and y variables
     NumericMatrix data(n_rows_xy, n_cols_x);
@@ -2306,19 +2305,19 @@ List roll_lm_z(const SEXP& x, const NumericVector& y,
     List result(3);
     
     // check 'x' and 'y' arguments for errors
-    check_rows_equal(n_rows_xy, y.size(), "x", "y");
+    roll::check_rows_equal(n_rows_xy, y.size(), "x", "y");
     
     // check 'width' argument for errors
-    check_pos_int(width, "width");
+    roll::check_pos_int(width, "width");
     
     // default 'weights' argument is equal-weighted,
     // otherwise check argument for errors
-    check_weights(n_rows_xy, width, weights, "'x' (and 'y')");
-    bool status = check_lambda(weights, n_rows_xy, width, online);
+    roll::check_weights(n_rows_xy, width, weights, "'x' (and 'y')");
+    bool status = roll::check_lambda(weights, n_rows_xy, width, online);
     
     // default 'min_obs' argument is 'width',
     // otherwise check argument for errors
-    check_pos_int(min_obs, "min_obs");
+    roll::check_pos_int(min_obs, "min_obs");
     
     // cbind x and y variables
     NumericMatrix data(n_rows_xy, n_cols_x);

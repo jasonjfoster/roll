@@ -4,8 +4,10 @@
 #include <RcppArmadillo.h>
 using namespace Rcpp;
 
+namespace roll {
+
 // scalar checks: positive integer (>= 1)
-void check_pos_int(const int& value, const char* name) {
+inline void check_pos_int(const int& value, const char* name) {
 
   if (value < 1) {
     stop("value of '%s' must be greater than or equal to one", name);
@@ -14,8 +16,8 @@ void check_pos_int(const int& value, const char* name) {
 }
 
 // scalar checks: bounded double [lower, upper]
-void check_bounds_double(const double& value, const double& lower,
-                         const double& upper, const char* name) {
+inline void check_bounds_double(const double& value, const double& lower,
+                                const double& upper, const char* name) {
 
   if ((value < lower) || (value > upper)) {
     stop("value of '%s' must be between %f and %f", name, lower, upper);
@@ -24,8 +26,8 @@ void check_bounds_double(const double& value, const double& lower,
 }
 
 // dimension checks: equality
-void check_rows_equal(const int& n_rows_a, const int& n_rows_b,
-                      const char* name_a, const char* name_b) {
+inline void check_rows_equal(const int& n_rows_a, const int& n_rows_b,
+                             const char* name_a, const char* name_b) {
 
   if (n_rows_a != n_rows_b) {
     stop("number of rows in '%s' must equal the number of rows in '%s'", name_a, name_b);
@@ -34,8 +36,8 @@ void check_rows_equal(const int& n_rows_a, const int& n_rows_b,
 }
 
 // consolidated weights check
-void check_weights(const int& n_rows, const int& width,
-                   const arma::vec& weights, const char* context) {
+inline void check_weights(const int& n_rows, const int& width,
+                          const arma::vec& weights, const char* context) {
 
   if ((int)weights.size() < std::min(width, n_rows)) {
     stop("length of 'weights' must be greater than or equal to the number of rows in %s or 'width'",
@@ -45,8 +47,8 @@ void check_weights(const int& n_rows, const int& width,
 }
 
 // lambda check for online algorithm support (returns bool for control flow)
-bool check_lambda(const arma::vec& weights, const int& n_rows_x,
-                  const int& width, const bool& online) {
+inline bool check_lambda(const arma::vec& weights, const int& n_rows_x,
+                         const int& width, const bool& online) {
   
   // check if equal-weights
   bool status_eq = all(weights == weights[0]);
@@ -85,6 +87,8 @@ bool check_lambda(const arma::vec& weights, const int& n_rows_x,
   
   return status_exp;
   
+};
+
 }
 
 #endif
