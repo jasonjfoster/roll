@@ -69,7 +69,7 @@ inline void cube_attr(T& target, const int& n_d1,
 
 }
 
-// rsq attributes: set dim to (n_rows, 1), attach "R-squared" column name and xts attributes
+// r-squared attributes: set dim to (n_rows, 1), attach "R-squared" col name, copy xts attrs
 template <typename T, typename S>
 inline void rsq_attr(T& target, const int& n_rows,
                      const S& source, SEXP dimnames_x) {
