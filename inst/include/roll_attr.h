@@ -60,11 +60,11 @@ inline void cube_attr(T& target, const int& n_d1,
   target.attr("dim") = IntegerVector::create(n_d1, n_d2, n_d3);
 
   if ((dimnames_x.size() > 1) && (dimnames_y.size() > 1)) {
-    target.attr("dimnames") = List::create(dimnames_x[1], dimnames_y[1]);
+    target.attr("dimnames") = List::create(dimnames_x[1], dimnames_y[1], R_NilValue);
   } else if (dimnames_x.size() > 1) {
-    target.attr("dimnames") = List::create(dimnames_x[1], R_NilValue);
+    target.attr("dimnames") = List::create(dimnames_x[1], R_NilValue, R_NilValue);
   } else if (dimnames_y.size() > 1) {
-    target.attr("dimnames") = List::create(R_NilValue, dimnames_y[1]);
+    target.attr("dimnames") = List::create(R_NilValue, dimnames_y[1], R_NilValue);
   }
 
 }
