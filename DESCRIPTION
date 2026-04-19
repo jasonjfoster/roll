@@ -1,7 +1,7 @@
 Package: roll
 Type: Package
 Title: Rolling and Expanding Statistics
-Version: 1.2.0
+Version: 1.2.1
 Date: YYYY-MM-DD
 Authors@R: person("Jason", "Foster", , "jason.j.foster@gmail.com", c("aut", "cre"))
 Description: Fast and efficient computation of rolling and expanding statistics for time-series data.
@@ -11,7 +11,7 @@ BugReports: https://github.com/jasonjfoster/roll/issues
 Imports: Rcpp, RcppParallel
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
 SystemRequirements: GNU make
-Roxygen: list(old_usage = TRUE)
-RoxygenNote: 7.3.3
 Encoding: UTF-8
 Suggests: covr, testthat, zoo
+Config/roxygen2/old_usage: TRUE
+Config/roxygen2/version: 7.3.3.9000
