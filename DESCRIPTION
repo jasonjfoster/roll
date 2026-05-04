@@ -1,8 +1,7 @@
 Package: roll
 Type: Package
 Title: Rolling and Expanding Statistics
-Version: 1.2.1
-Date: YYYY-MM-DD
+Version: 1.2.2
 Authors@R: person("Jason", "Foster", , "jason.j.foster@gmail.com", c("aut", "cre"))
 Description: Fast and efficient computation of rolling and expanding statistics for time-series data.
 License: GPL (>= 2)
@@ -14,4 +13,4 @@ SystemRequirements: GNU make
 Encoding: UTF-8
 Suggests: covr, testthat, zoo
 Config/roxygen2/old_usage: TRUE
-Config/roxygen2/version: 7.3.3.9000
+Config/roxygen2/version: 8.0.0
