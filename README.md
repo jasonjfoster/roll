@@ -17,22 +17,22 @@ As mentioned above, the numerical calculations use 'RcppParallel' to parallelize
 
 Install the released version from CRAN:
 
-``` r
+```r
 install.packages("roll")
 ```
 
 Or the development version from GitHub:
 
-``` r
-# install.packages("devtools")
-devtools::install_github("jasonjfoster/roll")
+```r
+# install.packages("pak")
+pak::pak("jasonjfoster/roll")
 ```
 
 ## Usage
 
 Load the package and supply a dataset:
 
-``` r
+```r
 library(roll)
 
 n <- 15
@@ -43,7 +43,7 @@ weights <- 0.9 ^ (n:1)
 
 Then, to compute rolling and expanding means, use the `roll_mean` function:
 
-``` r
+```r
 # rolling means with complete windows
 roll_mean(x, width = 5)
 
@@ -59,7 +59,7 @@ roll_mean(x, width = n, min_obs = 1, weights = weights)
 
 Or use the `roll_lm` function to compute rolling and expanding regressions:
 
-``` r
+```r
 # rolling regressions with complete windows
 roll_lm(x, y, width = 5)
 
