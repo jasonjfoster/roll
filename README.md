@@ -9,9 +9,13 @@
 
 'roll' provides fast and efficient computation of rolling and expanding statistics for time-series data.
 
-The default algorithm in the 'roll' package, and suitable for most applications, is an **online algorithm**. Based on the speed requirements and sequential nature of many problems in practice, online algorithms are a natural fit for computing rolling and expanding statistics of time-series data. That is, as observations are added and removed from a window, online algorithms update statistics and discard observations from memory (Welford, 1962, <doi:10.1080/00401706.1962.10490022>; West, 1979, <doi:10.1145/359146.359153>); as a result, the amount of time to evaluate each function is significantly faster as the computation is independent of the window. In contrast, an offline algorithm requires all observations in memory to calculate the statistic for each window. Note that online algorithms are prone to loss of precision due to round-off error; hence, users can trade speed for accuracy and select the offline algorithm by setting the `online` argument to `FALSE`. Also, 'RcppParallel' is used to parallelize the online algorithms across columns and the offline algorithms across windows. 
+The default algorithm in the 'roll' package is an online algorithm that, as observations are added to and removed from a window, updates statistics and discards observations from memory (Welford, 1962, <doi:10.1080/00401706.1962.10490022>; West, 1979, <doi:10.1145/359146.359153>); as a result, the amount of time to evaluate each function is significantly shorter as the computation is independent of the window. In contrast, an offline algorithm requires all observations in memory to calculate the statistic for each window, so users can trade speed for accuracy and select the offline algorithm by setting the `online` argument to `FALSE`. Quantiles are computed from the inverse of the empirical distribution function with averaging at discontinuities (Hyndman and Fan, 1996, <doi:10.1080/00031305.1996.10473566>). Use cases include:
 
-As mentioned above, the numerical calculations use 'RcppParallel' to parallelize rolling and expanding statistics of time-series data. 'RcppParallel' provides a complete toolkit for creating safe, portable, high-performance parallel algorithms, built on top of the Intel Threading Building Blocks (TBB) and TinyThread libraries. By default, all the available cores on a machine are used for parallel algorithms. If users are either already taking advantage of parallelism or instead want to use a fixed number or proportion of threads, then set the number of threads with the `RcppParallel::setThreadOptions` function.
+* **Rolling summary statistics**: means, standard deviations, medians, and quantiles that adapt to the most recent window of observations
+* **Time-varying relationships**: rolling variances, covariances, correlations, and linear regressions between variables
+* **Feature engineering**: rolling z-scores and standardized series for forecasting and signal construction
+
+The package supports rolling and expanding windows, weights, and handling of missing values via the min_obs, complete_obs, and na_restore arguments. The implementation uses 'RcppParallel' to parallelize the online algorithms across columns and the offline algorithms across windows.
 
 ## Installation
 
@@ -41,7 +45,7 @@ y <- rnorm(n)
 weights <- 0.9 ^ (n:1)
 ```
 
-Then, to compute rolling and expanding means, use the `roll_mean` function:
+Then, to compute rolling and expanding means, use the `roll_mean()` function:
 
 ```r
 # rolling means with complete windows
@@ -53,11 +57,11 @@ roll_mean(x, width = 5, min_obs = 1)
 # expanding means with partial windows
 roll_mean(x, width = n, min_obs = 1)
 
-# expanding means with weights and partial windows
+# expanding means with partial windows and weights
 roll_mean(x, width = n, min_obs = 1, weights = weights)
 ```
 
-Or use the `roll_lm` function to compute rolling and expanding regressions:
+Or use the `roll_lm()` function to compute rolling and expanding regressions:
 
 ```r
 # rolling regressions with complete windows
@@ -69,13 +73,15 @@ roll_lm(x, y, width = 5, min_obs = 1)
 # expanding regressions with partial windows
 roll_lm(x, y, width = n, min_obs = 1)
 
-# expanding regressions with weights and partial windows 
+# expanding regressions with partial windows and weights
 roll_lm(x, y, width = n, min_obs = 1, weights = weights)
 ```
 
-Note that handling of missing values is supported as well (see the `min_obs`, `complete_obs`, and `na_restore` arguments).
+Handling of missing values is also supported (see the `min_obs`, `complete_obs`, and `na_restore` arguments).
 
 ## References
+
+Hyndman, R.J. and Fan, Y. (1996). "Sample Quantiles in Statistical Packages." *The American Statistician* 50 (4): 361-365. <doi:10.1080/00031305.1996.10473566>
 
 Welford, B.P. (1962). "Note on a Method for Calculating Corrected Sums of Squares and Products." *Technometrics* 4 (3): 419-420. <doi:10.1080/00401706.1962.10490022>
 
