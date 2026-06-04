@@ -1,17 +1,47 @@
-Package: roll
 Type: Package
+Package: roll
 Title: Rolling and Expanding Statistics
 Version: 1.2.2
-Authors@R: person("Jason", "Foster", , "jason.j.foster@gmail.com", c("aut", "cre"))
-Description: Fast and efficient computation of rolling and expanding statistics for time-series data. The default algorithm in the 'roll' package is an online algorithm that, as observations are added to and removed from a window, updates statistics and discards observations from memory (Welford, 1962, <doi:10.1080/00401706.1962.10490022>; West, 1979, <doi:10.1145/359146.359153>); as a result, the amount of time to evaluate each function is significantly shorter as the computation is independent of the window. In contrast, an offline algorithm requires all observations in memory to calculate the statistic for each window, so users can trade speed for accuracy and select the offline algorithm by setting the online argument to FALSE. Quantiles are computed from the inverse of the empirical distribution function with averaging at discontinuities (Hyndman and Fan, 1996, <doi:10.1080/00031305.1996.10473566>). Use cases include rolling summary statistics, time-varying relationships between variables, and feature engineering for forecasting and signal construction. The package supports rolling and expanding windows, weights, and handling of missing values via the min_obs, complete_obs, and na_restore arguments. The implementation uses 'RcppParallel' to parallelize the online algorithms across columns and the offline algorithms across windows.
+Authors@R: 
+    person("Jason", "Foster", , "jason.j.foster@gmail.com", role = c("aut", "cre"))
+Description: Fast and efficient computation of rolling and expanding
+    statistics for time-series data. The default algorithm in the 'roll'
+    package is an online algorithm that, as observations are added to and
+    removed from a window, updates statistics and discards observations
+    from memory (Welford, 1962, <doi:10.1080/00401706.1962.10490022>;
+    West, 1979, <doi:10.1145/359146.359153>); as a result, the amount of
+    time to evaluate each function is significantly shorter as the
+    computation is independent of the window. In contrast, an offline
+    algorithm requires all observations in memory to calculate the
+    statistic for each window, so users can trade speed for accuracy and
+    select the offline algorithm by setting the online argument to FALSE.
+    Quantiles are computed from the inverse of the empirical distribution
+    function with averaging at discontinuities (Hyndman and Fan, 1996,
+    <doi:10.1080/00031305.1996.10473566>). Use cases include rolling
+    summary statistics, time-varying relationships between variables, and
+    feature engineering for forecasting and signal construction. The
+    package supports rolling and expanding windows, weights, and handling
+    of missing values via the min_obs, complete_obs, and na_restore
+    arguments. The implementation uses 'RcppParallel' to parallelize the
+    online algorithms across columns and the offline algorithms across
+    windows.
 License: GPL (>= 2)
 URL: https://github.com/jasonjfoster/roll
 BugReports: https://github.com/jasonjfoster/roll/issues
-Depends: R (>= 3.5.0)
-Imports: Rcpp, RcppParallel
-LinkingTo: Rcpp, RcppArmadillo, RcppParallel
-SystemRequirements: GNU make
-Encoding: UTF-8
-Suggests: covr, testthat, zoo
+Depends: 
+    R (>= 3.5.0)
+Imports: 
+    Rcpp,
+    RcppParallel
+Suggests: 
+    covr,
+    testthat,
+    zoo
+LinkingTo: 
+    Rcpp,
+    RcppArmadillo,
+    RcppParallel
 Config/roxygen2/old_usage: TRUE
 Config/roxygen2/version: 8.0.0
+Encoding: UTF-8
+SystemRequirements: GNU make
