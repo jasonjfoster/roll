@@ -10,8 +10,8 @@ Description: Fast and efficient computation of rolling and expanding
     removed from a window, updates statistics and discards observations
     from memory (Welford, 1962, <doi:10.1080/00401706.1962.10490022>;
     West, 1979, <doi:10.1145/359146.359153>); as a result, the amount of
-    time to evaluate each function is significantly shorter as the
-    computation is independent of the window. In contrast, an offline
+    time to evaluate each function is significantly shorter because the
+    computation is independent of the window size. In contrast, an offline
     algorithm requires all observations in memory to calculate the
     statistic for each window, so users can trade speed for accuracy and
     select the offline algorithm by setting the online argument to FALSE.

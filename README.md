@@ -9,11 +9,11 @@
 
 'roll' provides fast and efficient computation of rolling and expanding statistics for time-series data.
 
-The default algorithm in the 'roll' package is an online algorithm that, as observations are added to and removed from a window, updates statistics and discards observations from memory (Welford, 1962, <doi:10.1080/00401706.1962.10490022>; West, 1979, <doi:10.1145/359146.359153>); as a result, the amount of time to evaluate each function is significantly shorter as the computation is independent of the window. In contrast, an offline algorithm requires all observations in memory to calculate the statistic for each window, so users can trade speed for accuracy and select the offline algorithm by setting the `online` argument to `FALSE`. Quantiles are computed from the inverse of the empirical distribution function with averaging at discontinuities (Hyndman and Fan, 1996, <doi:10.1080/00031305.1996.10473566>). Use cases include:
+The default algorithm in the 'roll' package is an online algorithm that, as observations are added to and removed from a window, updates statistics and discards observations from memory (Welford, 1962, <doi:10.1080/00401706.1962.10490022>; West, 1979, <doi:10.1145/359146.359153>); as a result, the amount of time to evaluate each function is significantly shorter because the computation is independent of the window size. In contrast, an offline algorithm requires all observations in memory to calculate the statistic for each window, so users can trade speed for accuracy and select the offline algorithm by setting the `online` argument to `FALSE`. Quantiles are computed from the inverse of the empirical distribution function with averaging at discontinuities (Hyndman and Fan, 1996, <doi:10.1080/00031305.1996.10473566>). Use cases include:
 
 * **Rolling summary statistics**: means, standard deviations, medians, and quantiles that adapt to the most recent window of observations
 * **Time-varying relationships**: rolling variances, covariances, correlations, and linear regressions between variables
-* **Feature engineering**: rolling z-scores and standardized series for forecasting and signal construction
+* **Feature engineering**: rolling z-scores for forecasting and signal construction
 
 The package supports rolling and expanding windows, weights, and handling of missing values via the min_obs, complete_obs, and na_restore arguments. The implementation uses 'RcppParallel' to parallelize the online algorithms across columns and the offline algorithms across windows.
 
