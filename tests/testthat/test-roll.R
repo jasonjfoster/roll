@@ -1,6 +1,6 @@
 test_that("equal to online algorithm", {
   
-  # skip("long-running test")
+  skip_on_cran()
   
   # test data
   test_roll_x <- c(lapply(test_ls, function(x){x[ , 1:3]}),

@@ -1,6 +1,6 @@
 test_that("equivalent to zoo::rollapply", {
   
-  # skip("long-running test")
+  skip_on_cran()
   
   packages <- c("zoo")
   
@@ -8,7 +8,7 @@ test_that("equivalent to zoo::rollapply", {
   
   if (!all(status)) {
     
-    skip(paste0(paste0("'", paste0(names(status[!status]), collapse = ", '", sep = "'")),
+    skip(paste0("'", paste0(names(status[!status]), collapse = "', '"),
                 "' package(s) required for this test"))
     
   }  
