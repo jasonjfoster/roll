@@ -1,5 +1,9 @@
 # roll
 
+## Version 1.2.2
+
+* Added tests for input checks
+
 ## Version 1.2.1
 
 * Fixed an issue related to floating point arithmetic ([#51](https://github.com/jasonjfoster/roll/issues/51))

@@ -44,3 +44,7 @@ test_ls[1:2] <- lapply(test_ls[1:2], setNames, paste0("x", rep(1:n_vars)))
 #   return(x)
 #   
 # })
+
+test_check_x <- c(lapply(test_ls[2], function(x){x[ , 1:3]}),
+                  list("random vector with 0's" = test_ls[[2]][ , 1]))
+test_check_y <- test_ls[[2]][ , 4]
