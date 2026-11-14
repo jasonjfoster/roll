@@ -150,13 +150,13 @@ test_that("equivalent to zoo::rollapply", {
                                        test_zoo_y[[ay]], width))
 
           # "the standard deviation is zero"
-          expect_equal(roll_cor(test_zoo_x[[ax]], test_zoo_y[[ay]],
-                                width, test_weights[[1]],
-                                test_center[1], test_scale[1],
-                                test_min_obs[1], test_complete_obs[2],
-                                test_na_restore[2], test_online[i]),
-                       rollapplyr_cube(cor, test_zoo_x[[ax]],
-                                       test_zoo_y[[ay]], width))
+          expect_equal(suppressWarnings(roll_cor(test_zoo_x[[ax]], test_zoo_y[[ay]],
+                                                 width, test_weights[[1]],
+                                                 test_center[1], test_scale[1],
+                                                 test_min_obs[1], test_complete_obs[2],
+                                                 test_na_restore[2], test_online[i])),
+                       suppressWarnings(rollapplyr_cube(cor, test_zoo_x[[ax]],
+                                                        test_zoo_y[[ay]], width)))
 
           expect_equal(roll_crossprod(test_zoo_x[[ax]], test_zoo_y[[ay]],
                                       width, test_weights[[1]],
@@ -173,13 +173,13 @@ test_that("equivalent to zoo::rollapply", {
             
             # "essentially perfect fit: summary may be unreliable"
             # "'complete_obs = FALSE' is not supported"
-            expect_equal(roll_lm(test_zoo_x[[ax]], test_zoo_yy[[ay]],
-                                 width, test_weights[[1]],
-                                 test_intercept[g], test_min_obs[1],
-                                 test_complete_obs[2], test_na_restore[2],
-                                 test_online[i]),
-                         rollapplyr_lm(test_zoo_x[[ax]], test_zoo_yy[[ay]],
-                                       width, test_intercept[g]))
+            expect_equal(suppressWarnings(roll_lm(test_zoo_x[[ax]], test_zoo_yy[[ay]],
+                                                  width, test_weights[[1]],
+                                                  test_intercept[g], test_min_obs[1],
+                                                  test_complete_obs[2], test_na_restore[2],
+                                                  test_online[i])),
+                         suppressWarnings(rollapplyr_lm(test_zoo_x[[ax]], test_zoo_yy[[ay]],
+                                                        width, test_intercept[g])))
             
           }
         }
