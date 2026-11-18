@@ -2,7 +2,7 @@
 
 ## Version 1.2.2
 
-* Added tests for input checks
+* Added tests for weights and input checks
 
 ## Version 1.2.1
 

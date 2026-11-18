@@ -22,12 +22,71 @@ dimnames_lm_x <- function(dimnames, n_cols_x, intercept) {
   
 }
 
-scale_z <- function(x, center = TRUE, scale = TRUE) {
+sum_weights <- function(x, weights) {
+  
+  weights_subset <- tail(weights, length(x))
+  
+  result <- sum(x * weights_subset)
+  
+  return(result)
+  
+}
+
+prod_weights <- function(x, weights) {
+  
+  weights_subset <- tail(weights, length(x))
+  
+  result <- prod(x * weights_subset)
+  
+  return(result)
+  
+}
+
+mean_weights <- function(x, weights) {
+  
+  weights_subset <- tail(weights, length(x))
+  
+  result <- weighted.mean(x, weights_subset)
+  
+  return(result)
+  
+}
+
+var_weights <- function(x, weights) {
+  
+  weights_subset <- tail(weights, length(x))
+  
+  result <- as.numeric(cov.wt(as.matrix(x), wt = weights_subset)$cov)
+  
+  return(result)
+  
+}
+
+sd_weights <- function(x, weights) {
+  
+  result <- sqrt(var_weights(x, weights))
+  
+  return(result)
+  
+}
+
+scale_weights <- function(x, weights, center = TRUE, scale = TRUE) {
   
   n_rows_x <- length(x)
+  weights_subset <- tail(weights, n_rows_x)
+  x_center <- center
+  x_scale <- scale
   result <- as.numeric(NA)
   
-  temp <- scale(x, center = center, scale = scale)
+  if (center) {
+    x_center <- weighted.mean(x, weights_subset)
+  }
+  
+  if (scale) {
+    x_scale <- sqrt(as.numeric(cov.wt(as.matrix(x), wt = weights_subset, center = center)$cov))
+  }
+  
+  temp <- scale(x, center = x_center, scale = x_scale)
   
   if ((scale && (n_rows_x > 1)) || !scale) {
     result <- temp[length(temp)]
@@ -37,7 +96,31 @@ scale_z <- function(x, center = TRUE, scale = TRUE) {
   
 }
 
-rollapplyr_cube <- function(f, x, y, width) {
+cov_weights <- function(x, y, weights) {
+  
+  n_cols_x <- NCOL(x)
+  n_cols_y <- NCOL(y)
+  
+  result <- cov.wt(cbind(x, y), wt = weights)$cov
+  result <- result[1:n_cols_x, n_cols_x + 1:n_cols_y, drop = FALSE]
+  
+  return(result)
+  
+}
+
+cor_weights <- function(x, y, weights) {
+  
+  n_cols_x <- NCOL(x)
+  n_cols_y <- NCOL(y)
+  
+  result <- cov.wt(cbind(x, y), wt = weights, cor = TRUE)$cor
+  result <- result[1:n_cols_x, n_cols_x + 1:n_cols_y, drop = FALSE]
+  
+  return(result)
+  
+}
+
+rollapplyr_cube <- function(f, x, y, width, weights) {
   
   if (is.matrix(x) || is.matrix(y)) {
     
@@ -68,8 +151,11 @@ rollapplyr_cube <- function(f, x, y, width) {
     
     for (i in 1:n_rows_xy) {
       
-      result[ , , i] <- f(x[max(1, i - width + 1):i, , drop = FALSE],
-                          y[max(1, i - width + 1):i, , drop = FALSE])
+      x_subset <- x[max(1, i - width + 1):i, , drop = FALSE]
+      y_subset <- y[max(1, i - width + 1):i, , drop = FALSE]
+      weights_subset <- tail(weights, min(i, width))
+      
+      result[ , , i] <- f(x_subset, y_subset, weights_subset)
       
     }
     
@@ -86,8 +172,11 @@ rollapplyr_cube <- function(f, x, y, width) {
     
     for (i in 1:n_rows_xy) {
       
-      result[i] <- f(x[max(1, i - width + 1):i],
-                     y[max(1, i - width + 1):i])
+      x_subset <- x[max(1, i - width + 1):i]
+      y_subset <- y[max(1, i - width + 1):i]
+      weights_subset <- tail(weights, min(i, width))
+      
+      result[i] <- f(x_subset, y_subset, weights_subset)
       
     }
     
@@ -99,14 +188,15 @@ rollapplyr_cube <- function(f, x, y, width) {
   
 }
 
-crossprod_scale <- function(x, y, center = FALSE, scale = FALSE) {
+crossprod_weights <- function(x, y, weights) {
   
-  result <- crossprod(scale(x, center = center, scale = scale),
-                      scale(y, center = center, scale = scale))
+  result <- crossprod(weights * x, y)
+  
+  return(result)
   
 }
 
-rollapplyr_lm <- function(x, y, width, intercept) {
+rollapplyr_lm <- function(x, y, width, weights, intercept) {
   
   if (!requireNamespace("zoo", quietly = TRUE)) {
     stop("zoo package required for this function")
@@ -163,15 +253,18 @@ rollapplyr_lm <- function(x, y, width, intercept) {
       
       x_subset <- x[max(1, i - width + 1):i, , drop = FALSE]
       y_subset <- y[max(1, i - width + 1):i, , drop = FALSE]
+      weights_subset <- tail(weights, min(i, width))
       data <- as.data.frame(cbind(y_subset, x_subset))
       
       if (intercept) {
         
         # "Unparseable 'response'; use is deprecated.  Use as.name(.) or `..`!"
-        fit <- lm(reformulate(termlabels = ".", response = as.name(names(data)[1])), data = data)
+        fit <- lm(reformulate(termlabels = ".", response = as.name(names(data)[1])),
+                  weights = weights_subset, data = data)
         
       } else {
-        fit <- lm(reformulate(termlabels = ".-1", response = as.name(names(data)[1])), data = data)
+        fit <- lm(reformulate(termlabels = ".-1", response = as.name(names(data)[1])),
+                  weights = weights_subset, data = data)
       }
       
       summary_fit <- summary(fit)
@@ -249,12 +342,15 @@ rollapplyr_lm <- function(x, y, width, intercept) {
       
       x_subset <- x[max(1, i - width + 1):i]
       y_subset <- y[max(1, i - width + 1):i]
+      weights_subset <- tail(weights, min(i, width))
       data <- as.data.frame(cbind(y_subset, x_subset))
       
       if (intercept) {
-        fit <- lm(reformulate(termlabels = ".", response = names(data)[1]), data = data)
+        fit <- lm(reformulate(termlabels = ".", response = names(data)[1]),
+                  weights = weights_subset, data = data)
       } else {
-        fit <- lm(reformulate(termlabels = ".-1", response = names(data)[1]), data = data)
+        fit <- lm(reformulate(termlabels = ".-1", response = names(data)[1]),
+                  weights = weights_subset, data = data)
       }
       
       summary_fit <- summary(fit)
