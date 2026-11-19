@@ -1893,7 +1893,8 @@ struct RollQuantileOnlineMat : public Worker {
             
             status = false;
             
-            if (!status && (sum_lower_w / sum_w > p)) {
+            // tolerance for consistency with R's all.equal
+            while (!status && !mset_lower.empty() && (sum_lower_w / sum_w - p > sqrt(arma::datum::eps))) {
               
               offset = std::get<1>(*mset_lower.rbegin());
               n_size_x = i - offset;
@@ -1913,7 +1914,9 @@ struct RollQuantileOnlineMat : public Worker {
             
             status = false;
             
-            if (!status && !mset_upper.empty() && (sum_lower_w / sum_w < p)) {
+            // tolerance for consistency with R's all.equal
+            while (!status && !mset_upper.empty() &&
+                   (mset_lower.empty() || (sum_lower_w / sum_w - p < -sqrt(arma::datum::eps)))) {
               
               offset = std::get<1>(*mset_upper.begin());
               n_size_x = i - offset;
@@ -1959,7 +1962,8 @@ struct RollQuantileOnlineMat : public Worker {
               
               status = false;
               
-              if (!status && (sum_lower_w / sum_w > p)) {
+              // tolerance for consistency with R's all.equal
+              while (!status && !mset_lower.empty() && (sum_lower_w / sum_w - p > sqrt(arma::datum::eps))) {
                 
                 offset = std::get<1>(*mset_lower.rbegin());
                 n_size_x = i - offset;
@@ -1979,7 +1983,9 @@ struct RollQuantileOnlineMat : public Worker {
               
               status = false;
               
-              if (!status && !mset_upper.empty() && (sum_lower_w / sum_w < p)) {
+              // tolerance for consistency with R's all.equal
+              while (!status && !mset_upper.empty() &&
+                     (mset_lower.empty() || (sum_lower_w / sum_w - p < -sqrt(arma::datum::eps)))) {
                 
                 offset = std::get<1>(*mset_upper.begin());
                 n_size_x = i - offset;
@@ -2008,10 +2014,10 @@ struct RollQuantileOnlineMat : public Worker {
             if (n_obs >= min_obs) {
               
               if (p == 0) {
-                arma_quantile(i, j) = std::get<0>(*mset_upper.begin());
+                arma_quantile(i, j) = std::get<0>(*mset_lower.rbegin());
               } else if (p == 1) {
                 arma_quantile(i, j) = std::get<0>(*mset_lower.rbegin());
-              } else if (std::fabs(sum_lower_w / sum_w - p) <= sqrt(arma::datum::eps)) {
+              } else if (!mset_upper.empty() && (std::fabs(sum_lower_w / sum_w - p) <= sqrt(arma::datum::eps))) {
                 arma_quantile(i, j) = (std::get<0>(*mset_lower.rbegin()) + std::get<0>(*mset_upper.begin())) / 2;
               } else {
                 arma_quantile(i, j) = std::get<0>(*mset_lower.rbegin());
@@ -2151,7 +2157,8 @@ struct RollQuantileOfflineMat : public Worker {
             
             // last element of sorted array that is 'p' of 'weights'
             // note: 'weights' must be greater than 0
-            if (!status1 && (sum_upper_w / sum_w >= p)) {
+            // tolerance for consistency with R's all.equal
+            if (!status1 && (sum_upper_w / sum_w - p >= -sqrt(arma::datum::eps))) {
               
               status1 = true;
               idxquantile1_x = n_size_x - count - 1;

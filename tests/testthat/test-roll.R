@@ -53,7 +53,7 @@ test_that("equal to online algorithm", {
                                     test_weights[[f]], test_min_obs[c],
                                     test_complete_obs[d], test_na_restore[e],
                                     test_online[2]))
-
+              
               expect_equal(roll_prod(test_roll_x[[ax]], width,
                                      test_weights[[f]], test_min_obs[c],
                                      test_complete_obs[d], test_na_restore[e],
@@ -80,7 +80,7 @@ test_that("equal to online algorithm", {
                                     test_weights[[f]], test_min_obs[c],
                                     test_complete_obs[d], test_na_restore[e],
                                     test_online[2]))
-
+              
               expect_equal(roll_max(test_roll_x[[ax]], width,
                                     test_weights[[f]], test_min_obs[c],
                                     test_complete_obs[d], test_na_restore[e],
@@ -89,7 +89,7 @@ test_that("equal to online algorithm", {
                                     test_weights[[f]], test_min_obs[c],
                                     test_complete_obs[d], test_na_restore[e],
                                     test_online[2]))
-
+              
               expect_equal(roll_idxmin(test_roll_x[[ax]], width,
                                        test_weights[[f]], test_min_obs[c],
                                        test_complete_obs[d], test_na_restore[e],
@@ -98,7 +98,7 @@ test_that("equal to online algorithm", {
                                        test_weights[[f]], test_min_obs[c],
                                        test_complete_obs[d], test_na_restore[e],
                                        test_online[2]))
-
+              
               expect_equal(roll_idxmax(test_roll_x[[ax]], width,
                                        test_weights[[f]], test_min_obs[c],
                                        test_complete_obs[d], test_na_restore[e],

@@ -2,6 +2,10 @@
 
 ## Version 1.2.2
 
+* Fixed an issue for the `p` argument in the `roll_quantile` function
+
+* Fixed an issue for missing values in the `roll_median` and `roll_quantile` functions
+
 * Added tests for weights and input checks
 
 ## Version 1.2.1

@@ -70,7 +70,7 @@ sd_weights <- function(x, weights) {
   
 }
 
-scale_weights <- function(x, weights, center = TRUE, scale = TRUE) {
+scale_weights <- function(x, weights, center, scale) {
   
   n_rows_x <- length(x)
   weights_subset <- tail(weights, n_rows_x)
@@ -115,6 +115,14 @@ cor_weights <- function(x, y, weights) {
   
   result <- cov.wt(cbind(x, y), wt = weights, cor = TRUE)$cor
   result <- result[1:n_cols_x, n_cols_x + 1:n_cols_y, drop = FALSE]
+  
+  return(result)
+  
+}
+
+crossprod_weights <- function(x, y, weights) {
+  
+  result <- crossprod(weights * x, y)
   
   return(result)
   
@@ -183,14 +191,6 @@ rollapplyr_cube <- function(f, x, y, width, weights) {
     result <- as.numeric(result)
     
   }
-  
-  return(result)
-  
-}
-
-crossprod_weights <- function(x, y, weights) {
-  
-  result <- crossprod(weights * x, y)
   
   return(result)
   
@@ -274,16 +274,16 @@ rollapplyr_lm <- function(x, y, width, weights, intercept) {
       if (nrow(summary_fit_coef) == n_cols_x) {
         
         result[["coefficients"]][i, ] <- summary_fit_coef[ , "Estimate"]
-
+        
         var_y <- crossprod(y_subset)
         rsq <- summary_fit$r.squared
-
+        
         if (!is.na(var_y) && (var_y > .Machine$double.eps)) {
           result[["r.squared"]][i, ] <- rsq
         }
         
         df_resid <- nrow(data) - n_cols_x # fit$df.residual
-
+        
         if (!is.na(rsq) && !is.na(df_resid) && (df_resid > 0)) {
           result[["std.error"]][i, ] <- summary_fit_coef[ , "Std. Error"]
         }
@@ -325,17 +325,17 @@ rollapplyr_lm <- function(x, y, width, weights, intercept) {
                    "std.error" = rep(as.numeric(NA), n_rows_xy))
     
     if (zoo::is.zoo(x)) {
-
+      
       x_attr <- attributes(x)
       x_attr[["dim"]] <- NULL
       x_attr[["dimnames"]] <- NULL
-
+      
     } else if (zoo::is.zoo(y)) {
-
+      
       x_attr <- attributes(y)
       x_attr[["dim"]] <- NULL
       x_attr[["dimnames"]] <- NULL
-
+      
     }
     
     for (i in 1:n_rows_xy) {
@@ -360,16 +360,16 @@ rollapplyr_lm <- function(x, y, width, weights, intercept) {
       if (nrow(summary_fit_coef) == df_fit) {
         
         result[["coefficients"]][i] <- summary_fit_coef[ , "Estimate"]
-
+        
         var_y <- crossprod(y_subset)
         rsq <- summary_fit$r.squared
-
+        
         if (!is.na(var_y) && (var_y > .Machine$double.eps)) {
           result[["r.squared"]][i] <- rsq
         }
         
         df_resid <- nrow(data) - n_cols_x # fit$df.residual
-
+        
         if (!is.na(rsq) && !is.na(df_resid) && (df_resid > 0)) {
           result[["std.error"]][i] <- summary_fit_coef[ , "Std. Error"]
         }

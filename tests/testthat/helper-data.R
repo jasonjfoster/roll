@@ -6,7 +6,7 @@ lambda <- 0.9 # 0.9 # 1 / 0.9
 dates <- rev(seq(Sys.Date(), length.out = n_obs, by = "-1 day"))
 
 # test arguments
-test_p <- c(0, 0.25, 0.5, 0.75, 1)
+test_p <- c(0, 0.2, 0.25, 0.3, 0.5, 0.7, 0.75, 0.8, 1)
 test_width <- c(1, 5, 10, 15)
 test_intercept <- c(TRUE, FALSE)
 test_center <- c(TRUE, FALSE)
@@ -38,11 +38,11 @@ if (requireNamespace("zoo", quietly = TRUE)) {
 test_ls[1:2] <- lapply(test_ls[1:2], setNames, paste0("x", rep(1:n_vars)))
 
 # test_ls[1:2] <- lapply(test_ls[1:2], function(x) {
-#   
+#
 #   colnames(x) <- paste0("x", rep(1:n_vars))
-#   
+#
 #   return(x)
-#   
+#
 # })
 
 test_check_x <- c(lapply(test_ls[2], function(x){x[ , 1:3]}),
