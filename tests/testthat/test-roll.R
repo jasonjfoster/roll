@@ -121,7 +121,7 @@ test_that("equal to online algorithm", {
               for (g in 1:length(test_p)) {
                 
                 # "'online' is only supported for equal 'weights'"
-                expect_equal(roll_quantile(test_roll_x[[ax]],  width,
+                expect_equal(roll_quantile(test_roll_x[[ax]], width,
                                            rep(1, width), test_p[g],
                                            test_min_obs[c], test_complete_obs[d],
                                            test_na_restore[e], test_online[1]),
@@ -211,12 +211,12 @@ test_that("equal to online algorithm", {
                   
                   # "'complete_obs = FALSE' is not supported"
                   expect_equal(suppressWarnings(roll_lm(test_roll_x[[ax]], test_roll_y[[ay]],
-                                                        test_width[b], test_weights[[f]],
+                                                        width, test_weights[[f]],
                                                         test_intercept[g], test_min_obs[c],
                                                         test_complete_obs[d], test_na_restore[e],
                                                         test_online[1])),
                                suppressWarnings(roll_lm(test_roll_x[[ax]], test_roll_y[[ay]],
-                                                        test_width[b], test_weights[[f]],
+                                                        width, test_weights[[f]],
                                                         test_intercept[g], test_min_obs[c],
                                                         test_complete_obs[d], test_na_restore[e],
                                                         test_online[2])))
