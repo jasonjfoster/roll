@@ -108,29 +108,33 @@ test_that("equal to online algorithm", {
                                        test_complete_obs[d], test_na_restore[e],
                                        test_online[2]))
               
-              # "'online' is only supported for equal 'weights'"
-              expect_equal(roll_median(test_roll_x[[ax]], width,
-                                       rep(1, width), test_min_obs[c],
-                                       test_complete_obs[d], test_na_restore[e],
-                                       test_online[1]),
-                           roll_median(test_roll_x[[ax]], width,
-                                       rep(1, width), test_min_obs[c],
-                                       test_complete_obs[d], test_na_restore[e],
-                                       test_online[2]))
+            }
+            
+            # "'online' is only supported for equal 'weights'"
+            expect_equal(roll_median(test_roll_x[[ax]], width,
+                                     rep(lambda, width), test_min_obs[c],
+                                     test_complete_obs[d], test_na_restore[e],
+                                     test_online[1]),
+                         roll_median(test_roll_x[[ax]], width,
+                                     rep(lambda, width), test_min_obs[c],
+                                     test_complete_obs[d], test_na_restore[e],
+                                     test_online[2]))
+            
+            for (g in 1:length(test_p)) {
               
-              for (g in 1:length(test_p)) {
-                
-                # "'online' is only supported for equal 'weights'"
-                expect_equal(roll_quantile(test_roll_x[[ax]], width,
-                                           rep(1, width), test_p[g],
-                                           test_min_obs[c], test_complete_obs[d],
-                                           test_na_restore[e], test_online[1]),
-                             roll_quantile(test_roll_x[[ax]], width,
-                                           rep(1, width), test_p[g],
-                                           test_min_obs[c], test_complete_obs[d],
-                                           test_na_restore[e], test_online[2]))
-                
-              }
+              # "'online' is only supported for equal 'weights'"
+              expect_equal(roll_quantile(test_roll_x[[ax]], width,
+                                         rep(lambda, width), test_p[g],
+                                         test_min_obs[c], test_complete_obs[d],
+                                         test_na_restore[e], test_online[1]),
+                           roll_quantile(test_roll_x[[ax]], width,
+                                         rep(lambda, width), test_p[g],
+                                         test_min_obs[c], test_complete_obs[d],
+                                         test_na_restore[e], test_online[2]))
+              
+            }
+            
+            for (f in 1:length(test_weights)) {
               
               for (g in 1:length(test_center)) {
                 

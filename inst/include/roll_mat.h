@@ -2013,11 +2013,7 @@ struct RollQuantileOnlineMat : public Worker {
             
             if (n_obs >= min_obs) {
               
-              if (p == 0) {
-                arma_quantile(i, j) = std::get<0>(*mset_lower.rbegin());
-              } else if (p == 1) {
-                arma_quantile(i, j) = std::get<0>(*mset_lower.rbegin());
-              } else if (!mset_upper.empty() && (std::fabs(sum_lower_w / sum_w - p) <= sqrt(arma::datum::eps))) {
+              if (!mset_upper.empty() && (std::fabs(sum_lower_w / sum_w - p) <= sqrt(arma::datum::eps))) {
                 arma_quantile(i, j) = (std::get<0>(*mset_lower.rbegin()) + std::get<0>(*mset_upper.begin())) / 2;
               } else {
                 arma_quantile(i, j) = std::get<0>(*mset_lower.rbegin());

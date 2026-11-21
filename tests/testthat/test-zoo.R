@@ -95,27 +95,31 @@ test_that("equivalent to zoo::rollapply", {
                        zoo::rollapplyr(test_data_x[[ax]], width = width,
                                        which.max, partial = TRUE))
           
-          # "'online' is only supported for equal 'weights'"
-          expect_equal(roll_median(test_data_x[[ax]], width,
-                                   rep(1, width), test_min_obs[1],
-                                   test_complete_obs[2], test_na_restore[2],
-                                   test_online[i]),
-                       zoo::rollapplyr(test_data_x[[ax]], width = width,
-                                       median, partial = TRUE))
+        }
+        
+        # "'online' is only supported for equal 'weights'"
+        expect_equal(roll_median(test_data_x[[ax]], width,
+                                 rep(lambda, width), test_min_obs[1],
+                                 test_complete_obs[2], test_na_restore[2],
+                                 test_online[i]),
+                     zoo::rollapplyr(test_data_x[[ax]], width = width,
+                                     median, partial = TRUE))
+        
+        for (g in 1:length(test_p)) {
           
-          for (g in 1:length(test_p)) {
-            
-            # "'online' is only supported for equal 'weights'"
-            expect_equal(roll_quantile(test_data_x[[ax]], width,
-                                       rep(1, width), test_p[g],
-                                       test_min_obs[1], test_complete_obs[2],
-                                       test_na_restore[2], test_online[i]),
-                         zoo::rollapplyr(test_data_x[[ax]], width = width,
-                                         quantile, probs = test_p[g],
-                                         type = 2, names = FALSE,
-                                         partial = TRUE))
-            
-          }
+          # "'online' is only supported for equal 'weights'"
+          expect_equal(roll_quantile(test_data_x[[ax]], width,
+                                     rep(lambda, width), test_p[g],
+                                     test_min_obs[1], test_complete_obs[2],
+                                     test_na_restore[2], test_online[i]),
+                       zoo::rollapplyr(test_data_x[[ax]], width = width,
+                                       quantile, probs = test_p[g],
+                                       type = 2, names = FALSE,
+                                       partial = TRUE))
+          
+        }
+        
+        for (f in 1:length(test_weights)) {
           
           expect_equal(roll_var(test_data_x[[ax]], width,
                                 test_weights[[f]], test_center[1],

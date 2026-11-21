@@ -6,7 +6,7 @@ lambda <- 0.9 # 0.9 # 1 / 0.9
 dates <- rev(seq(Sys.Date(), length.out = n_obs, by = "-1 day"))
 
 # test arguments
-test_p <- c(0, 0.2, 0.25, 0.3, 0.5, 0.7, 0.75, 0.8, 1)
+test_p <- c(0, 1e-12, 0.2, 0.25, 0.3, 0.5, 0.7, 0.75, 0.8, 1 - 1e-12, 1)
 test_width <- c(1, 5, 10, 15)
 test_intercept <- c(TRUE, FALSE)
 test_center <- c(TRUE, FALSE)
